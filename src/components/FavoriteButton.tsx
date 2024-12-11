@@ -24,8 +24,8 @@ export default function FavoriteButton({ mockupId, userId, isFavorite, className
     <button
       onClick={handleClick}
       className={clsx(
-        'absolute top-2 left-2 p-2 rounded-full transition-all duration-200 z-10',
-        isFavorite ? 'bg-red-500 text-white' : 'bg-white/80 backdrop-blur-sm hover:bg-white',
+        'absolute top-2 left-2 p-2 rounded-lg transition-all duration-200 z-10',
+        isFavorite ? 'gradient-bg text-white' : 'bg-white/80 backdrop-blur-sm hover:bg-white',
         className
       )}
       title={isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}

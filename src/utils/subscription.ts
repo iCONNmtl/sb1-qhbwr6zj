@@ -1,13 +1,23 @@
 import { doc, updateDoc, increment, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import toast from 'react-hot-toast';
-import type { UserSubscription } from '../types/user';
+import type { UserSubscription, UserPlan } from '../types/user';
 
 export const PLAN_NAMES = {
   BASIC: 'Basic',
   PRO: 'Pro',
   EXPERT: 'Expert'
 } as const;
+
+export const PLAN_LIMITS = {
+  Basic: 1,
+  Pro: 10,
+  Expert: 15
+} as const;
+
+export function getPlanMockupLimit(plan: UserPlan): number {
+  return PLAN_LIMITS[plan];
+}
 
 export async function updateUserCredits(userId: string, creditsToDeduct: number): Promise<void> {
   const userRef = doc(db, 'users', userId);

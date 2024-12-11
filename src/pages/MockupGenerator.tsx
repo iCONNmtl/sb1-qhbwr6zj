@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Image, CheckCircle, Loader2, Heart } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Image, CheckCircle, Loader2 } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { useNavigate } from 'react-router-dom';
 import { collection, query, where, getDocs, doc, getDoc, addDoc, onSnapshot } from 'firebase/firestore';
@@ -7,8 +7,9 @@ import { db } from '../lib/firebase';
 import toast from 'react-hot-toast';
 import DesignUploader from '../components/DesignUploader';
 import FavoriteButton from '../components/FavoriteButton';
+import CategoryCount from '../components/CategoryCount';
 import { triggerGenerationWebhook } from '../lib/webhooks';
-import { updateUserCredits } from '../utils/subscription';
+import { updateUserCredits, getPlanMockupLimit } from '../utils/subscription';
 import { processDesignFile } from '../utils/imageProcessing';
 import clsx from 'clsx';
 import ImageLoader from '../components/ImageLoader';
@@ -90,20 +91,32 @@ export default function MockupGenerator() {
     return () => unsubscribe();
   }, [user]);
 
-  const handleMockupSelection = (mockupId: string) => {
+  const handleMockupSelection = useCallback((mockupId: string) => {
+    if (!userProfile) return;
+
+    const mockupLimit = getPlanMockupLimit(userProfile.subscription.plan);
+    
     setSelectedMockups(prev => {
       if (prev.includes(mockupId)) {
         return prev.filter(id => id !== mockupId);
       }
+      
+      if (prev.length >= mockupLimit) {
+        toast.error(`Votre plan ${userProfile.subscription.plan} est limité à ${mockupLimit} mockup${mockupLimit > 1 ? 's' : ''} par génération`);
+        return prev;
+      }
+      
       return [...prev, mockupId];
     });
-  };
+  }, [userProfile]);
 
-  const filteredMockups = mockups.filter(mockup => {
-    if (selectedCategory === 'all') return true;
-    if (selectedCategory === 'favorites') return favorites.includes(mockup.id);
-    return mockup.category === selectedCategory;
-  });
+  const filteredMockups = React.useMemo(() => {
+    return mockups.filter(mockup => {
+      if (selectedCategory === 'all') return true;
+      if (selectedCategory === 'favorites') return favorites.includes(mockup.id);
+      return mockup.category === selectedCategory;
+    });
+  }, [mockups, selectedCategory, favorites]);
 
   const handleGenerate = async () => {
     if (!user || !userProfile) {
@@ -118,6 +131,12 @@ export default function MockupGenerator() {
 
     if (selectedMockups.length === 0) {
       toast.error('Veuillez sélectionner au moins un mockup');
+      return;
+    }
+
+    const mockupLimit = getPlanMockupLimit(userProfile.subscription.plan);
+    if (selectedMockups.length > mockupLimit) {
+      toast.error(`Votre plan ${userProfile.subscription.plan} est limité à ${mockupLimit} mockup${mockupLimit > 1 ? 's' : ''} par génération`);
       return;
     }
 
@@ -179,31 +198,27 @@ export default function MockupGenerator() {
       </section>
 
       <section>
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">
-          2. Sélectionnez vos mockups
-        </h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold text-gray-900">
+            2. Sélectionnez vos mockups
+          </h2>
+          {userProfile && (
+            <div className="text-sm text-gray-600">
+              {selectedMockups.length} / {getPlanMockupLimit(userProfile.subscription.plan)} mockups sélectionnés
+            </div>
+          )}
+        </div>
         <div className="space-y-6">
           <div className="flex space-x-4 overflow-x-auto pb-2">
             {categories.map((category) => (
-              <button
+              <CategoryCount
                 key={category.id}
+                category={category}
+                mockups={mockups}
+                favorites={favorites}
+                isSelected={selectedCategory === category.id}
                 onClick={() => setSelectedCategory(category.id)}
-                className={clsx(
-                  'px-4 py-2 rounded-xl whitespace-nowrap transition-all duration-200',
-                  selectedCategory === category.id
-                    ? 'gradient-bg text-white shadow-lg scale-105'
-                    : 'bg-white text-gray-600 hover:bg-gray-50'
-                )}
-              >
-                {category.id === 'favorites' ? (
-                  <span className="flex items-center">
-                    <Heart className="h-4 w-4 mr-2" />
-                    {category.name}
-                  </span>
-                ) : (
-                  category.name
-                )}
-              </button>
+              />
             ))}
           </div>
 
