@@ -1,8 +1,8 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
+import Sidebar from './components/navigation/Sidebar';
+import PageContainer from './components/layout/PageContainer';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
@@ -18,15 +18,17 @@ import PrivacyPolicy from './pages/legal/PrivacyPolicy';
 import AuthGuard from './components/AuthGuard';
 import AdminGuard from './components/AdminGuard';
 import { useAuth } from './hooks/useAuth';
+import { useStore } from './store/useStore';
 
 function App() {
-  useAuth(); // Initialize authentication listener
+  useAuth();
+  const { user } = useStore();
 
   return (
     <BrowserRouter>
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-grow container mx-auto px-4 py-8">
+      <div className="min-h-screen flex">
+        {user && <Sidebar />}
+        <PageContainer>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
@@ -55,8 +57,7 @@ function App() {
               </AuthGuard>
             } />
           </Routes>
-        </main>
-        <Footer />
+        </PageContainer>
         <Toaster position="bottom-right" />
       </div>
     </BrowserRouter>

@@ -5,12 +5,23 @@ import Pagination from '../Pagination';
 import UserEditor from './UserEditor';
 import type { UserProfile } from '../../types/user';
 
+interface UserStats {
+  total: number;
+  basic: number;
+  pro: number;
+  expert: number;
+  basicPercentage: number;
+  proPercentage: number;
+  expertPercentage: number;
+}
+
 interface UserListProps {
   users: (UserProfile & { id: string })[];
   onRefresh: () => Promise<void>;
+  stats: UserStats;
 }
 
-export default function UserList({ users, onRefresh }: UserListProps) {
+export default function UserList({ users, onRefresh, stats }: UserListProps) {
   const [editingUser, setEditingUser] = useState<(UserProfile & { id: string }) | null>(null);
   const {
     currentPage,
@@ -37,6 +48,22 @@ export default function UserList({ users, onRefresh }: UserListProps) {
         <h2 className="text-xl font-semibold text-gray-900">
           Liste des utilisateurs
         </h2>
+        <div className="mt-2 flex flex-wrap gap-4 text-sm text-gray-600">
+          <div>
+            {stats.total} utilisateurs au total
+          </div>
+          <div className="flex gap-3">
+            <span className="text-blue-600">
+              {stats.basic} Basic ({stats.basicPercentage}%)
+            </span>
+            <span className="text-green-600">
+              {stats.pro} Pro ({stats.proPercentage}%)
+            </span>
+            <span className="text-purple-600">
+              {stats.expert} Expert ({stats.expertPercentage}%)
+            </span>
+          </div>
+        </div>
       </div>
       
       <div className="overflow-x-auto">

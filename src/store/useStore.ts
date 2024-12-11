@@ -21,6 +21,8 @@ interface Store {
   generations: Generation[];
   addGeneration: (generation: Generation) => void;
   setGenerations: (generations: Generation[]) => void;
+  isSidebarCollapsed: boolean;
+  setSidebarCollapsed: (collapsed: boolean) => void;
 }
 
 export const useStore = create<Store>()(
@@ -35,12 +37,15 @@ export const useStore = create<Store>()(
         generations: [generation, ...state.generations]
       })),
       setGenerations: (generations) => set({ generations }),
+      isSidebarCollapsed: false,
+      setSidebarCollapsed: (collapsed) => set({ isSidebarCollapsed: collapsed }),
     }),
     {
       name: 'mockup-pro-storage',
       partialize: (state) => ({
         generations: state.generations,
-        credits: state.credits
+        credits: state.credits,
+        isSidebarCollapsed: state.isSidebarCollapsed
       }),
     }
   )
