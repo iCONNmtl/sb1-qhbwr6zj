@@ -8,6 +8,7 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import MockupGenerator from './pages/MockupGenerator';
+import MockupLibrary from './pages/MockupLibrary';
 import AdminDashboard from './pages/AdminDashboard';
 import Pricing from './pages/Pricing';
 import Contact from './pages/Contact';
@@ -20,7 +21,7 @@ import AdminGuard from './components/AdminGuard';
 import { useAuth } from './hooks/useAuth';
 import { useStore } from './store/useStore';
 
-function App() {
+export default function App() {
   useAuth();
   const { user } = useStore();
 
@@ -34,6 +35,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/pricing" element={<Pricing />} />
+            <Route path="/mockups" element={<MockupLibrary />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/legal/mentions-legales" element={<LegalNotice />} />
             <Route path="/legal/cgu" element={<TermsOfService />} />
@@ -63,5 +65,3 @@ function App() {
     </BrowserRouter>
   );
 }
-
-export default App;
