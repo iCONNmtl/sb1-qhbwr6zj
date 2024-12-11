@@ -12,7 +12,7 @@ export default function Footer() {
               <div className="gradient-bg p-2 rounded-xl">
                 <Layers className="h-8 w-8 text-white" />
               </div>
-              <span className="text-xl font-bold text-gray-900">MockupPro</span>
+              <span className="text-xl font-bold text-gray-900">Pixmock</span>
             </Link>
             <p className="mt-4 text-gray-600">
               Créez des mockups professionnels en quelques secondes
@@ -70,19 +70,9 @@ export default function Footer() {
               Contact
             </h3>
             <ul className="mt-4 space-y-4">
-              <li className="text-gray-600">
-                123 Avenue des Champs-Élysées
-                <br />
-                75008 Paris
-              </li>
               <li>
-                <a href="tel:+33123456789" className="text-gray-600 hover:text-indigo-600">
-                  +33 1 23 45 67 89
-                </a>
-              </li>
-              <li>
-                <a href="mailto:contact@mockuppro.com" className="text-gray-600 hover:text-indigo-600">
-                  contact@mockuppro.com
+                <a href="mailto:contact@pixmock.com" className="text-gray-600 hover:text-indigo-600">
+                  contact@pixmock.com
                 </a>
               </li>
             </ul>
@@ -91,7 +81,7 @@ export default function Footer() {
 
         <div className="mt-12 border-t border-gray-200 pt-8">
           <p className="text-center text-gray-500">
-            © {new Date().getFullYear()} MockupPro. Tous droits réservés.
+            © {new Date().getFullYear()} Pixmock. Tous droits réservés.
           </p>
         </div>
       </div>
