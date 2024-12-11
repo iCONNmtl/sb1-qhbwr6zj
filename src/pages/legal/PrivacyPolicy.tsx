@@ -73,7 +73,7 @@ export default function PrivacyPolicy() {
             5. Contact
           </h2>
           <p className="text-gray-600">
-            Pour toute question concernant vos données personnelles ou pour exercer vos droits, contactez notre délégué à la protection des données à privacy@mockuppro.com
+            Pour toute question concernant vos données personnelles ou pour exercer vos droits, contactez notre délégué à la protection des données à contact@pixmock.com
           </p>
         </section>
       </div>

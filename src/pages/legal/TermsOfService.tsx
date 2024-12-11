@@ -13,7 +13,7 @@ export default function TermsOfService() {
             1. Objet
           </h2>
           <p className="text-gray-600">
-            Les présentes Conditions Générales d'Utilisation (CGU) régissent l'utilisation du service MockupPro, accessible depuis le site web mockuppro.com. Tout accès ou utilisation du service suppose l'acceptation et le respect de l'ensemble des termes des présentes conditions.
+            Les présentes Conditions Générales d'Utilisation (CGU) régissent l'utilisation du service Pixmock, accessible depuis le site web pixmock.com. Tout accès ou utilisation du service suppose l'acceptation et le respect de l'ensemble des termes des présentes conditions.
           </p>
         </section>
 
@@ -22,7 +22,7 @@ export default function TermsOfService() {
             2. Description du service
           </h2>
           <p className="text-gray-600 mb-4">
-            MockupPro est un service en ligne permettant aux utilisateurs de générer des mockups professionnels à partir de leurs designs. Le service inclut :
+            Pixmock est un service en ligne permettant aux utilisateurs de générer des mockups professionnels à partir de leurs designs. Le service inclut :
           </p>
           <ul className="list-disc pl-6 text-gray-600 space-y-2">
             <li>La génération de mockups en haute qualité</li>
@@ -64,10 +64,10 @@ export default function TermsOfService() {
             5. Modifications et résiliation
           </h2>
           <p className="text-gray-600 mb-4">
-            MockupPro se réserve le droit de modifier ces CGU à tout moment. Les utilisateurs seront informés des modifications par email ou via le site.
+            Pixmock se réserve le droit de modifier ces CGU à tout moment. Les utilisateurs seront informés des modifications par email ou via le site.
           </p>
           <p className="text-gray-600">
-            MockupPro peut suspendre ou résilier un compte en cas de violation des présentes CGU, sans préavis ni remboursement.
+            Pixmock peut suspendre ou résilier un compte en cas de violation des présentes CGU, sans préavis ni remboursement.
           </p>
         </section>
       </div>

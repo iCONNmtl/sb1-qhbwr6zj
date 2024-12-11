@@ -44,7 +44,7 @@ export default function Home() {
       name: "Marie Laurent",
       role: "Designer Freelance",
       image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=128&h=128&q=80",
-      content: "Grâce à MockupPro, je peux maintenant présenter mes designs de manière professionnelle en quelques secondes. Un vrai gain de temps !"
+      content: "Grâce à Pixmock, je peux maintenant présenter mes designs de manière professionnelle en quelques secondes. Un vrai gain de temps !"
     },
     {
       name: "Thomas Martin",
@@ -62,7 +62,7 @@ export default function Home() {
 
   const faqs = [
     {
-      question: "Comment fonctionne MockupPro ?",
+      question: "Comment fonctionne Pixmock ?",
       answer: "C'est simple ! Uploadez votre design, sélectionnez un ou plusieurs mockups, et notre système génère automatiquement des rendus professionnels en quelques secondes."
     },
     {
@@ -71,7 +71,7 @@ export default function Home() {
     },
     {
       question: "Quelle est la qualité des exports ?",
-      answer: "Nous générons des images JPG en haute résolution (jusqu'à 4K) parfaites pour vos présentations clients et supports marketing."
+      answer: "Nous générons des images PNG en haute résolution (2048x2048px) parfaites pour vos présentations clients et supports marketing."
     },
     {
       question: "Puis-je générer plusieurs mockups à la fois ?",
@@ -140,7 +140,7 @@ export default function Home() {
       <section className="card p-12">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            Pourquoi choisir MockupPro ?
+            Pourquoi choisir Pixmock ?
           </h2>
           <p className="text-xl text-gray-600">
             Des fonctionnalités pensées pour les professionnels
@@ -166,7 +166,7 @@ export default function Home() {
             {
               icon: <Image className="h-6 w-6 text-indigo-600" />,
               title: "Export haute qualité",
-              description: "Images JPG jusqu'à 4K"
+              description: "Images PNG 2048x2048px"
             },
             {
               icon: <Clock className="h-6 w-6 text-indigo-600" />,
@@ -199,7 +199,7 @@ export default function Home() {
             Questions fréquentes
           </h2>
           <p className="text-xl text-gray-600">
-            Tout ce que vous devez savoir sur MockupPro
+            Tout ce que vous devez savoir sur Pixmock
           </p>
         </div>
         <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
@@ -327,7 +327,7 @@ export default function Home() {
           Prêt à révolutionner vos présentations ?
         </h2>
         <p className="text-xl text-indigo-100 mb-8 max-w-2xl mx-auto">
-          Rejoignez des milliers de designers qui gagnent du temps grâce à MockupPro
+          Rejoignez des milliers de designers qui gagnent du temps grâce à Pixmock
         </p>
         <Link
           to="/signup"

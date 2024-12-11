@@ -13,15 +13,13 @@ export default function LegalNotice() {
             1. Informations légales
           </h2>
           <p className="text-gray-600 mb-4">
-            MockupPro est édité par :
+            Pixmock est édité par :
           </p>
           <ul className="list-disc pl-6 text-gray-600 space-y-2">
-            <li>Raison sociale : MockupPro SAS</li>
-            <li>Siège social : 123 Avenue des Champs-Élysées, 75008 Paris</li>
-            <li>SIRET : 123 456 789 00012</li>
-            <li>Capital social : 10 000€</li>
-            <li>Directeur de la publication : John Doe</li>
-            <li>Email : contact@mockuppro.com</li>
+            <li>Raison sociale : Pixmock</li>
+            <li>Siège social : Montréal, Québec, Canada</li>
+            <li>Directeur de la publication : Kévin Hébert</li>
+            <li>Email : contact@pixmock.com</li>
           </ul>
         </section>
 
@@ -30,7 +28,7 @@ export default function LegalNotice() {
             2. Hébergement
           </h2>
           <p className="text-gray-600">
-            Le site MockupPro est hébergé par :
+            Le site Pixmock est hébergé par :
           </p>
           <ul className="list-disc pl-6 text-gray-600 space-y-2">
             <li>Raison sociale : Netlify, Inc.</li>
@@ -56,7 +54,7 @@ export default function LegalNotice() {
             4. Protection des données personnelles
           </h2>
           <p className="text-gray-600">
-            Conformément à la loi "Informatique et Libertés" du 6 janvier 1978 modifiée et au Règlement Général sur la Protection des Données (RGPD), vous disposez d'un droit d'accès, de rectification et de suppression de vos données. Pour exercer ce droit, veuillez nous contacter à l'adresse : privacy@mockuppro.com
+            Conformément à la loi "Informatique et Libertés" du 6 janvier 1978 modifiée et au Règlement Général sur la Protection des Données (RGPD), vous disposez d'un droit d'accès, de rectification et de suppression de vos données. Pour exercer ce droit, veuillez nous contacter à l'adresse : contact@pixmock.com
           </p>
         </section>
       </div>
