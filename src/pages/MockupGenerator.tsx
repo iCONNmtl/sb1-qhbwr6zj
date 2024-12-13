@@ -8,68 +8,26 @@ import DesignUploader from '../components/DesignUploader';
 import CategoryCount from '../components/CategoryCount';
 import MockupGrid from '../components/mockup/MockupGrid';
 import GenerationFooter from '../components/mockup/GenerationFooter';
-import LoadingAnimation from '../components/LoadingAnimation';
+import GenerationProgress from '../components/generation/GenerationProgress';
 import { getPlanMockupLimit } from '../utils/subscription';
 import { useMockupGeneration } from '../hooks/useMockupGeneration';
 import { useMockupSelection } from '../hooks/useMockupSelection';
+import { useMockups } from '../hooks/useMockups';
+import { useCategories } from '../hooks/useCategories';
 import type { UserProfile } from '../types/user';
 import type { Mockup } from '../types/mockup';
 
 export default function MockupGenerator() {
   const { user } = useStore();
-  const [isLoading, setIsLoading] = useState(true);
   const [designFile, setDesignFile] = useState<File>();
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [mockups, setMockups] = useState<Mockup[]>([]);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [favorites, setFavorites] = useState<string[]>([]);
-  const [categories, setCategories] = useState<Array<{ id: string; name: string }>>([
-    { id: 'all', name: 'Tous' }
-  ]);
 
+  const { mockups, loading: mockupsLoading } = useMockups();
+  const { categories } = useCategories(mockups, favorites);
   const { isGenerating, generateMockups } = useMockupGeneration();
   const { selectedMockups, handleMockupSelection } = useMockupSelection(userProfile);
-
-  useEffect(() => {
-    const fetchMockups = async () => {
-      try {
-        const mockupsQuery = query(
-          collection(db, 'mockups'),
-          where('active', '==', true)
-        );
-        const snapshot = await getDocs(mockupsQuery);
-        const mockupsData = snapshot.docs.map(doc => ({
-          ...doc.data(),
-          firestoreId: doc.id
-        })) as Mockup[];
-        
-        // Extract unique categories
-        const uniqueCategories = new Set(mockupsData.map(m => m.category));
-        const baseCategories = [{ id: 'all', name: 'Tous' }];
-        
-        // Only add favorites category if there are favorites
-        if (favorites.length > 0) {
-          baseCategories.push({ id: 'favorites', name: 'Mes favoris' });
-        }
-        
-        setCategories([
-          ...baseCategories,
-          ...Array.from(uniqueCategories).map(category => ({
-            id: category,
-            name: category
-          }))
-        ]);
-        
-        setMockups(mockupsData);
-      } catch (error) {
-        toast.error('Erreur lors du chargement des mockups');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchMockups();
-  }, [favorites]); // Add favorites as dependency to update categories when favorites change
 
   useEffect(() => {
     if (!user) return;
@@ -82,7 +40,6 @@ export default function MockupGenerator() {
           setUserProfile(userData);
           setFavorites(userData.favorites || []);
           
-          // If current category is favorites but there are no favorites, switch to all
           if (selectedCategory === 'favorites' && (!userData.favorites || userData.favorites.length === 0)) {
             setSelectedCategory('all');
           }
@@ -111,7 +68,7 @@ export default function MockupGenerator() {
 
   return (
     <div className="space-y-8">
-      {isGenerating && <LoadingAnimation />}
+      {isGenerating && <GenerationProgress totalMockups={selectedMockups.length} />}
 
       <section>
         <h2 className="text-xl font-semibold text-gray-900 mb-4">
@@ -145,7 +102,7 @@ export default function MockupGenerator() {
           ))}
         </div>
 
-        {isLoading ? (
+        {mockupsLoading ? (
           <div className="text-center py-12">
             <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-indigo-600" />
             <p className="text-gray-500">Chargement des mockups...</p>

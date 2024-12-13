@@ -12,7 +12,7 @@ export default function PublicHeader() {
             <div className="gradient-bg p-2 rounded-xl">
               <Layers className="h-6 w-6 text-white" />
             </div>
-            <span className="text-lg font-bold text-gray-900">MockupPro</span>
+            <span className="text-lg font-bold text-gray-900">Pixmock</span>
           </Link>
 
           {/* Navigation */}

@@ -49,7 +49,7 @@ export default function Sidebar() {
           </div>
           {!isSidebarCollapsed && (
             <span className="ml-3 text-xl font-bold text-gray-900">
-              MockupPro
+              Pixmock
             </span>
           )}
         </div>
