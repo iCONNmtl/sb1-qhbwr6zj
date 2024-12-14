@@ -19,7 +19,7 @@ export async function initializePlans() {
     {
       id: 'pro',
       name: 'Pro',
-      price: 29,
+      price: 49,
       credits: 100,
       description: 'Pour les professionnels',
       features: [
@@ -32,7 +32,7 @@ export async function initializePlans() {
     {
       id: 'expert',
       name: 'Expert',
-      price: 99,
+      price: 149,
       credits: 500,
       description: 'Pour les équipes',
       features: [
@@ -45,12 +45,10 @@ export async function initializePlans() {
     }
   ];
 
-  // Check if plans already exist
   const plansRef = collection(db, 'plans');
   const plansSnap = await getDocs(plansRef);
   
   if (plansSnap.empty) {
-    // Create plans if they don't exist
     for (const plan of defaultPlans) {
       await setDoc(doc(plansRef, plan.id), plan);
     }
