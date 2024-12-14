@@ -1,20 +1,12 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Layers, 
-  LayoutDashboard, 
-  Wand2, 
-  LogOut,
-  ChevronLeft,
-  ChevronRight,
-  Settings,
-  CreditCard
-} from 'lucide-react';
+import { Layers, LogOut, ChevronLeft, ChevronRight } from 'lucide-react';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../lib/firebase';
 import { useStore } from '../../store/useStore';
-import SidebarLink from './SidebarLink';
+import SidebarNav from './SidebarNav';
 import SidebarLegal from './SidebarLegal';
+import SidebarPlan from './SidebarPlan';
 import toast from 'react-hot-toast';
 import clsx from 'clsx';
 
@@ -67,52 +59,18 @@ export default function Sidebar() {
           )}
         </button>
 
-        {/* Main navigation */}
-        <div className="flex-1 py-8">
-          {/* Primary action */}
-          <div className="px-3 mb-8">
-            <SidebarLink
-              to="/generator"
-              icon={Wand2}
-              label="Générateur"
-              isCollapsed={isSidebarCollapsed}
-              className={clsx(
-                'gradient-bg text-white hover:opacity-90',
-                isSidebarCollapsed ? 'justify-center' : ''
-              )}
-            />
-          </div>
-
-          {/* Other navigation links */}
-          <div className="px-3 space-y-1">
-            <SidebarLink
-              to="/dashboard"
-              icon={LayoutDashboard}
-              label="Tableau de bord"
-              isCollapsed={isSidebarCollapsed}
-              className={isSidebarCollapsed ? 'justify-center' : ''}
-            />
-            <SidebarLink
-              to="/pricing"
-              icon={CreditCard}
-              label="Tarifs"
-              isCollapsed={isSidebarCollapsed}
-              className={isSidebarCollapsed ? 'justify-center' : ''}
-            />
-            {user?.uid === 'Juvh6BgsXhYsi3loKegWfzRIphG2' && (
-              <SidebarLink
-                to="/admin"
-                icon={Settings}
-                label="Admin"
-                isCollapsed={isSidebarCollapsed}
-                className={isSidebarCollapsed ? 'justify-center' : ''}
-              />
-            )}
-          </div>
+        {/* Navigation */}
+        <div className="flex-1 py-4">
+          <SidebarNav isCollapsed={isSidebarCollapsed} />
         </div>
 
-        {/* Footer section */}
-        <div className="mt-auto border-t border-gray-100 pt-4">
+        {/* Footer */}
+        <div className="mt-auto border-t border-gray-100">
+          {/* Plan info */}
+          <div className="border-b border-gray-100">
+            <SidebarPlan isCollapsed={isSidebarCollapsed} />
+          </div>
+
           <SidebarLegal isCollapsed={isSidebarCollapsed} />
           
           <div className="p-3">
