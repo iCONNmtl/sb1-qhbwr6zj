@@ -7,7 +7,8 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
-  Settings
+  Settings,
+  CreditCard
 } from 'lucide-react';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../lib/firebase';
@@ -49,7 +50,7 @@ export default function Sidebar() {
           </div>
           {!isSidebarCollapsed && (
             <span className="ml-3 text-xl font-bold text-gray-900">
-              Pixmock
+              MockupPro
             </span>
           )}
         </div>
@@ -88,6 +89,13 @@ export default function Sidebar() {
               to="/dashboard"
               icon={LayoutDashboard}
               label="Tableau de bord"
+              isCollapsed={isSidebarCollapsed}
+              className={isSidebarCollapsed ? 'justify-center' : ''}
+            />
+            <SidebarLink
+              to="/pricing"
+              icon={CreditCard}
+              label="Tarifs"
               isCollapsed={isSidebarCollapsed}
               className={isSidebarCollapsed ? 'justify-center' : ''}
             />

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ExternalLink, Calendar } from 'lucide-react';
+import { Download, Calendar } from 'lucide-react';
 import clsx from 'clsx';
 import ImageLoader from '../ImageLoader';
 
@@ -51,7 +51,7 @@ export default function GenerationGroup({ generation }: GenerationGroupProps) {
           {generation.mockups.map((mockup) => (
             <div
               key={mockup.id}
-              className="group aspect-square bg-gray-50 rounded-lg overflow-hidden relative cursor-pointer"
+              className="group aspect-square bg-gray-50 rounded-lg overflow-hidden relative cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-lg"
               onClick={() => handleOpenImage(mockup.url)}
             >
               <ImageLoader
@@ -60,10 +60,10 @@ export default function GenerationGroup({ generation }: GenerationGroupProps) {
                 className="absolute inset-0"
               />
               <div className={clsx(
-                "absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center",
-                "opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                "absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50",
+                "flex items-center justify-center transition-all duration-300"
               )}>
-                <ExternalLink className="h-6 w-6 text-white" />
+                <Download className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300" />
               </div>
             </div>
           ))}
