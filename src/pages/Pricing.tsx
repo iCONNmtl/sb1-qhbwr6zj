@@ -13,9 +13,7 @@ export default function Pricing() {
   const handlePlanSelection = (planId: string) => {
     if (!user) {
       navigate('/signup');
-      return;
     }
-    navigate(`/checkout/${planId}`);
   };
 
   if (loading) {
@@ -26,7 +24,8 @@ export default function Pricing() {
     <div className="py-12">
       <PricingHeader />
       <PricingGrid 
-        plans={plans} 
+        plans={plans}
+        userId={user?.uid}
         onSelectPlan={handlePlanSelection}
       />
       <PricingFooter />
