@@ -64,10 +64,11 @@ export default function Dashboard() {
               Aucune génération pour le moment
             </div>
           ) : (
-            generations.map((generation) => (
+            generations.map((generation, index) => (
               <GenerationGroup
                 key={generation.id}
                 generation={generation}
+                isLatest={index === 0}
               />
             ))
           )}
