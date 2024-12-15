@@ -2,7 +2,12 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { usePlans } from '../hooks/usePlans';
-import { PricingHeader, PricingGrid, PricingFooter } from '../components/pricing';
+import { 
+  PricingHeader, 
+  PricingGrid, 
+  PricingFooter,
+  PricingFAQ 
+} from '../components/pricing';
 import { LoadingSpinner } from '../components/common';
 
 export default function Pricing() {
@@ -28,6 +33,7 @@ export default function Pricing() {
         userId={user?.uid}
         onSelectPlan={handlePlanSelection}
       />
+      <PricingFAQ />
       <PricingFooter />
     </div>
   );

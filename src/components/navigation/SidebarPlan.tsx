@@ -16,11 +16,13 @@ export default function SidebarPlan({ isCollapsed }: SidebarPlanProps) {
 
   if (isCollapsed) {
     return (
-      <div className="px-2 py-1.5" title={`${subscription.credits} crédits - Plan ${subscription.plan}`}>
-        <div className="flex items-baseline justify-center space-x-1">
-          <span className="text-lg font-bold text-indigo-600">{subscription.credits}</span>
-          <span className="text-[10px] text-gray-500">crédits</span>
-        </div>
+      <div 
+        className="px-2 py-1.5 text-center" 
+        title={`${subscription.credits} crédits - Plan ${subscription.plan}`}
+      >
+        <span className="text-lg font-bold text-indigo-600">
+          {subscription.credits}
+        </span>
       </div>
     );
   }
