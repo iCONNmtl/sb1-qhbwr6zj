@@ -5,7 +5,6 @@ export default defineConfig({
   plugins: [react()],
   optimizeDeps: {
     exclude: ['lucide-react'],
-    include: ['react-countup'], // Ajoutez react-countup ici
   },
   server: {
     proxy: {
