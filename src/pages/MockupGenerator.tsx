@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import DesignUploader from '../components/DesignUploader';
 import CategoryCount from '../components/CategoryCount';
 import MockupGrid from '../components/mockup/MockupGrid';
+import MockupPagination from '../components/mockup/MockupPagination';
 import GenerationFooter from '../components/mockup/GenerationFooter';
 import GenerationProgress from '../components/generation/GenerationProgress';
 import { getPlanMockupLimit } from '../utils/subscription';
@@ -14,6 +15,7 @@ import { useMockupGeneration } from '../hooks/useMockupGeneration';
 import { useMockupSelection } from '../hooks/useMockupSelection';
 import { useMockups } from '../hooks/useMockups';
 import { useCategories } from '../hooks/useCategories';
+import { useMockupPagination } from '../hooks/useMockupPagination';
 import type { UserProfile } from '../types/user';
 import type { Mockup } from '../types/mockup';
 
@@ -28,6 +30,21 @@ export default function MockupGenerator() {
   const { categories } = useCategories(mockups, favorites);
   const { isGenerating, generateMockups } = useMockupGeneration();
   const { selectedMockups, handleMockupSelection } = useMockupSelection(userProfile);
+
+  // Filter mockups based on selected category
+  const filteredMockups = mockups.filter(mockup => {
+    if (selectedCategory === 'all') return true;
+    if (selectedCategory === 'favorites') return favorites.includes(mockup.id);
+    return mockup.category === selectedCategory;
+  });
+
+  // Paginate filtered mockups
+  const { 
+    currentPage, 
+    totalPages, 
+    paginatedMockups, 
+    handlePageChange 
+  } = useMockupPagination(filteredMockups);
 
   useEffect(() => {
     if (!user) return;
@@ -53,12 +70,6 @@ export default function MockupGenerator() {
 
     return () => unsubscribe();
   }, [user, selectedCategory]);
-
-  const filteredMockups = mockups.filter(mockup => {
-    if (selectedCategory === 'all') return true;
-    if (selectedCategory === 'favorites') return favorites.includes(mockup.id);
-    return mockup.category === selectedCategory;
-  });
 
   const handleGenerate = () => {
     if (!user || !userProfile || !designFile) return;
@@ -112,13 +123,23 @@ export default function MockupGenerator() {
             {selectedCategory === 'favorites' ? 'Aucun favori' : 'Aucun mockup disponible'}
           </div>
         ) : (
-          <MockupGrid
-            mockups={filteredMockups}
-            selectedMockups={selectedMockups}
-            favorites={favorites}
-            userId={user?.uid || ''}
-            onSelect={handleMockupSelection}
-          />
+          <>
+            <MockupGrid
+              mockups={paginatedMockups}
+              selectedMockups={selectedMockups}
+              favorites={favorites}
+              userId={user?.uid || ''}
+              onSelect={handleMockupSelection}
+            />
+            
+            {totalPages > 1 && (
+              <MockupPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
+            )}
+          </>
         )}
       </section>
 

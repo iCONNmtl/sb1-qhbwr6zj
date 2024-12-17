@@ -43,7 +43,7 @@ export default function MockupGrid({
           {mockup.previewUrl ? (
             <ImageLoader
               src={mockup.previewUrl}
-              alt={mockup.name}
+              alt={mockup.category}
               className="absolute inset-0"
             />
           ) : (
@@ -51,14 +51,17 @@ export default function MockupGrid({
               <Image className="h-12 w-12 text-gray-400" />
             </div>
           )}
+
           {selectedMockups.includes(mockup.id) && (
             <div className="absolute inset-0 flex items-center justify-center bg-indigo-600 bg-opacity-20 backdrop-blur-sm">
               <CheckCircle className="h-12 w-12 text-indigo-600" />
             </div>
           )}
-          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-4">
-            <h3 className="font-medium text-white">{mockup.name}</h3>
-            <p className="text-sm text-gray-200">{mockup.category}</p>
+
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-3">
+            <p className="text-sm text-white/90 font-medium">
+              {mockup.category}
+            </p>
           </div>
         </div>
       ))}

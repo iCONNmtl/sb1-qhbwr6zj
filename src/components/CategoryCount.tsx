@@ -35,22 +35,25 @@ export default function CategoryCount({
     <button
       onClick={onClick}
       className={clsx(
-        'px-4 py-2 rounded-xl whitespace-nowrap transition-all duration-200',
+        'group relative px-4 py-2 rounded-xl transition-all duration-200',
         isSelected
-          ? 'gradient-bg text-white shadow-lg scale-105'
-          : 'bg-white text-gray-600 hover:bg-gray-50'
+          ? 'gradient-bg text-white shadow-md'
+          : 'bg-white hover:bg-gray-50 text-gray-700'
       )}
     >
       <div className="flex items-center space-x-2">
         {category.id === 'favorites' && (
-          <Heart className="h-4 w-4" />
+          <Heart className={clsx(
+            'h-4 w-4',
+            isSelected ? 'text-white' : 'text-gray-400 group-hover:text-indigo-500'
+          )} />
         )}
-        <span>{category.name}</span>
+        <span className="font-medium">{category.name}</span>
         <span className={clsx(
-          'px-2 py-0.5 rounded-full text-xs',
+          'inline-flex items-center justify-center h-5 min-w-[20px] px-1.5 text-xs font-medium rounded-full',
           isSelected 
             ? 'bg-white/20 text-white' 
-            : 'bg-gray-100 text-gray-600'
+            : 'bg-gray-100 text-gray-600 group-hover:bg-indigo-50 group-hover:text-indigo-600'
         )}>
           {count}
         </span>
