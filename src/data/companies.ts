@@ -1,15 +1,15 @@
 export const TRUSTED_COMPANIES = [
     {
-      name: "Adobe",
-      description: "Leader mondial des logiciels créatifs",
-      logo: "https://upload.wikimedia.org/wikipedia/commons/8/8d/Adobe_Corporate_Logo.png",
-      url: "https://adobe.com"
+      name: "Hebumo",
+      description: "Boutique de décorations murales",
+      logo: "https://hebumo.com/cdn/shop/files/Logo_Noir_110x@2x.png",
+      url: "https://hebumo.com/"
     },
     {
-      name: "Figma",
-      description: "Plateforme de design collaborative",
-      logo: "https://upload.wikimedia.org/wikipedia/commons/3/33/Figma-logo.svg",
-      url: "https://figma.com"
+      name: "Postersport",
+      description: "Boutique d'affiches de sport",
+      logo: "https://postersport.com/cdn/shop/files/Logo_sport_ca79b2f6-3b7c-4549-b240-434fdf72e089.png",
+      url: "https://postersport.com/"
     },
     {
       name: "Dribbble",
