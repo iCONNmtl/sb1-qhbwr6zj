@@ -51,15 +51,11 @@ export default function Testimonials() {
   return (
     <section className="bg-gray-50 rounded-2xl p-12">
       <div className="text-center mb-12">
-        <div className="flex items-center justify-center gap-2 mb-4">
-          <RatingStars size="lg" className="mb-2" />
-          <span className="text-2xl font-bold text-gray-900">5.0</span>
-        </div>
         <h2 className="text-3xl font-bold text-gray-900 mb-4">
           Ce qu'en pensent nos utilisateurs
         </h2>
         <p className="text-xl text-gray-600">
-          Plus de 2 000 avis vérifiés avec une note moyenne de 5/5
+        Grâce à notre outil, ils boostent leur taux de conversion, gagnent du temps précieux et améliorent leur productivité.
         </p>
       </div>
 
@@ -84,7 +80,6 @@ export default function Testimonials() {
                 <div className="pt-8">
                   <div className="flex items-center justify-between mb-4">
                     <RatingStars rating={testimonial.rating} />
-                    <span className="text-sm text-gray-500">{testimonial.date}</span>
                   </div>
 
                   <p className="text-gray-600 mb-6">

@@ -17,7 +17,7 @@ export default function Home() {
             Créez des mockups professionnels en quelques secondes
           </h1>
           <p className="text-lg md:text-xl text-gray-600">
-            Transformez instantanément vos designs en présentations percutantes. Générez plusieurs mockups en un clic et impressionnez vos clients.
+            Transformez instantanément vos designs en présentations percutantes. Générez plusieurs mockups en un clic et valorisez vos créations pour captiver vos clients.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
