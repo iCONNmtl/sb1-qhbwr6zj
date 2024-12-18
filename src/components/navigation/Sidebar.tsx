@@ -1,12 +1,13 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Layers, LogOut, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LogOut, ChevronLeft, ChevronRight } from 'lucide-react';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../lib/firebase';
 import { useStore } from '../../store/useStore';
 import SidebarNav from './SidebarNav';
 import SidebarLegal from './SidebarLegal';
 import SidebarPlan from './SidebarPlan';
+import Logo from '../common/Logo';
 import toast from 'react-hot-toast';
 import clsx from 'clsx';
 
@@ -32,22 +33,13 @@ export default function Sidebar() {
       )}
     >
       <div className="flex flex-col h-full">
-        {/* Logo */}
         <div className={clsx(
           'flex items-center p-4',
           isSidebarCollapsed ? 'justify-center' : 'px-6'
         )}>
-          <div className="gradient-bg p-2 rounded-xl">
-            <Layers className="h-8 w-8 text-white" />
-          </div>
-          {!isSidebarCollapsed && (
-            <span className="ml-3 text-xl font-bold text-gray-900">
-              Pixmock
-            </span>
-          )}
+          <Logo showText={!isSidebarCollapsed} size={isSidebarCollapsed ? 'sm' : 'md'} />
         </div>
 
-        {/* Toggle button */}
         <button
           onClick={() => setSidebarCollapsed(!isSidebarCollapsed)}
           className="absolute -right-3 top-8 p-1 bg-white border border-gray-200 rounded-full shadow-sm hover:bg-gray-50"
@@ -59,14 +51,11 @@ export default function Sidebar() {
           )}
         </button>
 
-        {/* Navigation */}
         <div className="flex-1 py-4">
           <SidebarNav isCollapsed={isSidebarCollapsed} />
         </div>
 
-        {/* Footer */}
         <div className="mt-auto border-t border-gray-100">
-          {/* Plan info */}
           <div className="border-b border-gray-100">
             <SidebarPlan isCollapsed={isSidebarCollapsed} />
           </div>

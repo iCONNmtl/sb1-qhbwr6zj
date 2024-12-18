@@ -1,21 +1,15 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Layers, User, CreditCard, Image } from 'lucide-react';
+import { User, CreditCard, Image } from 'lucide-react';
+import Logo from '../common/Logo';
 
 export default function PublicHeader() {
   return (
     <header className="bg-white border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-3">
-            <div className="gradient-bg p-2 rounded-xl">
-              <Layers className="h-6 w-6 text-white" />
-            </div>
-            <span className="text-lg font-bold text-gray-900">Pixmock</span>
-          </Link>
+          <Logo size="sm" />
 
-          {/* Navigation */}
           <nav className="flex items-center space-x-6">
             <Link
               to="/mockups"
