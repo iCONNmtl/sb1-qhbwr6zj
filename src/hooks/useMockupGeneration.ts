@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { addDoc, collection } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useStore } from '../store/useStore';
-import { triggerGenerationWebhook } from '../lib/webhooks';
+import { generateMockups } from '../services/mockupService';
 import { updateUserCredits } from '../utils/subscription';
 import { processDesignFile } from '../utils/imageProcessing';
 import { nanoid } from 'nanoid';
@@ -15,7 +15,7 @@ export function useMockupGeneration() {
   const { user, addGeneration } = useStore();
   const navigate = useNavigate();
 
-  const generateMockups = async (
+  const generate = async (
     designFile: File,
     selectedMockups: string[],
     selectedMockupData: any[],
@@ -42,22 +42,23 @@ export function useMockupGeneration() {
     }
 
     setIsGenerating(true);
+    const generationId = nanoid();
+
     try {
       // Process design file
       const processedDesign = await processDesignFile(designFile);
 
-      // Update credits
+      // Update credits before generation
       await updateUserCredits(user.uid, selectedMockups.length);
       
-      const generationId = nanoid();
-      
-      const result = await triggerGenerationWebhook({
-        generationId,
-        mockupIds: selectedMockups,
-        mockupUuids: selectedMockupData.map(m => m.mockupUuid),
-        smartObjectUuids: selectedMockupData.map(m => m.smartObjectUuid),
-        design: processedDesign
-      });
+      // Prepare UUID pairs
+      const uuidPairs = selectedMockupData.map(m => ({
+        mockupUuid: m.mockupUuid,
+        smartObjectUuid: m.smartObjectUuid
+      }));
+
+      // Generate mockups
+      const result = await generateMockups(processedDesign, uuidPairs, generationId);
 
       if (result.success && result.mockups) {
         const generationData = {
@@ -73,8 +74,11 @@ export function useMockupGeneration() {
         
         toast.success('Génération réussie !');
         navigate('/dashboard');
+      } else {
+        throw new Error(result.error || 'Erreur lors de la génération');
       }
     } catch (error: any) {
+      console.error('Generation error:', error);
       toast.error(error.message || 'Erreur lors de la génération des mockups');
     } finally {
       setIsGenerating(false);
@@ -83,6 +87,6 @@ export function useMockupGeneration() {
 
   return {
     isGenerating,
-    generateMockups
+    generateMockups: generate
   };
 }
