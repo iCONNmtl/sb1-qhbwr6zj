@@ -72,7 +72,7 @@ export default function FAQ() {
         <p className="text-gray-600">
           Vous avez d'autres questions ?{' '}
           <a 
-            href="mailto:support@mockuppro.com" 
+            href="mailto:contact@pixmock.com" 
             className="text-indigo-600 hover:text-indigo-500 font-medium"
           >
             Contactez notre support

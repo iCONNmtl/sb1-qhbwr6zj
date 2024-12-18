@@ -9,7 +9,7 @@ export default function CTASection() {
         Prêt à révolutionner vos présentations ?
       </h2>
       <p className="text-xl text-indigo-100 mb-8 max-w-2xl mx-auto">
-        Rejoignez des milliers de designers qui gagnent du temps grâce à MockupPro
+        Rejoignez des milliers de designers qui gagnent du temps grâce à Pixmock
       </p>
       <Link
         to="/signup"

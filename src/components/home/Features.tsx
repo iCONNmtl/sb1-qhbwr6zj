@@ -20,7 +20,7 @@ const FEATURES = [
   {
     icon: Image,
     title: "Export haute qualité",
-    description: "Images JPG jusqu'à 4K"
+    description: "Images PNG 2048x2048px"
   },
   {
     icon: Clock,
@@ -39,7 +39,7 @@ export default function Features() {
     <section className="card p-12">
       <div className="text-center mb-12">
         <h2 className="text-3xl font-bold text-gray-900 mb-4">
-          Pourquoi choisir MockupPro ?
+          Pourquoi choisir Pixmock ?
         </h2>
         <p className="text-xl text-gray-600">
           Des fonctionnalités pensées pour les professionnels

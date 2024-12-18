@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Layers } from 'lucide-react';
 import clsx from 'clsx';
 
 interface LogoProps {
@@ -8,32 +9,45 @@ interface LogoProps {
   showText?: boolean;
 }
 
-const LOGO_URL = "https://drive.usercontent.google.com/download?id=1jVbZB8d5sq_60pKt3TiAFe_DoB2xu5YP";
+const LOGO_URL = "https://lh3.googleusercontent.com/d/1jVbZB8d5sq_60pKt3TiAFe_DoB2xu5YP";
 
 export default function Logo({ className, size = 'md', showText = true }: LogoProps) {
+  const [imageError, setImageError] = useState(false);
+  
   const sizes = {
-    sm: 'h-8 w-8',
-    md: 'h-10 w-10',
-    lg: 'h-12 w-12'
+    sm: 'h-6 w-6',
+    md: 'h-8 w-8',
+    lg: 'h-10 w-10'
   };
 
   return (
-    <Link to="/" className={clsx('flex items-center space-x-3', className)}>
+    <Link to="/" className={clsx('flex items-center space-x-2', className)}>
       <div className={clsx(
         sizes[size],
-        'relative flex-shrink-0'
+        'relative flex-shrink-0',
+        imageError ? 'gradient-bg rounded-lg p-1.5' : ''
       )}>
-        <img 
-          src={LOGO_URL}
-          alt="MockupPro Logo"
-          className={clsx(
-            'w-full h-full object-contain',
-            'transition-all duration-200'
-          )}
-        />
+        {imageError ? (
+          <Layers className="w-full h-full text-white" />
+        ) : (
+          <img 
+            src={LOGO_URL}
+            alt="MockupPro Logo"
+            className={clsx(
+              'w-full h-full object-contain',
+              'transition-all duration-200'
+            )}
+            onError={() => setImageError(true)}
+          />
+        )}
       </div>
       {showText && (
-        <span className="text-xl font-bold text-gray-900">MockupPro</span>
+        <span className={clsx(
+          "font-bold text-gray-900",
+          size === 'sm' ? 'text-base' : 'text-lg'
+        )}>
+          Pixmock
+        </span>
       )}
     </Link>
   );
