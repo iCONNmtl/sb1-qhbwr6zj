@@ -2,13 +2,13 @@ export const TRUSTED_COMPANIES = [
     {
       name: "Hebumo",
       description: "Boutique de décorations murales",
-      logo: "https://hebumo.com/cdn/shop/files/Logo_Noir_110x@2x.png",
+      logo: "https://lh3.googleusercontent.com/d/1us1MVhA7cjTgZQ0T8D00vJgzPxe--_in",
       url: "https://hebumo.com/"
     },
     {
       name: "Postersport",
       description: "Boutique d'affiches de sport",
-      logo: "https://postersport.com/cdn/shop/files/Logo_sport_ca79b2f6-3b7c-4549-b240-434fdf72e089.png",
+      logo: "https://lh3.googleusercontent.com/d/1lNV5fWN2nFxKQOaEDHcl-hDrfzjACf9Z",
       url: "https://postersport.com/"
     },
     {
