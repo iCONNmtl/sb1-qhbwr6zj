@@ -36,15 +36,11 @@ export default function TrustedCompanies() {
     <section className="py-8 md:py-12">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-8 md:mb-12">
-          <div className="flex items-center justify-center gap-2 text-gray-600 mb-4">
-            <Building2 className="h-5 w-5" />
-            <span className="text-sm font-medium uppercase tracking-wider">Ils nous font confiance</span>
-          </div>
           <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
-            Utilisé par les meilleures entreprises
+            Utilisé par plusieurs entreprises
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Des startups aux grandes entreprises, MockupPro est la solution de référence pour la création de mockups professionnels
+            Des freelances aux grandes entreprises, Pixmock est la solution de référence pour la création de mockups professionnels
           </p>
         </div>
 

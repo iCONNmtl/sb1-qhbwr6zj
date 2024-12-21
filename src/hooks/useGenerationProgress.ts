@@ -5,8 +5,8 @@ type GenerationStep = 'preparation' | 'optimization' | 'generation' | 'finalizat
 // Durées en millisecondes
 const STEP_DURATIONS = {
   preparation: 2000,     // 2 secondes
-  optimization: 3000,    // 3 secondes
-  generation: 20000,     // 20 secondes par mockup
+  optimization: 4000,    // 4 secondes
+  generation: 10000,     // 10 secondes par mockup
   finalization: 2000     // 2 secondes
 };
 
