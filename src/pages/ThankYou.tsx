@@ -1,22 +1,11 @@
-import React, { useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { Link } from 'react-router-dom';
 import { CheckCircle, ArrowRight, Wand2 } from 'lucide-react';
-import { useStore } from '../store/useStore';
 import Logo from '../components/common/Logo';
 
 export default function ThankYou() {
-  const { user } = useStore();
-  const navigate = useNavigate();
-
-  // Redirect to home if no user
-  useEffect(() => {
-    if (!user) {
-      navigate('/');
-    }
-  }, [user, navigate]);
-
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gray-50">
       <div className="w-full max-w-lg text-center">
         {/* Logo */}
         <div className="mb-8">
@@ -24,7 +13,7 @@ export default function ThankYou() {
         </div>
 
         {/* Success Message */}
-        <div className="bg-white rounded-2xl p-8 shadow-sm mb-8">
+        <div className="bg-white rounded-2xl p-8 shadow-sm mb-8 animate-fade-in">
           <div className="mb-6">
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <CheckCircle className="h-10 w-10 text-green-600" />
@@ -44,19 +33,19 @@ export default function ThankYou() {
             </h2>
             <ul className="space-y-3 text-left">
               <li className="flex items-start">
-                <ArrowRight className="h-5 w-5 text-indigo-600 mr-2 mt-0.5" />
+                <ArrowRight className="h-5 w-5 text-indigo-600 mr-2 mt-0.5 flex-shrink-0" />
                 <span className="text-gray-600">
                   Accédez au générateur pour créer vos premiers mockups
                 </span>
               </li>
               <li className="flex items-start">
-                <ArrowRight className="h-5 w-5 text-indigo-600 mr-2 mt-0.5" />
+                <ArrowRight className="h-5 w-5 text-indigo-600 mr-2 mt-0.5 flex-shrink-0" />
                 <span className="text-gray-600">
                   Sélectionnez les mockups qui vous intéressent
                 </span>
               </li>
               <li className="flex items-start">
-                <ArrowRight className="h-5 w-5 text-indigo-600 mr-2 mt-0.5" />
+                <ArrowRight className="h-5 w-5 text-indigo-600 mr-2 mt-0.5 flex-shrink-0" />
                 <span className="text-gray-600">
                   Uploadez votre design et générez vos mockups en un clic
                 </span>
@@ -86,7 +75,7 @@ export default function ThankYou() {
         <p className="text-sm text-gray-600">
           Une question ? Contactez notre support à{' '}
           <a href="mailto:contact@pixmock.com" className="text-indigo-600 hover:text-indigo-500">
-            contact@pixmock.com
+          contact@pixmock.com
           </a>
         </p>
       </div>
