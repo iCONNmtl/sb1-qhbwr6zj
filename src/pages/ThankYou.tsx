@@ -1,17 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { CheckCircle, ArrowRight, Wand2 } from 'lucide-react';
-import Logo from '../components/common/Logo';
 
 export default function ThankYou() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gray-50">
       <div className="w-full max-w-lg text-center">
-        {/* Logo */}
-        <div className="mb-8">
-          <Logo size="lg" className="inline-block" />
-        </div>
-
         {/* Success Message */}
         <div className="bg-white rounded-2xl p-8 shadow-sm mb-8 animate-fade-in">
           <div className="mb-6">
@@ -75,7 +69,7 @@ export default function ThankYou() {
         <p className="text-sm text-gray-600">
           Une question ? Contactez notre support à{' '}
           <a href="mailto:contact@pixmock.com" className="text-indigo-600 hover:text-indigo-500">
-          contact@pixmock.com
+            contact@pixmock.com
           </a>
         </p>
       </div>
