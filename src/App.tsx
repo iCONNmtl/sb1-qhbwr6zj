@@ -12,6 +12,7 @@ import MockupLibrary from './pages/MockupLibrary';
 import AdminDashboard from './pages/AdminDashboard';
 import Pricing from './pages/Pricing';
 import Contact from './pages/Contact';
+import ThankYou from './pages/ThankYou';
 import LegalNotice from './pages/legal/LegalNotice';
 import TermsOfService from './pages/legal/TermsOfService';
 import TermsOfSale from './pages/legal/TermsOfSale';
@@ -37,6 +38,7 @@ export default function App() {
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/mockups" element={<MockupLibrary />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/thank-you" element={<ThankYou />} />
             <Route path="/legal/mentions-legales" element={<LegalNotice />} />
             <Route path="/legal/cgu" element={<TermsOfService />} />
             <Route path="/legal/cgv" element={<TermsOfSale />} />
