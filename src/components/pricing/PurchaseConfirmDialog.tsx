@@ -21,8 +21,8 @@ export default function PurchaseConfirmDialog({ plan, userId, onClose }: Purchas
     try {
       // Liens de paiement Stripe directs
       const stripeLinks = {
-        pro: 'https://buy.stripe.com/test_3cs9Dn6UM3b0c924gi',
-        expert: 'https://buy.stripe.com/test_9AQ7vf7YQ12Sc92dQT'
+        pro: 'https://buy.stripe.com/28o9Dwgt22UbeaYfZ1',
+        expert: 'https://buy.stripe.com/fZeaHA4Kk7ar8QE9AC'
       };
 
       const baseUrl = stripeLinks[plan.id.toLowerCase() as keyof typeof stripeLinks];
