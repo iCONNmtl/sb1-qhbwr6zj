@@ -9,7 +9,7 @@ interface LogoProps {
   showText?: boolean;
 }
 
-const LOGO_URL = "https://lh3.googleusercontent.com/d/1zMgIieh76pSFOAzelWfWukdfAB7RZFCC";
+const LOGO_URL = "https://lh3.googleusercontent.com/d/1r_kyXOYX6eZfmBBpqyNABuHOjxE2GRbw";
 
 export default function Logo({ className, size = 'md', showText = true }: LogoProps) {
   const [imageError, setImageError] = useState(false);
