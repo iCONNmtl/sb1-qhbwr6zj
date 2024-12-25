@@ -13,17 +13,18 @@ import AdminDashboard from './pages/AdminDashboard';
 import Pricing from './pages/Pricing';
 import Contact from './pages/Contact';
 import ThankYou from './pages/ThankYou';
+import ResetPassword from './pages/ResetPassword';
 import LegalNotice from './pages/legal/LegalNotice';
 import TermsOfService from './pages/legal/TermsOfService';
 import TermsOfSale from './pages/legal/TermsOfSale';
 import PrivacyPolicy from './pages/legal/PrivacyPolicy';
 import AuthGuard from './components/AuthGuard';
 import AdminGuard from './components/AdminGuard';
-import { useAuth } from './hooks/useAuth';
 import { useStore } from './store/useStore';
+import { useAuthState } from './hooks/useAuthState';
 
 export default function App() {
-  useAuth();
+  useAuthState(); // Initialize auth state
   const { user } = useStore();
 
   return (
@@ -35,6 +36,7 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/mockups" element={<MockupLibrary />} />
             <Route path="/contact" element={<Contact />} />
