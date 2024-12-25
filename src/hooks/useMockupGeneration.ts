@@ -9,6 +9,7 @@ import { processDesignFile } from '../utils/imageProcessing';
 import { nanoid } from 'nanoid';
 import toast from 'react-hot-toast';
 import type { UserProfile } from '../types/user';
+import type { ExportFormat } from '../types/mockup';
 
 export function useMockupGeneration() {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -19,7 +20,8 @@ export function useMockupGeneration() {
     designFile: File,
     selectedMockups: string[],
     selectedMockupData: any[],
-    userProfile: UserProfile
+    userProfile: UserProfile,
+    exportFormat: ExportFormat
   ) => {
     if (!user) {
       toast.error('Vous devez être connecté');
@@ -45,20 +47,15 @@ export function useMockupGeneration() {
     const generationId = nanoid();
 
     try {
-      // Process design file
       const processedDesign = await processDesignFile(designFile);
-
-      // Update credits before generation
       await updateUserCredits(user.uid, selectedMockups.length);
       
-      // Prepare UUID pairs
       const uuidPairs = selectedMockupData.map(m => ({
         mockupUuid: m.mockupUuid,
         smartObjectUuid: m.smartObjectUuid
       }));
 
-      // Generate mockups
-      const result = await generateMockups(processedDesign, uuidPairs, generationId);
+      const result = await generateMockups(processedDesign, uuidPairs, generationId, exportFormat);
 
       if (result.success && result.mockups) {
         const generationData = {
@@ -66,6 +63,7 @@ export function useMockupGeneration() {
           userId: user.uid,
           designName: designFile.name,
           mockups: result.mockups,
+          exportFormat,
           createdAt: new Date().toISOString()
         };
 

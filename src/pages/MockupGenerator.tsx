@@ -10,6 +10,7 @@ import MockupGrid from '../components/mockup/MockupGrid';
 import MockupPagination from '../components/mockup/MockupPagination';
 import GenerationFooter from '../components/mockup/GenerationFooter';
 import GenerationProgress from '../components/generation/GenerationProgress';
+import ExportFormatSelector from '../components/mockup/ExportFormatSelector';
 import { getPlanMockupLimit } from '../utils/subscription';
 import { useMockupGeneration } from '../hooks/useMockupGeneration';
 import { useMockupSelection } from '../hooks/useMockupSelection';
@@ -17,12 +18,13 @@ import { useMockups } from '../hooks/useMockups';
 import { useCategories } from '../hooks/useCategories';
 import { useMockupPagination } from '../hooks/useMockupPagination';
 import type { UserProfile } from '../types/user';
-import type { Mockup } from '../types/mockup';
+import type { Mockup, ExportFormat } from '../types/mockup';
 
 export default function MockupGenerator() {
   const { user } = useStore();
   const [designFile, setDesignFile] = useState<File>();
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [exportFormat, setExportFormat] = useState<ExportFormat>('webp');
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [favorites, setFavorites] = useState<string[]>([]);
 
@@ -74,7 +76,7 @@ export default function MockupGenerator() {
   const handleGenerate = () => {
     if (!user || !userProfile || !designFile) return;
     const selectedMockupData = mockups.filter(m => selectedMockups.includes(m.id));
-    generateMockups(designFile, selectedMockups, selectedMockupData, userProfile);
+    generateMockups(designFile, selectedMockups, selectedMockupData, userProfile, exportFormat);
   };
 
   return (
@@ -88,10 +90,20 @@ export default function MockupGenerator() {
         <DesignUploader onUpload={setDesignFile} uploadedFile={designFile} />
       </section>
 
+      <section>
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">
+          2. Choisissez le format d'export
+        </h2>
+        <ExportFormatSelector
+          format={exportFormat}
+          onChange={setExportFormat}
+        />
+      </section>
+
       <section className="space-y-6">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold text-gray-900">
-            2. Sélectionnez vos mockups
+            3. Sélectionnez vos mockups
           </h2>
           {userProfile && (
             <div className="text-sm text-gray-600">
