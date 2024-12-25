@@ -6,14 +6,15 @@ import PageContainer from './components/layout/PageContainer';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import ResetPassword from './pages/ResetPassword';
 import Dashboard from './pages/Dashboard';
 import MockupGenerator from './pages/MockupGenerator';
 import MockupLibrary from './pages/MockupLibrary';
+import CustomMockup from './pages/CustomMockup';
 import AdminDashboard from './pages/AdminDashboard';
 import Pricing from './pages/Pricing';
 import Contact from './pages/Contact';
 import ThankYou from './pages/ThankYou';
-import ResetPassword from './pages/ResetPassword';
 import LegalNotice from './pages/legal/LegalNotice';
 import TermsOfService from './pages/legal/TermsOfService';
 import TermsOfSale from './pages/legal/TermsOfSale';
@@ -24,7 +25,7 @@ import { useStore } from './store/useStore';
 import { useAuthState } from './hooks/useAuthState';
 
 export default function App() {
-  useAuthState(); // Initialize auth state
+  useAuthState();
   const { user } = useStore();
 
   return (
@@ -48,6 +49,11 @@ export default function App() {
             <Route path="/generator" element={
               <AuthGuard>
                 <MockupGenerator />
+              </AuthGuard>
+            } />
+            <Route path="/custom-mockup" element={
+              <AuthGuard>
+                <CustomMockup />
               </AuthGuard>
             } />
             <Route path="/dashboard" element={
