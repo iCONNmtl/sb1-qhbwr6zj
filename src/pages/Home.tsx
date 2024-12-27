@@ -53,9 +53,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Trusted Companies */}
-      <TrustedCompanies />
-
       {/* Features */}
       <Features />
 
