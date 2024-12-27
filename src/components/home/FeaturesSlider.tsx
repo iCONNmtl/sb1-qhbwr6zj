@@ -6,17 +6,17 @@ const FEATURES = [
   {
     title: "Bibliothèque complète de mockups",
     description: "Accédez à une large collection de mockups professionnels, enrichie chaque semaine avec de nouveaux modèles pour rester à la pointe des tendances.",
-    image: "https://lh3.googleusercontent.com/d/10rrjfGD5yLEAqZSmVl3iYBZQVlTZgTfc"
+    image: "https://lh3.googleusercontent.com/d/1tNk7p5cosoom--czxMnxbpEv5VokP7HV"
   },
   {
     title: "Importez vos propres mockups",
     description: "Créez et partagez vos propres mockups personnalisés. Notre outil vous permet d'ajouter facilement vos créations à votre bibliothèque privée.",
-    image: "https://lh3.googleusercontent.com/d/1nCLgTJbeetRME5fW7eglnF2ZoBSsiPAf"
+    image: "https://lh3.googleusercontent.com/d/1qcVdRvtkdZ4HiN7iEJ-0jVeH9iaR0q99"
   },
   {
     title: "Génération rapide et professionnelle", 
     description: "Gagnez un temps précieux en générant vos mockups en quelques secondes. Obtenez des résultats professionnels sans compromis sur la qualité.",
-    image: "https://lh3.googleusercontent.com/d/11RA__rx0UsEOMV1Xr9jNCAtSWNBhncZ7"
+    image: "https://lh3.googleusercontent.com/d/1EPGJz4PvcciH7HcxUWFqS700IWk7ceoX"
   }
 ];
 
