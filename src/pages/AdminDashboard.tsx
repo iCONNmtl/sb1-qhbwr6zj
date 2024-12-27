@@ -6,17 +6,17 @@ import MockupEditor from '../components/MockupEditor';
 import UserList from '../components/admin/UserList';
 import MockupList from '../components/admin/MockupList';
 import { initializePlans } from '../utils/plans';
-import { fetchAdminStats } from '../utils/adminStats';
+import { fetchAdminStats, getMockupGenerationCount, getUserGenerationCount } from '../utils/adminStats';
+import { LoadingSpinner } from '../components/common';
 import toast from 'react-hot-toast';
-import type { UserProfile } from '../types/user';
 import type { Mockup } from '../types/mockup';
+import type { UserProfile } from '../types/user';
 
 export default function AdminDashboard() {
   const [showUploader, setShowUploader] = useState(false);
   const [editingMockup, setEditingMockup] = useState<Mockup | null>(null);
-  const [mockups, setMockups] = useState<Mockup[]>([]);
-  const [users, setUsers] = useState<(UserProfile & { id: string })[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [mockups, setMockups] = useState<(Mockup & { generationCount?: number })[]>([]);
+  const [users, setUsers] = useState<(UserProfile & { id: string; generationCount?: number })[]>([]);
   const [stats, setStats] = useState({
     users: {
       total: 0,
@@ -30,6 +30,7 @@ export default function AdminDashboard() {
     mockups: 0,
     totalGenerations: 0
   });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const initialize = async () => {
@@ -58,10 +59,14 @@ export default function AdminDashboard() {
   const fetchMockups = async () => {
     try {
       const mockupsSnap = await getDocs(collection(db, 'mockups'));
-      return mockupsSnap.docs.map(doc => ({
-        ...doc.data(),
-        firestoreId: doc.id
-      })) as Mockup[];
+      const mockupsData = await Promise.all(
+        mockupsSnap.docs.map(async (doc) => {
+          const mockup = { ...doc.data(), firestoreId: doc.id } as Mockup;
+          const generationCount = await getMockupGenerationCount(mockup.id);
+          return { ...mockup, generationCount };
+        })
+      );
+      return mockupsData;
     } catch (error) {
       console.error('Error fetching mockups:', error);
       throw error;
@@ -71,39 +76,56 @@ export default function AdminDashboard() {
   const fetchUsers = async () => {
     try {
       const usersSnap = await getDocs(collection(db, 'users'));
-      return usersSnap.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as (UserProfile & { id: string })[];
+      const usersData = await Promise.all(
+        usersSnap.docs.map(async (doc) => {
+          const user = { id: doc.id, ...doc.data() } as UserProfile & { id: string };
+          const generationCount = await getUserGenerationCount(doc.id);
+          return { ...user, generationCount };
+        })
+      );
+      return usersData;
     } catch (error) {
       console.error('Error fetching users:', error);
       throw error;
     }
   };
 
+  const handleRefresh = async () => {
+    setLoading(true);
+    try {
+      const [adminStats, mockupsData, usersData] = await Promise.all([
+        fetchAdminStats(),
+        fetchMockups(),
+        fetchUsers()
+      ]);
+      
+      setStats(adminStats);
+      setMockups(mockupsData);
+      setUsers(usersData);
+      toast.success('Données mises à jour');
+    } catch (error) {
+      toast.error('Erreur lors de la mise à jour');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Chargement...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner message="Chargement du tableau de bord..." />;
   }
 
   return (
     <div className="space-y-8">
       <UserList 
         users={users} 
-        onRefresh={fetchUsers}
+        onRefresh={handleRefresh}
         stats={stats.users}
       />
 
       <MockupList
         mockups={mockups}
         totalGenerations={stats.totalGenerations}
-        onRefresh={fetchMockups}
+        onRefresh={handleRefresh}
         onShowUploader={() => setShowUploader(true)}
         onEdit={setEditingMockup}
       />
@@ -111,9 +133,7 @@ export default function AdminDashboard() {
       {showUploader && (
         <MockupUploader
           onClose={() => setShowUploader(false)}
-          onSuccess={() => {
-            fetchMockups().then(setMockups);
-          }}
+          onSuccess={handleRefresh}
         />
       )}
 
@@ -121,9 +141,7 @@ export default function AdminDashboard() {
         <MockupEditor
           mockup={editingMockup}
           onClose={() => setEditingMockup(null)}
-          onSuccess={() => {
-            fetchMockups().then(setMockups);
-          }}
+          onSuccess={handleRefresh}
         />
       )}
     </div>

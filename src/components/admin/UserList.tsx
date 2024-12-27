@@ -16,7 +16,7 @@ interface UserStats {
 }
 
 interface UserListProps {
-  users: (UserProfile & { id: string })[];
+  users: (UserProfile & { id: string; generationCount?: number })[];
   onRefresh: () => Promise<void>;
   stats: UserStats;
 }
@@ -80,6 +80,9 @@ export default function UserList({ users, onRefresh, stats }: UserListProps) {
                 Crédits
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Générations
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Date d'inscription
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -114,6 +117,11 @@ export default function UserList({ users, onRefresh, stats }: UserListProps) {
                       {user.subscription.credits || 0}
                     </span>
                   </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span className="px-2 py-1 text-xs font-medium rounded-full bg-indigo-100 text-indigo-800">
+                    {user.generationCount || 0}
+                  </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">

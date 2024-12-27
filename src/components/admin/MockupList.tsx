@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Eye, EyeOff, Edit, Image } from 'lucide-react';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
@@ -11,7 +11,7 @@ import toast from 'react-hot-toast';
 import type { Mockup } from '../../types/mockup';
 
 interface MockupListProps {
-  mockups: Mockup[];
+  mockups: (Mockup & { generationCount?: number })[];
   totalGenerations: number;
   onRefresh: () => Promise<void>;
   onShowUploader: () => void;
@@ -96,6 +96,9 @@ export default function MockupList({
                 Catégorie
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Générations
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Statut
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -140,6 +143,11 @@ export default function MockupList({
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-indigo-100 text-indigo-800">
                     {mockup.category}
+                  </span>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                    {mockup.generationCount || 0}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">

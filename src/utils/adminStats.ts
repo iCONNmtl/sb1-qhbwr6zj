@@ -14,7 +14,6 @@ interface AdminStats {
   };
   mockups: number;
   totalGenerations: number;
-  revenue: number;
 }
 
 export async function fetchAdminStats(): Promise<AdminStats> {
@@ -48,21 +47,6 @@ export async function fetchAdminStats(): Promise<AdminStats> {
       return total + (generation.mockups?.length || 0);
     }, 0);
 
-    // Calculate revenue (last 30 days)
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    
-    const paymentsQuery = query(
-      collection(db, 'payments'),
-      where('createdAt', '>=', thirtyDaysAgo.toISOString())
-    );
-    
-    const paymentsSnap = await getDocs(paymentsQuery);
-    const revenue = paymentsSnap.docs.reduce(
-      (acc, doc) => acc + (doc.data().amount || 0),
-      0
-    );
-
     return {
       users: {
         ...userStats,
@@ -71,11 +55,47 @@ export async function fetchAdminStats(): Promise<AdminStats> {
         expertPercentage
       },
       mockups: mockupsCount,
-      totalGenerations,
-      revenue: revenue / 100 // Convert cents to euros
+      totalGenerations
     };
   } catch (error) {
     console.error('Error fetching admin stats:', error);
     throw error;
+  }
+}
+
+export async function getMockupGenerationCount(mockupId: string): Promise<number> {
+  try {
+    const generationsSnap = await getDocs(collection(db, 'generations'));
+    let count = 0;
+    
+    generationsSnap.docs.forEach(doc => {
+      const generation = doc.data();
+      if (generation.mockups?.some((m: any) => m.id === mockupId)) {
+        count++;
+      }
+    });
+    
+    return count;
+  } catch (error) {
+    console.error('Error getting mockup generation count:', error);
+    return 0;
+  }
+}
+
+export async function getUserGenerationCount(userId: string): Promise<number> {
+  try {
+    const q = query(collection(db, 'generations'), where('userId', '==', userId));
+    const generationsSnap = await getDocs(q);
+    let count = 0;
+    
+    generationsSnap.docs.forEach(doc => {
+      const generation = doc.data();
+      count += generation.mockups?.length || 0;
+    });
+    
+    return count;
+  } catch (error) {
+    console.error('Error getting user generation count:', error);
+    return 0;
   }
 }
