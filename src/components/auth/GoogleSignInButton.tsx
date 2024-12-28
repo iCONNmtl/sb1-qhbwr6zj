@@ -1,5 +1,6 @@
 import React from 'react';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { useNavigate } from 'react-router-dom';
 import { auth } from '../../lib/firebase';
 import toast from 'react-hot-toast';
 
@@ -8,11 +9,14 @@ interface GoogleSignInButtonProps {
 }
 
 export default function GoogleSignInButton({ className }: GoogleSignInButtonProps) {
+  const navigate = useNavigate();
+
   const handleGoogleSignIn = async () => {
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
       toast.success('Connexion réussie');
+      navigate('/dashboard');
     } catch (error: any) {
       console.error('Google sign in error:', error);
       toast.error('Erreur lors de la connexion avec Google');

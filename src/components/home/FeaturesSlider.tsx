@@ -5,7 +5,7 @@ import { useAutoSlider } from '../../hooks/useAutoSlider';
 const FEATURES = [
   {
     title: "Bibliothèque complète de mockups",
-    description: "Accédez à une large collection de mockups professionnels, enrichie chaque semaine avec de nouveaux modèles pour rester à la pointe des tendances.",
+    description: "Accédez à une large collection de mockups professionnels, enrichie chaque semaine avec de nouveaux modèles réalistes et variés",
     image: "https://lh3.googleusercontent.com/d/1ivwffQeVnzZBn4l0zeTvXmFTKjjFRHIZ"
   },
   {
@@ -15,7 +15,7 @@ const FEATURES = [
   },
   {
     title: "Génération rapide et professionnelle", 
-    description: "Gagnez un temps précieux en générant vos mockups en quelques secondes. Obtenez des résultats professionnels sans compromis sur la qualité.",
+    description: "Gagnez un temps précieux en générant vos mockups en quelques secondes. Obtenez des résultats professionnels en haute résolution",
     image: "https://lh3.googleusercontent.com/d/1C3aK16BFu44sb0eL0tLOJv7ybMOw1DeE"
   }
 ];

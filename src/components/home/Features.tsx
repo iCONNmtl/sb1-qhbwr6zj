@@ -21,7 +21,7 @@ const FEATURES = [
   {
     icon: Image,
     title: "Export haute qualité",
-    description: "Images JPG jusqu'à 4K"
+    description: "Images PNG ou WEBP 2048x2048px"
   },
   {
     icon: Clock,

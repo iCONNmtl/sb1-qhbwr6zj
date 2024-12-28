@@ -9,12 +9,12 @@ const TESTIMONIALS = [
     image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=128&h=128&q=80",
     rating: 5,
     date: "Il y a 2 jours",
-    content: "Pixmock a révolutionné ma façon de présenter mes designs aux clients. Le temps de préparation est passé de 2 heures à 5 minutes.",
+    content: "Pixmock a révolutionné ma façon de présenter mes designs aux clients. Le temps de préparation est passé de 2 heures à 15 minutes.",
     stats: {
       icon: Clock,
       label: "Temps économisé",
-      value: "95%",
-      detail: "2h → 5min par présentation"
+      value: "88%",
+      detail: "2h → 15min par présentation"
     }
   },
   {
@@ -27,7 +27,7 @@ const TESTIMONIALS = [
     stats: {
       icon: TrendingUp,
       label: "Taux de conversion",
-      value: "+45%",
+      value: "+37%",
       detail: "Sur les propositions commerciales"
     }
   },
@@ -37,10 +37,10 @@ const TESTIMONIALS = [
     image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&auto=format&fit=crop&w=128&h=128&q=80",
     rating: 5,
     date: "Il y a 2 semaines",
-    content: "La qualité des rendus est exceptionnelle. Nous avons augmenté nos revenus grâce à des clients plus satisfaits.",
+    content: "La qualité des rendus est exceptionnelle. Le nombre de clients a augmenté grâce à une meilleure projection des résultats finaux",
     stats: {
       icon: BarChart2,
-      label: "Revenus annuels",
+      label: "Clients annuels",
       value: "+28%",
       detail: "Grâce à de meilleures présentations"
     }
