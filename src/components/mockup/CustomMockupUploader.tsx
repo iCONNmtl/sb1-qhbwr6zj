@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { Upload, Loader2, ExternalLink } from 'lucide-react';
+import { Loader2, Lock } from 'lucide-react';
 import { createCustomMockup, initializeCustomMockup } from '../../services/customMockupService';
+import { useSubscriptionStatus } from '../../hooks/useSubscriptionStatus';
+import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 interface CustomMockupUploaderProps {
@@ -8,16 +10,25 @@ interface CustomMockupUploaderProps {
 }
 
 export default function CustomMockupUploader({ userId }: CustomMockupUploaderProps) {
+  const [loading, setLoading] = useState(false);
   const [mockupId, setMockupId] = useState<string>();
   const [driveUrl, setDriveUrl] = useState<string>();
-  const [loading, setLoading] = useState(false);
+  const { subscription } = useSubscriptionStatus(userId);
+
+  const isPremium = subscription?.plan === 'Pro' || subscription?.plan === 'Expert';
 
   const handleInitialize = async () => {
+    if (!isPremium) return;
+    
     setLoading(true);
     try {
-      const { mockupId, driveUrl } = await initializeCustomMockup(userId);
-      setMockupId(mockupId);
-      setDriveUrl(driveUrl);
+      const result = await initializeCustomMockup(userId);
+      setMockupId(result.mockupId);
+      setDriveUrl(result.driveUrl);
+      
+      // Ouvrir le dossier Drive dans un nouvel onglet
+      window.open(result.driveUrl, '_blank');
+      
       toast.success('Dossier créé avec succès');
     } catch (error) {
       toast.error('Erreur lors de la création du dossier');
@@ -42,91 +53,89 @@ export default function CustomMockupUploader({ userId }: CustomMockupUploaderPro
     }
   };
 
+  if (!isPremium) {
+    return (
+      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div className="p-6 flex flex-col items-center text-center">
+          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+            <Lock className="h-8 w-8 text-gray-400" />
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            Fonctionnalité Premium
+          </h3>
+          <p className="text-gray-600 mb-6">
+            L'ajout de mockups personnalisés est réservé aux plans Pro et Expert.
+            Passez à un plan supérieur pour débloquer cette fonctionnalité.
+          </p>
+          <Link
+            to="/pricing"
+            className="w-full inline-flex items-center justify-center px-6 py-3 gradient-bg text-white rounded-xl hover:opacity-90 transition"
+          >
+            Voir les plans
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-      <div className="border-b border-gray-100 p-6">
-        <h2 className="text-xl font-semibold text-gray-900">
-          Upload de votre PSD
-        </h2>
-        <p className="mt-1 text-sm text-gray-500">
-          Commencez par créer un dossier partagé pour uploader votre fichier
-        </p>
-      </div>
-
-      <div className="p-6">
-        {!mockupId ? (
+      <div className="p-6 space-y-6">
+        {/* Step 1: Initialize */}
+        {!mockupId && (
           <button
             onClick={handleInitialize}
             disabled={loading}
-            className="w-full py-4 px-6 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full h-32 flex flex-col items-center justify-center px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition disabled:opacity-50"
           >
             {loading ? (
               <>
-                <Loader2 className="h-5 w-5 animate-spin mr-2" />
-                Création du dossier...
+                <Loader2 className="h-8 w-8 animate-spin mb-2" />
+                <span>Création du dossier...</span>
               </>
             ) : (
               <>
-                <Upload className="h-5 w-5 mr-2" />
-                Uploader mon PSD
+                <span className="text-lg font-medium">Étape 1 : Créer le dossier</span>
+                <span className="text-sm text-indigo-200 mt-1">Un dossier Google Drive sera créé pour vous</span>
               </>
             )}
           </button>
-        ) : (
-          <div className="space-y-6">
-            <div className="bg-indigo-50 rounded-xl p-6">
-              <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center flex-shrink-0">
-                  <Upload className="h-6 w-6 text-indigo-600" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-indigo-900 mb-2">
-                    Dossier créé avec succès !
-                  </h3>
-                  <div className="space-y-4">
-                    <p className="text-sm text-indigo-700">
-                      Suivez ces étapes pour finaliser la création de votre mockup :
-                    </p>
-                    <ol className="text-sm text-indigo-700 space-y-2">
-                      <li className="flex items-start">
-                        <span className="font-medium mr-2">1.</span>
-                        Accédez au dossier en cliquant sur le lien ci-dessous
-                      </li>
-                      <li className="flex items-start">
-                        <span className="font-medium mr-2">2.</span>
-                        Déposez votre fichier PSD dans le dossier
-                      </li>
-                      <li className="flex items-start">
-                        <span className="font-medium mr-2">3.</span>
-                        Cliquez sur "Créer mon mockup" une fois le fichier déposé
-                      </li>
-                    </ol>
-                    <a
-                      href={driveUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center px-4 py-2 bg-white text-indigo-600 rounded-lg hover:bg-indigo-50 transition"
-                    >
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      Ouvrir le dossier Drive
-                    </a>
-                  </div>
-                </div>
-              </div>
+        )}
+
+        {/* Step 2: Create Mockup */}
+        {mockupId && (
+          <div className="space-y-4">
+            <div className="bg-indigo-50 rounded-xl p-4">
+              <p className="text-sm text-indigo-900">
+                Dossier créé ! Déposez votre PSD dans le dossier Google Drive puis cliquez sur le bouton ci-dessous.
+              </p>
+              {driveUrl && (
+                <a
+                  href={driveUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center text-sm text-indigo-600 hover:text-indigo-700 mt-2"
+                >
+                  Ouvrir le dossier
+                </a>
+              )}
             </div>
 
             <button
               onClick={handleCreate}
               disabled={loading}
-              className="w-full py-4 px-6 gradient-bg text-white rounded-xl hover:opacity-90 transition flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full h-32 flex flex-col items-center justify-center px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition disabled:opacity-50"
             >
               {loading ? (
                 <>
-                  <Loader2 className="h-5 w-5 animate-spin mr-2" />
-                  Création du mockup...
+                  <Loader2 className="h-8 w-8 animate-spin mb-2" />
+                  <span>Création du mockup...</span>
                 </>
               ) : (
-                'Créer mon mockup'
+                <>
+                  <span className="text-lg font-medium">Étape 2 : Créer le mockup</span>
+                  <span className="text-sm text-indigo-200 mt-1">Cliquez ici une fois votre PSD déposé</span>
+                </>
               )}
             </button>
           </div>
