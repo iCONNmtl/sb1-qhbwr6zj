@@ -5,6 +5,7 @@ import { auth, db } from '../lib/firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import { useStore } from '../store/useStore';
 import { Lock, Mail } from 'lucide-react';
+import GoogleSignInButton from '../components/auth/GoogleSignInButton';
 import toast from 'react-hot-toast';
 import type { UserProfile } from '../types/user';
 
@@ -110,7 +111,33 @@ export default function Signup() {
             >
               {loading ? 'Création...' : 'Créer mon compte'}
             </button>
+
+            <p className="text-xs text-center text-gray-500">
+              En continuant, vous acceptez nos{' '}
+              <Link to="/legal/cgu" className="text-indigo-600 hover:text-indigo-500">
+                conditions d'utilisation
+              </Link>{' '}
+              et notre{' '}
+              <Link to="/legal/confidentialite" className="text-indigo-600 hover:text-indigo-500">
+                politique de confidentialité
+              </Link>
+            </p>
           </form>
+
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">Ou</span>
+              </div>
+            </div>
+
+            <div className="mt-6">
+              <GoogleSignInButton />
+            </div>
+          </div>
 
           <p className="mt-6 text-center text-sm text-gray-600">
             Déjà un compte ?{' '}

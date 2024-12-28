@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Download, Calendar, Eye, ChevronDown, ChevronUp } from 'lucide-react';
+import React, { useState } from 'react';
+import { Eye, ChevronDown, ChevronUp, Download } from 'lucide-react';
 import clsx from 'clsx';
 import ImageLoader from '../ImageLoader';
 import MockupPreviewModal from '../mockup/MockupPreviewModal';
@@ -20,15 +20,8 @@ interface GenerationGroupProps {
 }
 
 export default function GenerationGroup({ generation, isLatest }: GenerationGroupProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(isLatest);
   const [selectedMockup, setSelectedMockup] = useState<{id: string; name: string; url: string} | null>(null);
-
-  // Ouvre automatiquement la dernière génération
-  useEffect(() => {
-    if (isLatest) {
-      setIsExpanded(true);
-    }
-  }, [isLatest]);
 
   const handleOpenImage = (url: string) => {
     window.open(url, '_blank');
@@ -46,27 +39,28 @@ export default function GenerationGroup({ generation, isLatest }: GenerationGrou
 
   return (
     <>
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+      <div className={clsx(
+        "bg-white rounded-xl shadow-sm overflow-hidden transition-all duration-300",
+        isLatest && "ring-2 ring-indigo-600"
+      )}>
         <div 
-          className="p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors"
+          className="p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors flex items-center justify-between"
           onClick={() => setIsExpanded(!isExpanded)}
         >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center text-sm text-gray-500">
-              <Calendar className="h-4 w-4 mr-2" />
-              <span>{formatDate(generation.createdAt)}</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="px-3 py-1 bg-indigo-50 text-indigo-600 text-sm font-medium rounded-full">
-                {generation.mockups.length} mockup{generation.mockups.length > 1 ? 's' : ''}
-              </span>
-              {isExpanded ? (
-                <ChevronUp className="h-5 w-5 text-gray-400" />
-              ) : (
-                <ChevronDown className="h-5 w-5 text-gray-400" />
-              )}
-            </div>
+          <div className="flex items-center space-x-4">
+            <span className="text-sm text-gray-500">
+              {formatDate(generation.createdAt)}
+            </span>
+            <span className="px-3 py-1 bg-indigo-50 text-indigo-600 text-sm font-medium rounded-full">
+              {generation.mockups.length} mockup{generation.mockups.length > 1 ? 's' : ''}
+            </span>
           </div>
+
+          {isExpanded ? (
+            <ChevronUp className="h-5 w-5 text-gray-400" />
+          ) : (
+            <ChevronDown className="h-5 w-5 text-gray-400" />
+          )}
         </div>
         
         {isExpanded && (

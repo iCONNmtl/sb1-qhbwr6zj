@@ -14,14 +14,5 @@ export interface UserProfile {
   email: string;
   subscription: UserSubscription;
   createdAt: string;
-  favorites?: string[]; // Array of mockup IDs
-}
-
-export interface PlanConfig {
-  id: string;
-  name: UserPlan;
-  price: number;
-  credits: number;
-  description: string;
-  features: string[];
+  favorites?: string[];
 }
