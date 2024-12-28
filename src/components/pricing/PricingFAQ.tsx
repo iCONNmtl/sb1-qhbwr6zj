@@ -8,7 +8,7 @@ const FAQ_ITEMS = [
   },
   {
     question: "Puis-je acheter plusieurs packs ?",
-    answer: "Oui, vous pouvez acheter autant de packs que vous le souhaitez. Les crédits s'accumulent dans votre compte."
+    answer: "Oui, vous pouvez acheter autant de packs que vous le souhaitez. Les crédits s'accumulent dans votre compte, mais vous aurez les avantages du dernier pack acheté"
   },
   {
     question: "Comment fonctionne le paiement ?",
@@ -19,8 +19,8 @@ const FAQ_ITEMS = [
     answer: "Non, les crédits n'expirent jamais. Vous pouvez les utiliser à votre rythme."
   },
   {
-    question: "Puis-je me faire rembourser ?",
-    answer: "Les crédits non utilisés peuvent être remboursés dans les 14 jours suivant l'achat, conformément à nos conditions générales de vente."
+    question: "Est-ce que je garde les avantages du pack ?",
+    answer: "Vous profitez des avantages du pack sélectionné, si vous basculez sur le pack inférieur, vous aurez les avantages du pack inférieur"
   },
   {
     question: "Y a-t-il des frais cachés ?",

@@ -42,7 +42,7 @@ export default function LegalNotice() {
             3. Propriété intellectuelle
           </h2>
           <p className="text-gray-600 mb-4">
-            L'ensemble du contenu du site MockupPro (logos, textes, éléments graphiques, vidéos, etc.) est protégé par le droit d'auteur et le droit des marques.
+            L'ensemble du contenu du site Pixmock.com (logos, textes, éléments graphiques, images, vidéos, etc.) est protégé par le droit d'auteur et le droit des marques.
           </p>
           <p className="text-gray-600">
             Toute reproduction ou représentation totale ou partielle de ce site par quelque procédé que ce soit, sans autorisation expresse, est interdite et constituerait une contrefaçon sanctionnée par les articles L.335-2 et suivants du Code de la propriété intellectuelle.

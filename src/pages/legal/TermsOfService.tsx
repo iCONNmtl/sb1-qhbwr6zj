@@ -43,7 +43,7 @@ export default function TermsOfService() {
             <li>Fournir des informations exactes et à jour</li>
             <li>Maintenir la confidentialité de ses identifiants</li>
             <li>Ne pas partager son compte avec des tiers</li>
-            <li>Informer immédiatement MockupPro de toute utilisation non autorisée</li>
+            <li>Informer immédiatement Pixmock de toute utilisation non autorisée</li>
           </ul>
         </section>
 
