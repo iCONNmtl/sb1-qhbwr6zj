@@ -2,6 +2,12 @@ import { API_CONFIG } from '../config/api';
 import toast from 'react-hot-toast';
 import type { ExportFormat } from '../types/mockup';
 
+interface TextCustomization {
+  enabled: boolean;
+  appliedMockups: number[];
+  html: string;
+}
+
 interface GenerationResponse {
   success: boolean;
   mockups?: Array<{
@@ -16,7 +22,8 @@ export async function generateMockups(
   design: File,
   uuidPairs: Array<{ mockupUuid: string; smartObjectUuid: string }>,
   generationId: string,
-  exportFormat: ExportFormat
+  exportFormat: ExportFormat,
+  textCustomization: TextCustomization
 ): Promise<GenerationResponse> {
   const formData = new FormData();
   formData.append('design', design);
@@ -24,6 +31,11 @@ export async function generateMockups(
   formData.append('uuidPairs', JSON.stringify(uuidPairs));
   formData.append('mockupCount', uuidPairs.length.toString());
   formData.append('exportFormat', exportFormat);
+  
+  // Separate text customization into distinct fields
+  formData.append('textCustomizationEnabled', textCustomization.enabled.toString());
+  formData.append('textCustomizationMockups', JSON.stringify(textCustomization.appliedMockups));
+  formData.append('textCustomizationHtml', textCustomization.enabled ? textCustomization.html : '');
 
   try {
     const response = await fetch(API_CONFIG.webhooks.mockupGeneration, {

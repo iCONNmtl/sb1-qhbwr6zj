@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Loader2 } from 'lucide-react';
 import { useStore } from '../store/useStore';
-import { collection, query, where, getDocs, onSnapshot, doc } from 'firebase/firestore';
+import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import toast from 'react-hot-toast';
+
+// Components
 import DesignUploader from '../components/DesignUploader';
 import CategoryCount from '../components/CategoryCount';
 import MockupGrid from '../components/mockup/MockupGrid';
@@ -11,14 +12,19 @@ import MockupPagination from '../components/mockup/MockupPagination';
 import GenerationFooter from '../components/mockup/GenerationFooter';
 import GenerationProgress from '../components/generation/GenerationProgress';
 import ExportFormatSelector from '../components/mockup/ExportFormatSelector';
-import { getPlanMockupLimit } from '../utils/subscription';
+import TextEditor from '../components/mockup/TextEditor';
+import TextCustomizationToggle from '../components/mockup/TextCustomizationToggle';
+
+// Hooks
 import { useMockupGeneration } from '../hooks/useMockupGeneration';
 import { useMockupSelection } from '../hooks/useMockupSelection';
 import { useMockups } from '../hooks/useMockups';
 import { useCategories } from '../hooks/useCategories';
 import { useMockupPagination } from '../hooks/useMockupPagination';
+
+// Types
 import type { UserProfile } from '../types/user';
-import type { Mockup, ExportFormat } from '../types/mockup';
+import type { ExportFormat } from '../types/mockup';
 
 export default function MockupGenerator() {
   const { user } = useStore();
@@ -27,11 +33,17 @@ export default function MockupGenerator() {
   const [exportFormat, setExportFormat] = useState<ExportFormat>('webp');
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [favorites, setFavorites] = useState<string[]>([]);
+  const [customHtml, setCustomHtml] = useState<string>('');
+  const [isTextCustomizationEnabled, setIsTextCustomizationEnabled] = useState(false);
+  const [customizedMockups, setCustomizedMockups] = useState<number[]>([]);
 
   const { mockups, loading: mockupsLoading } = useMockups();
   const { categories } = useCategories(mockups, favorites);
   const { isGenerating, generateMockups } = useMockupGeneration();
   const { selectedMockups, handleMockupSelection } = useMockupSelection(userProfile);
+
+  // Get selected mockup data
+  const selectedMockupData = mockups.filter(m => selectedMockups.includes(m.id));
 
   // Filter mockups based on selected category
   const filteredMockups = mockups.filter(mockup => {
@@ -75,14 +87,28 @@ export default function MockupGenerator() {
 
   const handleGenerate = () => {
     if (!user || !userProfile || !designFile) return;
-    const selectedMockupData = mockups.filter(m => selectedMockups.includes(m.id));
-    generateMockups(designFile, selectedMockups, selectedMockupData, userProfile, exportFormat);
+
+    const textCustomization = {
+      enabled: isTextCustomizationEnabled,
+      appliedMockups: customizedMockups,
+      html: customHtml
+    };
+
+    generateMockups(
+      designFile, 
+      selectedMockups, 
+      selectedMockupData, 
+      userProfile, 
+      exportFormat,
+      textCustomization
+    );
   };
 
   return (
     <div className="space-y-8">
       {isGenerating && <GenerationProgress totalMockups={selectedMockups.length} />}
 
+      {/* Design Upload */}
       <section>
         <h2 className="text-xl font-semibold text-gray-900 mb-4">
           1. Uploadez votre design
@@ -90,24 +116,15 @@ export default function MockupGenerator() {
         <DesignUploader onUpload={setDesignFile} uploadedFile={designFile} />
       </section>
 
-      <section>
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">
-          2. Choisissez le format d'export
-        </h2>
-        <ExportFormatSelector
-          format={exportFormat}
-          onChange={setExportFormat}
-        />
-      </section>
-
+      {/* Mockup Selection */}
       <section className="space-y-6">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold text-gray-900">
-            3. Sélectionnez vos mockups
+            2. Sélectionnez vos mockups
           </h2>
           {userProfile && (
             <div className="text-sm text-gray-600">
-              {selectedMockups.length} / {getPlanMockupLimit(userProfile.subscription.plan)} mockups sélectionnés
+              {selectedMockups.length} mockup{selectedMockups.length > 1 ? 's' : ''} sélectionné{selectedMockups.length > 1 ? 's' : ''}
             </div>
           )}
         </div>
@@ -127,8 +144,8 @@ export default function MockupGenerator() {
 
         {mockupsLoading ? (
           <div className="text-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-indigo-600" />
-            <p className="text-gray-500">Chargement des mockups...</p>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
+            <p className="mt-4 text-gray-500">Chargement des mockups...</p>
           </div>
         ) : filteredMockups.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
@@ -155,6 +172,42 @@ export default function MockupGenerator() {
         )}
       </section>
 
+      {/* Text Customization */}
+      {selectedMockups.length > 0 && (
+        <section>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">
+            3. Personnalisez votre texte
+          </h2>
+          
+          <div className="space-y-6">
+            <TextCustomizationToggle
+              isEnabled={isTextCustomizationEnabled}
+              onChange={setIsTextCustomizationEnabled}
+            />
+
+            {isTextCustomizationEnabled && (
+              <TextEditor
+                selectedMockups={selectedMockupData}
+                onGenerateHtml={setCustomHtml}
+                onCustomizedMockupsChange={setCustomizedMockups}
+              />
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* Export Format */}
+      <section>
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">
+          {selectedMockups.length > 0 ? '4' : '3'}. Choisissez le format d'export
+        </h2>
+        <ExportFormatSelector
+          format={exportFormat}
+          onChange={setExportFormat}
+        />
+      </section>
+
+      {/* Generation Footer */}
       <GenerationFooter
         userProfile={userProfile}
         selectedMockups={selectedMockups}

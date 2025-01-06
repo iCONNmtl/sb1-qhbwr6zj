@@ -3,6 +3,7 @@ import { Eye, ChevronDown, ChevronUp, Download } from 'lucide-react';
 import clsx from 'clsx';
 import ImageLoader from '../ImageLoader';
 import MockupPreviewModal from '../mockup/MockupPreviewModal';
+import { downloadImage } from '../../utils/download';
 
 interface MockupGeneration {
   id: string;
@@ -23,8 +24,12 @@ export default function GenerationGroup({ generation, isLatest }: GenerationGrou
   const [isExpanded, setIsExpanded] = useState(isLatest);
   const [selectedMockup, setSelectedMockup] = useState<{id: string; name: string; url: string} | null>(null);
 
-  const handleOpenImage = (url: string) => {
-    window.open(url, '_blank');
+  const handleDownload = async (mockup: { name: string; url: string }) => {
+    try {
+      await downloadImage(mockup.url, mockup.name);
+    } catch (error) {
+      console.error('Error downloading image:', error);
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -87,7 +92,10 @@ export default function GenerationGroup({ generation, isLatest }: GenerationGrou
                       <Eye className="h-5 w-5" />
                     </button>
                     <button
-                      onClick={() => handleOpenImage(mockup.url)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDownload(mockup);
+                      }}
                       className="p-2 bg-white text-gray-600 rounded-lg opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 hover:bg-indigo-50 hover:text-indigo-600"
                     >
                       <Download className="h-5 w-5" />
@@ -104,7 +112,7 @@ export default function GenerationGroup({ generation, isLatest }: GenerationGrou
         <MockupPreviewModal
           mockup={selectedMockup}
           onClose={() => setSelectedMockup(null)}
-          onDownload={() => handleOpenImage(selectedMockup.url)}
+          onDownload={() => handleDownload(selectedMockup)}
         />
       )}
     </>
