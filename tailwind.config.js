@@ -35,18 +35,17 @@ export default {
           900: '#111827',
         },
         indigo: {
-          50: '#F2EDFF', // Très clair
-          100: '#D8CBFF',
-          200: '#BBA5FF',
-          300: '#9C82FF',
-          400: '#846CFF',
-          500: '#7B61FF', // Couleur principale
-          600: '#6C55E6',
-          700: '#5C48C7',
-          800: '#4D3CA3',
-          900: '#3F3081', // Très foncé
+          50: '#F4E5FF', // Très clair, pastel
+          100: '#E4B3FF', // Clair
+          200: '#D27FFF', // Moyennement clair
+          300: '#BF4CFF', // Vibrant
+          400: '#A822FF', // Flashy
+          500: '#8700FF', // Couleur principale
+          600: '#7600E6', // Légèrement plus foncé
+          700: '#6200C4', // Plus profond
+          800: '#5000A3', // Plus sombre
+          900: '#3E0081', // Très sombre
         },
-        
       },
     },
   },
