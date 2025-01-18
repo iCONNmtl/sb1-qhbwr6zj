@@ -31,7 +31,7 @@ export default function Footer() {
           <div className="flex items-center space-x-4">
             <Logo size="sm" />
             <span className="text-sm text-gray-500">
-              © {currentYear} MockupPro. Tous droits réservés.
+              © {currentYear} Pixmock. Tous droits réservés.
             </span>
           </div>
 

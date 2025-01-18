@@ -34,7 +34,7 @@ export default function SidebarNav({ isCollapsed }: SidebarNavProps) {
         {
           to: '/dashboard',
           icon: LayoutDashboard,
-          label: 'Tableau de bord'
+          label: 'Vos mockups'
         }
       ]
     },

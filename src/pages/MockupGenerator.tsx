@@ -200,7 +200,7 @@ export default function MockupGenerator() {
       {selectedMockups.length > 0 && (
         <section>
           <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            3. Personnalisez votre texte
+            3. Personnalisez vos mockups
           </h2>
           
           <div className="space-y-6">
