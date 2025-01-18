@@ -41,10 +41,10 @@ export default {
           300: '#EF6461', // Vibrant
           400: '#D95B58', // Flashy
           500: '#D95B58', // Couleur principale
-          600: '#B34B49', // Légèrement plus foncé
-          700: '#B34B49', // Plus profond
-          800: '#A34442', // Plus sombre
-          900: '#A34442', // Très sombre
+          600: '#C7235A', // Légèrement plus foncé
+          700: '#A51D4B', // Plus profond
+          800: '#88183E', // Plus sombre
+          900: '#711433', // Très sombre
         },
       },
     },
