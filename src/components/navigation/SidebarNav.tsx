@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, Wand2, CreditCard, Settings, Upload } from 'lucide-react';
+import { LayoutDashboard, Wand2, CreditCard, Settings } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import SidebarLink from './SidebarLink';
 import clsx from 'clsx';
@@ -32,11 +32,6 @@ export default function SidebarNav({ isCollapsed }: SidebarNavProps) {
           primary: true
         },
         {
-          to: '/custom-mockup',
-          icon: Upload,
-          label: 'Ajouter un mockup'
-        },
-        {
           to: '/dashboard',
           icon: LayoutDashboard,
           label: 'Tableau de bord'
@@ -50,6 +45,11 @@ export default function SidebarNav({ isCollapsed }: SidebarNavProps) {
           to: '/pricing',
           icon: CreditCard,
           label: 'Tarifs'
+        },
+        {
+          to: '/settings',
+          icon: Settings,
+          label: 'Paramètres'
         }
       ]
     }

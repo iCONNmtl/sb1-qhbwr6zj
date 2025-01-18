@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { User } from 'firebase/auth';
+import type { GenerationPlatform } from '../types/mockup';
 
 interface Generation {
   id: string;
@@ -9,6 +10,7 @@ interface Generation {
     id: string;
     name: string;
     url: string;
+    platform?: GenerationPlatform;
   }[];
   createdAt: string;
 }

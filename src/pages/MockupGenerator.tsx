@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import { Link } from 'react-router-dom';
+import { Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 // Components
@@ -20,7 +22,6 @@ import { useMockupGeneration } from '../hooks/useMockupGeneration';
 import { useMockupSelection } from '../hooks/useMockupSelection';
 import { useMockups } from '../hooks/useMockups';
 import { useCategories } from '../hooks/useCategories';
-import { useMockupPagination } from '../hooks/useMockupPagination';
 
 // Types
 import type { UserProfile } from '../types/user';
@@ -36,6 +37,8 @@ export default function MockupGenerator() {
   const [customHtml, setCustomHtml] = useState<string>('');
   const [isTextCustomizationEnabled, setIsTextCustomizationEnabled] = useState(false);
   const [customizedMockups, setCustomizedMockups] = useState<number[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(20);
 
   const { mockups, loading: mockupsLoading } = useMockups();
   const { categories } = useCategories(mockups, favorites);
@@ -52,13 +55,20 @@ export default function MockupGenerator() {
     return mockup.category === selectedCategory;
   });
 
-  // Paginate filtered mockups
-  const { 
-    currentPage, 
-    totalPages, 
-    paginatedMockups, 
-    handlePageChange 
-  } = useMockupPagination(filteredMockups);
+  // Calculate total pages
+  const totalPages = Math.ceil(filteredMockups.length / itemsPerPage);
+
+  // Reset to page 1 when category changes or if current page is beyond total pages
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(1);
+    }
+  }, [selectedCategory, totalPages, currentPage]);
+
+  // Get current mockups
+  const indexOfLastMockup = currentPage * itemsPerPage;
+  const indexOfFirstMockup = indexOfLastMockup - itemsPerPage;
+  const currentMockups = filteredMockups.slice(indexOfFirstMockup, indexOfLastMockup);
 
   useEffect(() => {
     if (!user) return;
@@ -104,6 +114,11 @@ export default function MockupGenerator() {
     );
   };
 
+  const handleCategoryChange = (categoryId: string) => {
+    setSelectedCategory(categoryId);
+    setCurrentPage(1); // Reset to first page when changing category
+  };
+
   return (
     <div className="space-y-8">
       {isGenerating && <GenerationProgress totalMockups={selectedMockups.length} />}
@@ -122,11 +137,20 @@ export default function MockupGenerator() {
           <h2 className="text-xl font-semibold text-gray-900">
             2. Sélectionnez vos mockups
           </h2>
-          {userProfile && (
-            <div className="text-sm text-gray-600">
-              {selectedMockups.length} mockup{selectedMockups.length > 1 ? 's' : ''} sélectionné{selectedMockups.length > 1 ? 's' : ''}
-            </div>
-          )}
+          <div className="flex items-center gap-4">
+            <Link
+              to="/custom-mockup"
+              className="flex items-center px-4 py-2 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors"
+            >
+              <Plus className="h-5 w-5 mr-2" />
+              <span>Ajouter votre mockup</span>
+            </Link>
+            {userProfile && (
+              <div className="text-sm text-gray-600">
+                {selectedMockups.length} mockup{selectedMockups.length > 1 ? 's' : ''} sélectionné{selectedMockups.length > 1 ? 's' : ''}
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="flex space-x-4 overflow-x-auto pb-2">
@@ -137,7 +161,7 @@ export default function MockupGenerator() {
               mockups={mockups}
               favorites={favorites}
               isSelected={selectedCategory === category.id}
-              onClick={() => setSelectedCategory(category.id)}
+              onClick={() => handleCategoryChange(category.id)}
             />
           ))}
         </div>
@@ -154,7 +178,7 @@ export default function MockupGenerator() {
         ) : (
           <>
             <MockupGrid
-              mockups={paginatedMockups}
+              mockups={currentMockups}
               selectedMockups={selectedMockups}
               favorites={favorites}
               userId={user?.uid || ''}
@@ -165,7 +189,7 @@ export default function MockupGenerator() {
               <MockupPagination
                 currentPage={currentPage}
                 totalPages={totalPages}
-                onPageChange={handlePageChange}
+                onPageChange={setCurrentPage}
               />
             )}
           </>

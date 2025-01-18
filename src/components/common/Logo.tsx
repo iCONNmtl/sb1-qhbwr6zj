@@ -32,7 +32,7 @@ export default function Logo({ className, size = 'md', showText = true }: LogoPr
         ) : (
           <img 
             src={LOGO_URL}
-            alt="MockupPro Logo"
+            alt="Pixmock Logo"
             className={clsx(
               'w-full h-full object-contain',
               'transition-all duration-200'
@@ -42,12 +42,20 @@ export default function Logo({ className, size = 'md', showText = true }: LogoPr
         )}
       </div>
       {showText && (
-        <span className={clsx(
-          "font-bold text-gray-900",
-          size === 'sm' ? 'text-base' : 'text-lg'
-        )}>
-          Pixmock
-        </span>
+        <div className="flex items-center">
+          <span className={clsx(
+            "font-bold text-gray-900",
+            size === 'sm' ? 'text-base' : 'text-lg'
+          )}>
+            Pixmock
+          </span>
+          <span className={clsx(
+            'ml-1.5 px-1.5 py-0.5 text-xs font-medium rounded-full bg-indigo-100 text-indigo-600',
+            size === 'sm' ? 'scale-90' : ''
+          )}>
+            beta
+          </span>
+        </div>
       )}
     </Link>
   );

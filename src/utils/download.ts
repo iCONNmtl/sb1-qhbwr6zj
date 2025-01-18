@@ -3,6 +3,8 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 
 export async function downloadImage(url: string, filename: string): Promise<void> {
+  const loadingToast = toast.loading('Téléchargement en cours...');
+  
   try {
     if (url.startsWith('https://hcti.io/')) {
       // For hcti.io URLs, fetch the image directly
@@ -27,7 +29,7 @@ export async function downloadImage(url: string, filename: string): Promise<void
       // Save file using file-saver
       saveAs(new Blob([response.data]), fullFilename);
       
-      toast.success('Image téléchargée avec succès');
+      toast.success('Image téléchargée avec succès', { id: loadingToast });
     } else {
       // For other URLs, open in new tab
       window.open(url, '_blank');
@@ -47,7 +49,7 @@ export async function downloadImage(url: string, filename: string): Promise<void
       }
     }
     
-    toast.error(errorMessage);
+    toast.error(errorMessage, { id: loadingToast });
     throw error;
   }
 }

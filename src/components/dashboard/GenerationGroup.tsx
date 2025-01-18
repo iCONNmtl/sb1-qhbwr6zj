@@ -18,9 +18,16 @@ interface MockupGeneration {
 interface GenerationGroupProps {
   generation: MockupGeneration;
   isLatest: boolean;
+  onSelectMockup?: (mockupId: string) => void;
+  selectedMockups?: string[];
 }
 
-export default function GenerationGroup({ generation, isLatest }: GenerationGroupProps) {
+export default function GenerationGroup({ 
+  generation, 
+  isLatest,
+  onSelectMockup,
+  selectedMockups = []
+}: GenerationGroupProps) {
   const [isExpanded, setIsExpanded] = useState(isLatest);
   const [selectedMockup, setSelectedMockup] = useState<{id: string; name: string; url: string} | null>(null);
 
@@ -74,7 +81,11 @@ export default function GenerationGroup({ generation, isLatest }: GenerationGrou
               {generation.mockups.map((mockup) => (
                 <div
                   key={mockup.id}
-                  className="group aspect-square bg-gray-50 rounded-lg overflow-hidden relative cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                  className={clsx(
+                    "group aspect-square bg-gray-50 rounded-lg overflow-hidden relative cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-lg",
+                    onSelectMockup && selectedMockups.includes(mockup.id) && "ring-2 ring-indigo-600"
+                  )}
+                  onClick={() => onSelectMockup?.(mockup.id)}
                 >
                   <ImageLoader
                     src={mockup.url}
@@ -86,7 +97,10 @@ export default function GenerationGroup({ generation, isLatest }: GenerationGrou
                     "flex items-center justify-center gap-4 transition-all duration-300"
                   )}>
                     <button
-                      onClick={() => setSelectedMockup(mockup)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedMockup(mockup);
+                      }}
                       className="p-2 bg-white text-gray-600 rounded-lg opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 hover:bg-indigo-50 hover:text-indigo-600"
                     >
                       <Eye className="h-5 w-5" />

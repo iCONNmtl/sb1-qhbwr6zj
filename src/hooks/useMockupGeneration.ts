@@ -21,7 +21,8 @@ export function useMockupGeneration() {
     selectedMockups: string[],
     selectedMockupData: any[],
     userProfile: UserProfile,
-    exportFormat: ExportFormat
+    exportFormat: ExportFormat,
+    customHtml?: string
   ) => {
     if (!user) {
       toast.error('Vous devez être connecté');
@@ -55,7 +56,13 @@ export function useMockupGeneration() {
         smartObjectUuid: m.smartObjectUuid
       }));
 
-      const result = await generateMockups(processedDesign, uuidPairs, generationId, exportFormat);
+      const result = await generateMockups(
+        processedDesign, 
+        uuidPairs, 
+        generationId, 
+        exportFormat,
+        customHtml
+      );
 
       if (result.success && result.mockups) {
         const generationData = {
@@ -64,6 +71,7 @@ export function useMockupGeneration() {
           designName: designFile.name,
           mockups: result.mockups,
           exportFormat,
+          customHtml,
           createdAt: new Date().toISOString()
         };
 

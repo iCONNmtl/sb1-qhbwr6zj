@@ -6,9 +6,10 @@ import TextPreview from './TextPreview';
 import TextLayerEditor from './TextLayerEditor';
 import TextTemplateSelector from './TextTemplateSelector';
 import MockupCustomizationSelector from './MockupCustomizationSelector';
-import { generateTextOverlayHtml, combineTextLayers } from '../../utils/textOverlay';
+import { generateTextOverlayHtml, generateCropHtml, combineTextLayers } from '../../utils/textOverlay';
 import type { Mockup } from '../../types/mockup';
 import type { TextLayer } from '../../types/textLayer';
+import type { PreviewFormat } from './PreviewFormatSelector';
 
 interface TextEditorProps {
   selectedMockups: Mockup[];
@@ -18,8 +19,8 @@ interface TextEditorProps {
 
 const DEFAULT_STYLE = {
   fontSize: '24px',
-  fontWeight: 'normal',
-  fontStyle: 'normal',
+  fontWeight: 'normal' as const,
+  fontStyle: 'normal' as const,
   color: '#000000',
   fontFamily: 'Roboto',
   textAlign: 'left' as const
@@ -33,6 +34,10 @@ export default function TextEditor({
   const [textLayers, setTextLayers] = useState<TextLayer[]>([]);
   const [selectedLayerId, setSelectedLayerId] = useState<string | null>(null);
   const [customizedMockups, setCustomizedMockups] = useState<number[]>([1]);
+  const [format, setFormat] = useState<PreviewFormat>('original');
+  const [cropPosition, setCropPosition] = useState({ x: 0, y: 0 });
+  const [cropSize, setCropSize] = useState({ width: 0, height: 0 });
+  const [gridConfig, setGridConfig] = useState({ width: 0, marginLeft: 0 });
 
   const selectedLayer = textLayers.find(layer => layer.id === selectedLayerId);
 
@@ -45,11 +50,10 @@ export default function TextEditor({
       })
     );
     
-    const combinedHtml = combineTextLayers(layersHtml);
+    const combinedHtml = combineTextLayers(layersHtml, format, cropPosition);
     onGenerateHtml(combinedHtml);
-  }, [textLayers, onGenerateHtml]);
+  }, [textLayers, format, cropPosition, onGenerateHtml]);
 
-  // Update parent component when customized mockups change
   useEffect(() => {
     onCustomizedMockupsChange?.(customizedMockups);
   }, [customizedMockups, onCustomizedMockupsChange]);
@@ -91,7 +95,6 @@ export default function TextEditor({
       <div className="grid grid-cols-2 gap-6">
         {/* Left Column: Text Controls */}
         <div className="space-y-6">
-          {/* Add Text Button */}
           <button
             onClick={addLayer}
             className="w-full flex items-center justify-center px-4 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
@@ -100,7 +103,6 @@ export default function TextEditor({
             Ajouter du texte
           </button>
 
-          {/* Text Layers List */}
           <div className="bg-white rounded-xl shadow-sm p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Calques de texte
@@ -154,7 +156,6 @@ export default function TextEditor({
             )}
           </div>
 
-          {/* Templates */}
           <TextTemplateSelector
             onSelect={(template) => {
               const newLayers = template.layers.map(layer => ({
@@ -174,9 +175,15 @@ export default function TextEditor({
             selectedLayerId={selectedLayerId}
             onSelectLayer={setSelectedLayerId}
             onUpdatePosition={(id, updates) => updateLayer(id, updates)}
+            format={format}
+            onFormatChange={setFormat}
+            cropPosition={cropPosition}
+            onCropPositionChange={setCropPosition}
+            cropSize={cropSize}
+            onCropSizeChange={setCropSize}
+            onGridConfigChange={setGridConfig}
           />
 
-          {/* Mockup Customization Selector */}
           <MockupCustomizationSelector
             totalMockups={selectedMockups.length}
             selectedMockups={customizedMockups}

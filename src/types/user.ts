@@ -15,4 +15,5 @@ export interface UserProfile {
   subscription: UserSubscription;
   createdAt: string;
   favorites?: string[];
+  enabledPlatforms?: string[];
 }

@@ -30,11 +30,15 @@ export default function CustomMockupInstructions() {
               <ul className="text-sm text-gray-600 space-y-2">
                 <li className="flex items-center">
                   <span className="w-2 h-2 bg-indigo-600 rounded-full mr-2"></span>
-                  Taille recommandée : 2048x2048px
+                  Taille recommandée : 3000x2000px
                 </li>
                 <li className="flex items-center">
                   <span className="w-2 h-2 bg-indigo-600 rounded-full mr-2"></span>
-                  Fond nommé "Background"
+                  Résolution : 300 DPI
+                </li>
+                <li className="flex items-center">
+                  <span className="w-2 h-2 bg-indigo-600 rounded-full mr-2"></span>
+                  Mode couleur : RGB
                 </li>
                 <li className="flex items-center">
                   <span className="w-2 h-2 bg-indigo-600 rounded-full mr-2"></span>
@@ -42,7 +46,7 @@ export default function CustomMockupInstructions() {
                 </li>
                 <li className="flex items-center">
                   <span className="w-2 h-2 bg-indigo-600 rounded-full mr-2"></span>
-                  Smart Object avec un fond blanc (sans design)
+                  Calques organisés en groupes
                 </li>
               </ul>
             </div>
@@ -58,11 +62,10 @@ export default function CustomMockupInstructions() {
             </div>
             <div className="space-y-3">
               {[
-                'Nommez votre mockup "Mockup.psd"',
-                'Cliquez sur "Créer le dossier"',
+                'Cliquez sur "Uploader mon PSD"',
                 'Un dossier Google Drive sera créé pour vous',
                 'Déposez votre PSD dans le dossier partagé',
-                'Cliquez sur "Créer le mockup"'
+                'Cliquez sur "Créer mon mockup"'
               ].map((step, index) => (
                 <div key={index} className="flex items-start">
                   <span className="flex-shrink-0 w-6 h-6 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-sm font-medium">

@@ -12,6 +12,7 @@ import MockupGenerator from './pages/MockupGenerator';
 import MockupLibrary from './pages/MockupLibrary';
 import CustomMockup from './pages/CustomMockup';
 import AdminDashboard from './pages/AdminDashboard';
+import Settings from './pages/Settings';
 import Pricing from './pages/Pricing';
 import Contact from './pages/Contact';
 import ThankYou from './pages/ThankYou';
@@ -59,6 +60,11 @@ export default function App() {
             <Route path="/dashboard" element={
               <AuthGuard>
                 <Dashboard />
+              </AuthGuard>
+            } />
+            <Route path="/settings" element={
+              <AuthGuard>
+                <Settings />
               </AuthGuard>
             } />
             <Route path="/admin" element={

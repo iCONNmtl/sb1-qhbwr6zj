@@ -1,11 +1,14 @@
 import React from 'react';
 import { X, Download } from 'lucide-react';
+import clsx from 'clsx';
 import ImageLoader from '../ImageLoader';
+import type { GenerationPlatform } from '../../types/mockup';
 
 interface MockupPreviewModalProps {
   mockup: {
     name: string;
     url: string;
+    platform?: GenerationPlatform;
   };
   onClose: () => void;
   onDownload: () => void;
@@ -44,16 +47,18 @@ export default function MockupPreviewModal({ mockup, onClose, onDownload }: Mock
           </div>
         </div>
 
-        {/* Square Image Container */}
-        <div className="relative w-full" style={{ paddingBottom: '100%' }}>
-          <div className="absolute inset-0 p-3">
-            <div className="w-full h-full bg-gray-50 rounded-lg flex items-center justify-center">
-              <ImageLoader
-                src={mockup.url}
-                alt={mockup.name}
-                className="max-w-full max-h-full object-contain"
-              />
-            </div>
+        {/* Image Container */}
+        <div className="p-4 flex items-center justify-center" style={{ minHeight: '400px' }}>
+          <div className={clsx(
+            'w-full h-full flex items-center justify-center',
+            mockup.platform && 'max-w-md'
+          )}>
+            <ImageLoader
+              src={mockup.url}
+              alt={mockup.name}
+              platform={mockup.platform}
+              className="rounded-lg"
+            />
           </div>
         </div>
       </div>
