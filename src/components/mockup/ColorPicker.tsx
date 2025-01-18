@@ -11,12 +11,12 @@ interface ColorPickerProps {
 const PRESET_COLORS = [
   '#000000', // Black
   '#FFFFFF', // White
-  '#FF0000', // Red
-  '#00FF00', // Green
-  '#0000FF', // Blue
-  '#FFFF00', // Yellow
-  '#FF00FF', // Magenta
-  '#00FFFF', // Cyan
+  '#ef233c', // Red
+  '#57cc99', // Green
+  '#00bbf9', // Blue
+  '#ffc300', // Yellow
+  '#390099', // Magenta
+  '#735751', // Cyan
 ];
 
 export default function ColorPicker({ value, onChange, allowTransparent = false }: ColorPickerProps) {

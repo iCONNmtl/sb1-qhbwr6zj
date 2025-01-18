@@ -5,18 +5,19 @@ import { useAutoSlider } from '../../hooks/useAutoSlider';
 const FEATURES = [
   {
     title: "Bibliothèque complète de mockups",
-    description: "Accédez à une large collection de mockups professionnels, enrichie chaque semaine avec de nouveaux modèles réalistes et variés",
-    image: "https://lh3.googleusercontent.com/d/1ivwffQeVnzZBn4l0zeTvXmFTKjjFRHIZ"
+    description: "Accédez à une large collection de mockups professionnels, enrichie chaque semaine avec de nouveaux modèles pour rester à la pointe des tendances. Des mockups adaptés à tous vos besoins, du web au mobile en passant par le print.",
   },
   {
     title: "Importez vos propres mockups",
-    description: "Créez et partagez vos propres mockups personnalisés. Notre outil vous permet d'ajouter facilement vos créations à votre bibliothèque privée.",
-    image: "https://lh3.googleusercontent.com/d/1-llkuzi1KXuULYjblA7OSqNVi7gnX2vi"
+    description: "Créez et partagez vos propres mockups personnalisés. Notre outil vous permet d'ajouter facilement vos créations à votre bibliothèque privée. Gardez le contrôle total sur vos designs et adaptez-les à votre marque.",
   },
   {
     title: "Génération rapide et professionnelle", 
-    description: "Gagnez un temps précieux en générant vos mockups en quelques secondes. Obtenez des résultats professionnels en haute résolution",
-    image: "https://lh3.googleusercontent.com/d/1C3aK16BFu44sb0eL0tLOJv7ybMOw1DeE"
+    description: "Gagnez un temps précieux en générant vos mockups en quelques secondes. Obtenez des résultats professionnels sans compromis sur la qualité. Notre technologie avancée assure des rendus réalistes et percutants.",
+  },
+  {
+    title: "Export et partage simplifiés",
+    description: "Exportez vos mockups en haute résolution et partagez-les directement sur vos réseaux sociaux préférés. Intégration native avec Instagram, Pinterest et les principales plateformes e-commerce pour une diffusion optimale de vos créations.",
   }
 ];
 
@@ -85,27 +86,13 @@ export default function FeaturesSlider() {
             onMouseLeave={() => setIsPaused(false)}
           >
             <div className="bg-white rounded-2xl overflow-hidden">
-              <div className="flex flex-col-reverse lg:flex-row h-full">
-                {/* Text Content */}
-                <div className="lg:w-1/2 p-8 lg:p-12 flex flex-col justify-center">
-                  <h3 className="text-2xl font-semibold text-gray-900 mb-4">
-                    {FEATURES[activeIndex].title}
-                  </h3>
-                  <p className="text-gray-600 leading-relaxed">
-                    {FEATURES[activeIndex].description}
-                  </p>
-                </div>
-
-                {/* Image */}
-                <div className="lg:w-1/2">
-                  <div className="aspect-video lg:h-full">
-                    <img
-                      src={FEATURES[activeIndex].image}
-                      alt={FEATURES[activeIndex].title}
-                      className="w-full h-full object-cover transition-opacity duration-300"
-                    />
-                  </div>
-                </div>
+              <div className="p-8 lg:p-12">
+                <h3 className="text-2xl font-semibold text-gray-900 mb-6">
+                  {FEATURES[activeIndex].title}
+                </h3>
+                <p className="text-gray-600 leading-relaxed text-lg">
+                  {FEATURES[activeIndex].description}
+                </p>
               </div>
             </div>
           </div>
