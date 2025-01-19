@@ -3,45 +3,60 @@ import type { TextTemplate } from '../types/textTemplate';
 export const TEXT_TEMPLATES: TextTemplate[] = [
   {
     id: 'promo-modern',
-    name: 'Promo Moderne',
+    name: 'Réduction',
     category: 'Promotions',
     layers: [
       {
         text: 'SOLDES',
         style: {
-          fontFamily: 'Montserrat',
+          fontFamily: 'Roboto',
           fontSize: '64px',
           fontWeight: 'bold',
           fontStyle: 'normal',
           color: '#FFFFFF',
           backgroundColor: '#000000',
-          padding: '20px',
-          borderRadius: '12px',
+          padding: '15px',
+          borderRadius: '10px',
           textAlign: 'center'
         },
-        position: { x: 50, y: 50 }
+        position: { x: 539, y: 38 }
       },
       {
         text: '-50%',
         style: {
           fontFamily: 'Roboto',
-          fontSize: '96px',
+          fontSize: '60px',
           fontWeight: 'bold',
           fontStyle: 'normal',
-          color: '#FF0000',
-          backgroundColor: 'rgba(255, 0, 0, 0.1)',
-          padding: '15px',
-          borderRadius: '20px',
+          color: '#000000',
+          backgroundColor: '#ffc300',
+          padding: '10px',
+          borderRadius: '10px',
           textAlign: 'center'
         },
-        position: { x: 50, y: 200 }
+        position: { x: 727, y: 147 }
+      },
+      {
+        text: 'ACHETEZ MAINTENANT',
+        style: {
+          fontFamily: 'Roboto',
+          fontSize: '30px',
+          fontWeight: 'bold',
+          fontStyle: 'normal',
+          color: '#000000',
+          backgroundColor: '#ffc300',
+          padding: '10px',
+          borderRadius: '10px',
+          textAlign: 'center'
+        },
+        position: { x: 316, y: 685 }
       }
     ]
   },
   {
     id: 'exclusive-launch',
     name: 'Lancement Exclusif',
-    category: 'Lancements',
+    category: 'Promotions',
     layers: [
       {
         text: 'NOUVEAUTÉ',
@@ -78,7 +93,7 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
   {
     id: 'customer-favorite',
     name: 'Coup de Coeur',
-    category: 'Produits',
+    category: 'Produit',
     layers: [
       {
         text: 'COUP DE COEUR',
@@ -150,46 +165,9 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
     ]
   },
   {
-    id: 'nature-inspiration',
-    name: 'Inspirations Nature',
-    category: 'Nature',
-    layers: [
-      {
-        text: 'HARMONIE NATURELLE',
-        style: {
-          fontFamily: 'Roboto Slab',
-          fontSize: '64px',
-          fontWeight: 'bold',
-          fontStyle: 'normal',
-          color: '#2E7D32',
-          backgroundColor: 'rgba(46, 125, 50, 0.2)',
-          padding: '20px',
-          borderRadius: '15px',
-          textAlign: 'center'
-        },
-        position: { x: 50, y: 50 }
-      },
-      {
-        text: 'Invitez la nature chez vous',
-        style: {
-          fontFamily: 'Montserrat',
-          fontSize: '32px',
-          fontWeight: 'normal',
-          fontStyle: 'italic',
-          color: '#1B5E20',
-          backgroundColor: 'transparent',
-          padding: '10px',
-          borderRadius: '5px',
-          textAlign: 'center'
-        },
-        position: { x: 50, y: 150 }
-      }
-    ]
-  },
-  {
     id: 'product-guarantee',
     name: 'Garantie et Satisfaction',
-    category: 'Qualités',
+    category: 'Produit',
     layers: [
       {
         text: '100% Satisfaction',
@@ -240,8 +218,8 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
   },
   {
     id: 'product-benefits',
-    name: 'Points Clés',
-    category: 'Qualités',
+    name: 'Arguments',
+    category: 'Produit',
     layers: [
       {
         text: 'Pourquoi choisir nos affiches ?',
@@ -360,7 +338,7 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
   {
     id: 'faq-guide',
     name: 'Guide et FAQ',
-    category: 'Informations',
+    category: 'Produit',
     layers: [
       {
         text: 'Comment accrocher votre affiche ?',
@@ -425,46 +403,9 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
     ]
   },              
   {
-    id: 'product-elegant',
-    name: 'Produit Élégant',
-    category: 'Produits',
-    layers: [
-      {
-        text: 'COLLECTION',
-        style: {
-          fontFamily: 'Playfair Display',
-          fontSize: '42px',
-          fontWeight: 'bold',
-          fontStyle: 'normal',
-          color: '#1a1a1a',
-          backgroundColor: 'rgba(255, 255, 255, 0.9)',
-          padding: '15px',
-          borderRadius: '8px',
-          textAlign: 'center'
-        },
-        position: { x: 50, y: 50 }
-      },
-      {
-        text: 'Printemps 2024',
-        style: {
-          fontFamily: 'Montserrat',
-          fontSize: '28px',
-          fontWeight: 'normal',
-          fontStyle: 'italic',
-          color: '#666666',
-          backgroundColor: 'transparent',
-          padding: '10px',
-          borderRadius: '4px',
-          textAlign: 'center'
-        },
-        position: { x: 50, y: 130 }
-      }
-    ]
-  },
-  {
     id: 'social-vibrant',
-    name: 'Social Vibrant',
-    category: 'Social Media',
+    name: 'Suivez Nous',
+    category: 'Réseaux Sociaux',
     layers: [
       {
         text: 'SUIVEZ-NOUS',
@@ -500,8 +441,8 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
   },
   {
     id: 'quote-minimal',
-    name: 'Citation Minimale',
-    category: 'Citations',
+    name: 'Avis Clients',
+    category: 'Produit',
     layers: [
       {
         text: '"La simplicité est la sophistication suprême"',
@@ -534,65 +475,12 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
         position: { x: 50, y: 150 }
       }
     ]
-  },
-  {
-    id: 'sale-flash',
-    name: 'Flash Sale',
-    category: 'Promotions',
-    layers: [
-      {
-        text: 'FLASH',
-        style: {
-          fontFamily: 'Montserrat',
-          fontSize: '72px',
-          fontWeight: 'bold',
-          fontStyle: 'normal',
-          color: '#FFFFFF',
-          backgroundColor: '#FF4D4D',
-          padding: '15px',
-          borderRadius: '0px',
-          textAlign: 'center'
-        },
-        position: { x: 50, y: 50 }
-      },
-      {
-        text: 'SALE',
-        style: {
-          fontFamily: 'Montserrat',
-          fontSize: '72px',
-          fontWeight: 'bold',
-          fontStyle: 'normal',
-          color: '#FF4D4D',
-          backgroundColor: '#FFFFFF',
-          padding: '15px',
-          borderRadius: '0px',
-          textAlign: 'center'
-        },
-        position: { x: 50, y: 160 }
-      },
-      {
-        text: '24H SEULEMENT',
-        style: {
-          fontFamily: 'Roboto',
-          fontSize: '24px',
-          fontWeight: 'bold',
-          fontStyle: 'normal',
-          color: '#FFFFFF',
-          backgroundColor: '#000000',
-          padding: '10px',
-          borderRadius: '4px',
-          textAlign: 'center'
-        },
-        position: { x: 50, y: 270 }
-      }
-    ]
   }
 ];
 
 export const TEMPLATE_CATEGORIES = [
   'Tous',
   'Promotions',
-  'Produits',
-  'Social Media',
-  'Citations'
+  'Produit',
+  'Réseaux Sociaux'
 ];
