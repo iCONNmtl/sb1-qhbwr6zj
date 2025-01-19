@@ -66,18 +66,18 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
           fontWeight: 'bold',
           fontStyle: 'normal',
           color: '#FFFFFF',
-          backgroundColor: '#2C3E50',
-          padding: '20px',
+          backgroundColor: '#735751',
+          padding: '35px',
           borderRadius: '15px',
           textAlign: 'center'
         },
-        position: { x: 50, y: 50 }
+        position: { x: 54, y: 50 }
       },
       {
         text: 'Découvrez notre dernière collection',
         style: {
           fontFamily: 'Roboto',
-          fontSize: '32px',
+          fontSize: '20px',
           fontWeight: 'normal',
           fontStyle: 'italic',
           color: '#D5D5D5',
@@ -86,7 +86,7 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
           borderRadius: '5px',
           textAlign: 'center'
         },
-        position: { x: 50, y: 150 }
+        position: { x: 86, y: 159 }
       }
     ]
   },
@@ -99,31 +99,16 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
         text: 'COUP DE COEUR',
         style: {
           fontFamily: 'Montserrat',
-          fontSize: '72px',
+          fontSize: '48px',
           fontWeight: 'bold',
           fontStyle: 'normal',
-          color: '#FF5722',
-          backgroundColor: 'rgba(255, 87, 34, 0.1)',
+          color: '#FFFFFF',
+          backgroundColor: '#ef233c',
           padding: '15px',
           borderRadius: '10px',
           textAlign: 'center'
         },
-        position: { x: 50, y: 50 }
-      },
-      {
-        text: 'Nos clients adorent',
-        style: {
-          fontFamily: 'Roboto',
-          fontSize: '36px',
-          fontWeight: 'normal',
-          fontStyle: 'italic',
-          color: '#FF5722',
-          backgroundColor: 'transparent',
-          padding: '10px',
-          borderRadius: '5px',
-          textAlign: 'center'
-        },
-        position: { x: 50, y: 150 }
+        position: { x: 497, y: 45 }
       }
     ]
   },
@@ -136,13 +121,13 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
         text: 'ÉDITION LIMITÉE',
         style: {
           fontFamily: 'Playfair Display',
-          fontSize: '64px',
+          fontSize: '60px',
           fontWeight: 'bold',
           fontStyle: 'normal',
-          color: '#FFFFFF',
-          backgroundColor: '#8E44AD',
-          padding: '20px',
-          borderRadius: '20px',
+          color: '#000000',
+          backgroundColor: '#ffc300',
+          padding: '15px',
+          borderRadius: '5px',
           textAlign: 'center'
         },
         position: { x: 50, y: 50 }
@@ -151,16 +136,16 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
         text: 'Disponible jusqu\'à épuisement',
         style: {
           fontFamily: 'Montserrat',
-          fontSize: '28px',
+          fontSize: '25px',
           fontWeight: 'normal',
           fontStyle: 'normal',
-          color: '#FFFFFF',
-          backgroundColor: '#8E44AD',
-          padding: '12px',
-          borderRadius: '10px',
+          color: '#ffc300',
+          backgroundColor: '#000000',
+          padding: '15px',
+          borderRadius: '5px',
           textAlign: 'center'
         },
-        position: { x: 50, y: 150 }
+        position: { x: 112, y: 162 }
       }
     ]
   },
@@ -176,43 +161,43 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
           fontSize: '48px',
           fontWeight: 'bold',
           fontStyle: 'normal',
-          color: '#27AE60',
-          backgroundColor: 'rgba(39, 174, 96, 0.1)',
+          color: '#FFFFFF',
+          backgroundColor: '#57cc99',
           padding: '15px',
           borderRadius: '10px',
           textAlign: 'center'
         },
-        position: { x: 50, y: 50 }
+        position: { x: 55, y: 41 }
       },
       {
         text: 'Livraison rapide',
         style: {
           fontFamily: 'Roboto',
-          fontSize: '32px',
+          fontSize: '30px',
           fontWeight: 'normal',
-          fontStyle: 'italic',
-          color: '#555555',
-          backgroundColor: 'transparent',
+          fontStyle: 'normal',
+          color: '#FFFFFF',
+          backgroundColor: '#57cc99',
           padding: '10px',
           borderRadius: '5px',
           textAlign: 'center'
         },
-        position: { x: 50, y: 150 }
+        position: { x: 55, y: 272 }
       },
       {
         text: 'Fabriqué avec soin au Québec',
         style: {
-          fontFamily: 'Playfair Display',
-          fontSize: '28px',
+          fontFamily: 'Roboto',
+          fontSize: '30px',
           fontWeight: 'normal',
           fontStyle: 'normal',
           color: '#8E44AD',
-          backgroundColor: 'transparent',
-          padding: '5px',
+          backgroundColor: '#57cc99',
+          padding: '10px',
           borderRadius: '5px',
           textAlign: 'center'
         },
-        position: { x: 50, y: 230 }
+        position: { x: 55, y: 178 }
       }
     ]
   },
@@ -228,13 +213,13 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
           fontSize: '42px',
           fontWeight: 'bold',
           fontStyle: 'normal',
-          color: '#000000',
-          backgroundColor: 'rgba(255, 215, 0, 0.1)',
-          padding: '20px',
+          color: '#FFFFFF',
+          backgroundColor: '#735751',
+          padding: '15px',
           borderRadius: '10px',
           textAlign: 'center'
         },
-        position: { x: 50, y: 50 }
+        position: { x: 79, y: 37 }
       },
       {
         text: '- Papier de haute qualité',
@@ -243,13 +228,13 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
           fontSize: '28px',
           fontWeight: 'normal',
           fontStyle: 'normal',
-          color: '#333333',
+          color: '#FFFFFF',
           backgroundColor: 'transparent',
           padding: '10px',
           borderRadius: '5px',
           textAlign: 'left'
         },
-        position: { x: 20, y: 150 }
+        position: { x: 85, y: 150 }
       },
       {
         text: '- Couleurs vibrantes et durables',
@@ -258,13 +243,13 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
           fontSize: '28px',
           fontWeight: 'normal',
           fontStyle: 'normal',
-          color: '#333333',
+          color: '#FFFFFF',
           backgroundColor: 'transparent',
           padding: '10px',
           borderRadius: '5px',
           textAlign: 'left'
         },
-        position: { x: 20, y: 200 }
+        position: { x: 85, y: 200 }
       },
       {
         text: '- Disponible avec ou sans cadre',
@@ -273,13 +258,13 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
           fontSize: '28px',
           fontWeight: 'normal',
           fontStyle: 'normal',
-          color: '#333333',
+          color: '#FFFFFF',
           backgroundColor: 'transparent',
           padding: '10px',
           borderRadius: '5px',
           textAlign: 'left'
         },
-        position: { x: 20, y: 250 }
+        position: { x: 85, y: 250 }
       }
     ]
   },
@@ -292,46 +277,31 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
         text: 'MEILLEURE VENTE',
         style: {
           fontFamily: 'Lora',
-          fontSize: '56px',
+          fontSize: '50px',
           fontWeight: 'bold',
           fontStyle: 'normal',
-          color: '#E74C3C',
-          backgroundColor: 'rgba(231, 76, 60, 0.1)',
-          padding: '15px',
+          color: '#FFFFFF',
+          backgroundColor: '#57cc99',
+          padding: '10px',
           borderRadius: '10px',
           textAlign: 'center'
         },
-        position: { x: 50, y: 50 }
-      },
-      {
-        text: 'Affiches de voyage',
-        style: {
-          fontFamily: 'Roboto',
-          fontSize: '36px',
-          fontWeight: 'normal',
-          fontStyle: 'normal',
-          color: '#333333',
-          backgroundColor: 'transparent',
-          padding: '10px',
-          borderRadius: '5px',
-          textAlign: 'center'
-        },
-        position: { x: 50, y: 150 }
+        position: { x: 430, y: 655 }
       },
       {
         text: 'Déjà plus de 1000 ventes !',
         style: {
           fontFamily: 'Montserrat',
-          fontSize: '28px',
+          fontSize: '30px',
           fontWeight: 'italic',
           fontStyle: 'italic',
-          color: '#555555',
+          color: '#000000',
           backgroundColor: 'transparent',
           padding: '5px',
           borderRadius: '5px',
           textAlign: 'center'
         },
-        position: { x: 50, y: 230 }
+        position: { x: 430, y: 594 }
       }
     ]
   },
@@ -343,62 +313,62 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
       {
         text: 'Comment accrocher votre affiche ?',
         style: {
-          fontFamily: 'Poppins',
+          fontFamily: 'Montserrat',
           fontSize: '40px',
           fontWeight: 'bold',
           fontStyle: 'normal',
-          color: '#2C3E50',
-          backgroundColor: 'rgba(44, 62, 80, 0.1)',
+          color: '#FFFFFF',
+          backgroundColor: '#000000',
           padding: '20px',
           borderRadius: '10px',
           textAlign: 'center'
         },
-        position: { x: 50, y: 50 }
+        position: { x: 54, y: 39 }
       },
       {
         text: '1. Choisissez un mur bien éclairé',
         style: {
           fontFamily: 'Roboto',
-          fontSize: '28px',
+          fontSize: '32px',
           fontWeight: 'normal',
           fontStyle: 'normal',
-          color: '#333333',
+          color: '#FFFFFF',
           backgroundColor: 'transparent',
-          padding: '10px',
+          padding: '0px',
           borderRadius: '5px',
           textAlign: 'left'
         },
-        position: { x: 20, y: 150 }
+        position: { x: 60, y: 170 }
       },
       {
         text: '2. Utilisez nos cadres ou adhésifs',
         style: {
           fontFamily: 'Roboto',
-          fontSize: '28px',
+          fontSize: '32px',
           fontWeight: 'normal',
           fontStyle: 'normal',
-          color: '#333333',
+          color: '#FFFFFF',
           backgroundColor: 'transparent',
-          padding: '10px',
+          padding: '0px',
           borderRadius: '5px',
           textAlign: 'left'
         },
-        position: { x: 20, y: 200 }
+        position: { x: 60, y: 230 }
       },
       {
         text: '3. Admirez votre décor personnalisé !',
         style: {
           fontFamily: 'Roboto',
-          fontSize: '28px',
+          fontSize: '32px',
           fontWeight: 'normal',
-          fontStyle: 'italic',
-          color: '#27AE60',
+          fontStyle: 'normal',
+          color: '#FFFFFF',
           backgroundColor: 'transparent',
-          padding: '10px',
+          padding: '0px',
           borderRadius: '5px',
           textAlign: 'left'
         },
-        position: { x: 20, y: 250 }
+        position: { x: 60, y: 290 }
       }
     ]
   },              
@@ -416,26 +386,26 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
           fontStyle: 'normal',
           color: '#FFFFFF',
           backgroundColor: '#1DA1F2',
-          padding: '20px',
-          borderRadius: '25px',
+          padding: '30px',
+          borderRadius: '15px',
           textAlign: 'center'
         },
-        position: { x: 50, y: 50 }
+        position: { x: 569, y: 621 }
       },
       {
         text: '@votremarque',
         style: {
           fontFamily: 'Montserrat',
-          fontSize: '32px',
+          fontSize: '30px',
           fontWeight: 'normal',
           fontStyle: 'normal',
-          color: '#1DA1F2',
-          backgroundColor: 'rgba(29, 161, 242, 0.1)',
-          padding: '12px',
+          color: '#FFFFFF',
+          backgroundColor: 'transparent',
+          padding: '0px',
           borderRadius: '20px',
           textAlign: 'center'
         },
-        position: { x: 50, y: 150 }
+        position: { x: 605, y: 716 }
       }
     ]
   },
@@ -445,34 +415,34 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
     category: 'Produit',
     layers: [
       {
-        text: '"La simplicité est la sophistication suprême"',
+        text: '"Les affiches sont magnifiques !"',
         style: {
           fontFamily: 'Playfair Display',
-          fontSize: '36px',
+          fontSize: '35px',
           fontWeight: 'normal',
           fontStyle: 'italic',
           color: '#333333',
           backgroundColor: 'rgba(255, 255, 255, 0.95)',
-          padding: '25px',
-          borderRadius: '15px',
+          padding: '15px',
+          borderRadius: '10px',
           textAlign: 'center'
         },
-        position: { x: 50, y: 50 }
+        position: { x: 420, y: 40 }
       },
       {
-        text: '- Leonardo da Vinci',
+        text: '"Je suis ravie, je reviendrai"',
         style: {
-          fontFamily: 'Montserrat',
-          fontSize: '24px',
+          fontFamily: 'Playfair Display',
+          fontSize: '35px',
           fontWeight: 'normal',
-          fontStyle: 'normal',
-          color: '#666666',
-          backgroundColor: 'transparent',
-          padding: '10px',
-          borderRadius: '4px',
+          fontStyle: 'italic',
+          color: '#333333',
+          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+          padding: '15px',
+          borderRadius: '10px',
           textAlign: 'right'
         },
-        position: { x: 50, y: 150 }
+        position: { x: 40, y: 682 }
       }
     ]
   }
