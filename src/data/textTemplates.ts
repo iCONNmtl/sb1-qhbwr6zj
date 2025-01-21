@@ -191,7 +191,7 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
           fontSize: '30px',
           fontWeight: 'normal',
           fontStyle: 'normal',
-          color: '#8E44AD',
+          color: '#FFFFFF',
           backgroundColor: '#57cc99',
           padding: '10px',
           borderRadius: '5px',
