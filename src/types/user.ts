@@ -10,10 +10,17 @@ export interface UserSubscription {
   stripeSubscriptionId?: string;
 }
 
+export interface PlatformAccount {
+  id: string;
+  platform: string;
+  name: string;
+}
+
 export interface UserProfile {
   email: string;
   subscription: UserSubscription;
   createdAt: string;
   favorites?: string[];
-  enabledPlatforms?: string[];
+  platformAccounts?: PlatformAccount[];
+  logoUrl?: string;
 }

@@ -2,38 +2,53 @@ import React, { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { ShoppingBag, Camera, BookmarkIcon, Share2, Loader2, Eye, Download, Shuffle, Instagram, Image as ImageIcon } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ShoppingBag, Camera, BookmarkIcon, Share2, Loader2, Eye, Download, Shuffle, Instagram, Image as ImageIcon, Calendar, Plus } from 'lucide-react';
 import ImageLoader from '../components/ImageLoader';
 import MockupPreviewModal from '../components/mockup/MockupPreviewModal';
+import SchedulePostDialog from '../components/scheduling/SchedulePostDialog';
 import { downloadImage } from '../utils/download';
 import clsx from 'clsx';
 import toast from 'react-hot-toast';
-import type { UserProfile } from '../types/user';
-import type { GenerationPlatform } from '../types/mockup';
 
-const PLATFORMS = [
-  { id: 'etsy', label: 'Etsy', icon: ShoppingBag, requiresProductId: true },
-  { id: 'shopify', label: 'Shopify', icon: ShoppingBag, requiresProductId: true },
-  { id: 'pinterest', label: 'Pinterest', icon: BookmarkIcon, requiresContent: true },
-  { id: 'instagram', label: 'Instagram', icon: Camera, requiresContent: true },
-];
+// Components
+import DesignUploader from '../components/DesignUploader';
+import CategoryCount from '../components/CategoryCount';
+import MockupGrid from '../components/mockup/MockupGrid';
+import MockupPagination from '../components/mockup/MockupPagination';
+import GenerationFooter from '../components/mockup/GenerationFooter';
+import GenerationProgress from '../components/generation/GenerationProgress';
+import ExportFormatSelector from '../components/mockup/ExportFormatSelector';
+import TextEditor from '../components/mockup/TextEditor';
+import TextCustomizationToggle from '../components/mockup/TextCustomizationToggle';
 
-const CATEGORIES = [
-  { id: 'all', name: 'Tous', icon: ImageIcon },
-  { id: 'instagram', name: 'Instagram', icon: Instagram, color: 'bg-pink-500' },
-  { id: 'pinterest', name: 'Pinterest', icon: BookmarkIcon, color: 'bg-red-500' }
-] as const;
+// Hooks
+import { useMockupGeneration } from '../hooks/useMockupGeneration';
+import { useMockupSelection } from '../hooks/useMockupSelection';
+import { useMockups } from '../hooks/useMockups';
+import { useCategories } from '../hooks/useCategories';
+
+// Types
+import type { UserProfile, PlatformAccount } from '../types/user';
+import type { ExportFormat } from '../types/mockup';
+
+interface PlatformData {
+  accountId: string;
+  content?: string;
+  productId?: string;
+}
 
 export default function Dashboard() {
   const { user, generations } = useStore();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [selectedMockups, setSelectedMockups] = useState<string[]>([]);
-  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
-  const [platformData, setPlatformData] = useState<Record<string, any>>({});
+  const [selectedPlatformAccounts, setSelectedPlatformAccounts] = useState<string[]>([]);
+  const [platformData, setPlatformData] = useState<Record<string, PlatformData>>({});
   const [isPublishing, setIsPublishing] = useState(false);
   const [previewMockup, setPreviewMockup] = useState<{id: string; name: string; url: string} | null>(null);
   const [randomCount, setRandomCount] = useState<number>(1);
-  const [selectedCategory, setSelectedCategory] = useState<'all' | GenerationPlatform>('all');
+  const [selectedCategory, setSelectedCategory] = useState<'all' | 'instagram' | 'pinterest'>('all');
+  const [showScheduleDialog, setShowScheduleDialog] = useState(false);
 
   // Get all mockups from all generations
   const allMockups = generations.flatMap(generation => generation.mockups);
@@ -57,7 +72,8 @@ export default function Dashboard() {
       doc(db, 'users', user.uid),
       (doc) => {
         if (doc.exists()) {
-          setUserProfile(doc.data() as UserProfile);
+          const data = doc.data() as UserProfile;
+          setUserProfile(data);
         }
       }
     );
@@ -73,45 +89,45 @@ export default function Dashboard() {
     }
   };
 
-  const togglePlatform = (platformId: string) => {
-    setSelectedPlatforms(prev => {
-      const isSelected = prev.includes(platformId);
+  const togglePlatformAccount = (accountId: string) => {
+    setSelectedPlatformAccounts(prev => {
+      const isSelected = prev.includes(accountId);
       if (isSelected) {
         const newPlatformData = { ...platformData };
-        delete newPlatformData[platformId];
+        delete newPlatformData[accountId];
         setPlatformData(newPlatformData);
-        return prev.filter(id => id !== platformId);
+        return prev.filter(id => id !== accountId);
       } else {
         setPlatformData(prev => ({
           ...prev,
-          [platformId]: {}
+          [accountId]: { accountId }
         }));
-        return [...prev, platformId];
+        return [...prev, accountId];
       }
     });
   };
 
-  const handlePlatformDataChange = (platformId: string, field: string, value: string) => {
+  const handlePlatformDataChange = (accountId: string, field: string, value: string) => {
     setPlatformData(prev => ({
       ...prev,
-      [platformId]: {
-        ...prev[platformId],
+      [accountId]: {
+        ...prev[accountId],
         [field]: value
       }
     }));
   };
 
   const validatePlatformData = (): boolean => {
-    for (const platformId of selectedPlatforms) {
-      const platform = PLATFORMS.find(p => p.id === platformId);
-      if (!platform) continue;
+    for (const accountId of selectedPlatformAccounts) {
+      const account = userProfile?.platformAccounts?.find(a => a.id === accountId);
+      if (!account) continue;
 
-      if (platform.requiresProductId && !platformData[platformId]?.productId) {
-        toast.error(`Veuillez entrer l'ID produit pour ${platform.label}`);
+      if (['etsy', 'shopify'].includes(account.platform) && !platformData[accountId]?.productId) {
+        toast.error(`Veuillez entrer l'ID produit pour ${account.name}`);
         return false;
       }
-      if (platform.requiresContent && !platformData[platformId]?.content) {
-        toast.error(`Veuillez entrer le contenu pour ${platform.label}`);
+      if (['instagram', 'pinterest'].includes(account.platform) && !platformData[accountId]?.content) {
+        toast.error(`Veuillez entrer le contenu pour ${account.name}`);
         return false;
       }
     }
@@ -119,7 +135,7 @@ export default function Dashboard() {
   };
 
   const handlePublish = async () => {
-    if (selectedPlatforms.length === 0 || selectedMockups.length === 0) return;
+    if (selectedPlatformAccounts.length === 0 || selectedMockups.length === 0) return;
     if (!validatePlatformData()) return;
 
     setIsPublishing(true);
@@ -128,10 +144,17 @@ export default function Dashboard() {
         .flatMap(gen => gen.mockups)
         .filter(mockup => selectedMockups.includes(mockup.id));
 
-      const platformsWithData = selectedPlatforms.map(platformId => ({
-        platform: platformId,
-        ...platformData[platformId]
-      }));
+      // Transformer les données pour le webhook
+      const platformsData = selectedPlatformAccounts.map(accountId => {
+        const account = userProfile?.platformAccounts?.find(a => a.id === accountId);
+        const data = platformData[accountId];
+        return {
+          accountId,
+          platform: account?.platform,
+          name: account?.name,
+          ...data
+        };
+      });
 
       const response = await fetch('https://hook.eu1.make.com/1brcdh36omu22jrtb06fwrpkb39nkw9b', {
         method: 'POST',
@@ -140,7 +163,7 @@ export default function Dashboard() {
         },
         body: JSON.stringify({
           mockups: selectedMockupData,
-          platforms: platformsWithData,
+          platforms: platformsData,
           userId: user?.uid
         })
       });
@@ -151,7 +174,7 @@ export default function Dashboard() {
 
       toast.success('Publication en cours de traitement');
       setSelectedMockups([]);
-      setSelectedPlatforms([]);
+      setSelectedPlatformAccounts([]);
       setPlatformData({});
     } catch (error) {
       console.error('Error publishing mockups:', error);
@@ -199,14 +222,18 @@ export default function Dashboard() {
 
         {/* Categories */}
         <div className="flex space-x-4 mb-6 overflow-x-auto pb-2">
-          {CATEGORIES.map((category) => {
+          {[
+            { id: 'all', name: 'Tous', icon: ImageIcon },
+            { id: 'instagram', name: 'Instagram', icon: Instagram, color: 'bg-pink-500' },
+            { id: 'pinterest', name: 'Pinterest', icon: BookmarkIcon, color: 'bg-red-500' }
+          ].map((category) => {
             const Icon = category.icon;
-            const count = categoryCounts[category.id];
+            const count = categoryCounts[category.id as keyof typeof categoryCounts];
 
             return (
               <button
                 key={category.id}
-                onClick={() => setSelectedCategory(category.id as 'all' | GenerationPlatform)}
+                onClick={() => setSelectedCategory(category.id as 'all' | 'instagram' | 'pinterest')}
                 className={clsx(
                   'flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-200',
                   selectedCategory === category.id
@@ -304,55 +331,68 @@ export default function Dashboard() {
             <h3 className="font-medium text-gray-900">
               Publier sur
             </h3>
-            <div className="flex flex-wrap gap-3">
-              {PLATFORMS.filter(platform => 
-                userProfile?.enabledPlatforms?.includes(platform.id)
-              ).map(platform => (
+            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {userProfile?.platformAccounts?.map(account => (
                 <button
-                  key={platform.id}
-                  onClick={() => togglePlatform(platform.id)}
+                  key={account.id}
+                  onClick={() => togglePlatformAccount(account.id)}
                   className={clsx(
-                    'flex items-center px-4 py-2 rounded-lg transition-all duration-200',
-                    selectedPlatforms.includes(platform.id)
-                      ? 'bg-indigo-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    'flex items-center justify-between p-4 rounded-xl border-2 transition-all duration-200',
+                    selectedPlatformAccounts.includes(account.id)
+                      ? 'border-indigo-600 bg-indigo-50'
+                      : 'border-gray-200 hover:border-gray-300'
                   )}
                 >
-                  <platform.icon className="h-5 w-5 mr-2" />
-                  <span>{platform.label}</span>
+                  <div className="flex items-center space-x-3">
+                    {React.createElement(
+                      account.platform === 'instagram' ? Instagram :
+                      account.platform === 'pinterest' ? BookmarkIcon :
+                      ShoppingBag,
+                      { className: "h-5 w-5 text-gray-500" }
+                    )}
+                    <div className="text-left">
+                      <p className="font-medium text-gray-900">{account.name}</p>
+                      <p className="text-sm text-gray-500">{
+                        account.platform.charAt(0).toUpperCase() + account.platform.slice(1)
+                      }</p>
+                    </div>
+                  </div>
                 </button>
               ))}
             </div>
 
             {/* Champs spécifiques aux plateformes */}
-            {selectedPlatforms.length > 0 && (
+            {selectedPlatformAccounts.length > 0 && (
               <div className="space-y-4 mt-4">
-                {selectedPlatforms.map(platformId => {
-                  const platform = PLATFORMS.find(p => p.id === platformId);
-                  if (!platform) return null;
+                {selectedPlatformAccounts.map(accountId => {
+                  const account = userProfile?.platformAccounts?.find(a => a.id === accountId);
+                  if (!account) return null;
+
+                  const requiresProductId = ['etsy', 'shopify'].includes(account.platform);
+                  const requiresContent = ['instagram', 'pinterest'].includes(account.platform);
 
                   return (
-                    <div key={platformId} className="space-y-2">
+                    <div key={accountId} className="space-y-2">
                       <label className="block text-sm font-medium text-gray-700">
-                        {platform.requiresProductId ? (
-                          `ID produit ${platform.label}`
+                        {requiresProductId ? (
+                          `ID produit - ${account.name}`
                         ) : (
-                          `Contenu ${platform.label}`
+                          `Contenu - ${account.name}`
                         )}
                       </label>
-                      {platform.requiresProductId ? (
+                      {requiresProductId ? (
                         <input
                           type="text"
-                          value={platformData[platformId]?.productId || ''}
-                          onChange={(e) => handlePlatformDataChange(platformId, 'productId', e.target.value)}
-                          placeholder={`Entrez l'ID produit ${platform.label}`}
+                          value={platformData[accountId]?.productId || ''}
+                          onChange={(e) => handlePlatformDataChange(accountId, 'productId', e.target.value)}
+                          placeholder={`Entrez l'ID produit pour ${account.name}`}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
                         />
                       ) : (
                         <textarea
-                          value={platformData[platformId]?.content || ''}
-                          onChange={(e) => handlePlatformDataChange(platformId, 'content', e.target.value)}
-                          placeholder={`Écrivez votre contenu pour ${platform.label}`}
+                          value={platformData[accountId]?.content || ''}
+                          onChange={(e) => handlePlatformDataChange(accountId, 'content', e.target.value)}
+                          placeholder={`Écrivez votre contenu pour ${account.name}`}
                           rows={3}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
                         />
@@ -368,23 +408,33 @@ export default function Dashboard() {
             <div className="text-sm text-gray-600">
               {selectedMockups.length} mockup{selectedMockups.length > 1 ? 's' : ''} sélectionné{selectedMockups.length > 1 ? 's' : ''}
             </div>
-            <button
-              onClick={handlePublish}
-              disabled={selectedPlatforms.length === 0 || selectedMockups.length === 0 || isPublishing}
-              className="flex items-center px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isPublishing ? (
-                <>
-                  <Loader2 className="h-5 w-5 animate-spin mr-2" />
-                  Publication...
-                </>
-              ) : (
-                <>
-                  <Share2 className="h-5 w-5 mr-2" />
-                  Publier
-                </>
-              )}
-            </button>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setShowScheduleDialog(true)}
+                disabled={selectedPlatformAccounts.length === 0 || selectedMockups.length === 0}
+                className="flex items-center px-6 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Calendar className="h-5 w-5 mr-2" />
+                Programmer
+              </button>
+              <button
+                onClick={handlePublish}
+                disabled={selectedPlatformAccounts.length === 0 || selectedMockups.length === 0 || isPublishing}
+                className="flex items-center px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isPublishing ? (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                    Publication...
+                  </>
+                ) : (
+                  <>
+                    <Share2 className="h-5 w-5 mr-2" />
+                    Publier
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -394,6 +444,26 @@ export default function Dashboard() {
           mockup={previewMockup}
           onClose={() => setPreviewMockup(null)}
           onDownload={() => handleDownload(previewMockup)}
+        />
+      )}
+
+      {showScheduleDialog && user && (
+        <SchedulePostDialog
+          userId={user.uid}
+          mockups={generations
+            .flatMap(gen => gen.mockups)
+            .filter(mockup => selectedMockups.includes(mockup.id))
+          }
+          platforms={selectedPlatformAccounts.map(accountId => ({
+            platform: userProfile?.platformAccounts?.find(a => a.id === accountId)?.platform,
+            ...platformData[accountId]
+          }))}
+          onClose={() => {
+            setShowScheduleDialog(false);
+            setSelectedMockups([]);
+            setSelectedPlatformAccounts([]);
+            setPlatformData({});
+          }}
         />
       )}
     </div>

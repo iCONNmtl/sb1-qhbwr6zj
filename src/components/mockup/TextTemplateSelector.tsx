@@ -1,20 +1,35 @@
 import React, { useState } from 'react';
-import { Layout, ChevronDown } from 'lucide-react';
+import { Layout, ChevronDown, Trash2 } from 'lucide-react';
 import { TEXT_TEMPLATES, TEMPLATE_CATEGORIES } from '../../data/textTemplates';
+import { deleteTemplate } from '../../services/templateService';
+import toast from 'react-hot-toast';
 import type { TextTemplate } from '../../types/textTemplate';
 import clsx from 'clsx';
 
 interface TextTemplateSelectorProps {
   onSelect: (template: TextTemplate) => void;
+  userTemplates: TextTemplate[];
 }
 
-export default function TextTemplateSelector({ onSelect }: TextTemplateSelectorProps) {
+export default function TextTemplateSelector({ onSelect, userTemplates }: TextTemplateSelectorProps) {
   const [selectedCategory, setSelectedCategory] = useState('Tous');
-  const [isOpen, setIsOpen] = useState(false);
 
-  const filteredTemplates = TEXT_TEMPLATES.filter(template => 
+  // Combine default and user templates
+  const allTemplates = [...TEXT_TEMPLATES, ...userTemplates];
+
+  const filteredTemplates = allTemplates.filter(template => 
     selectedCategory === 'Tous' || template.category === selectedCategory
   );
+
+  const handleDeleteTemplate = async (templateId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await deleteTemplate(templateId);
+      toast.success('Template supprimé');
+    } catch (error) {
+      toast.error('Erreur lors de la suppression');
+    }
+  };
 
   return (
     <div className="bg-white rounded-xl shadow-sm p-6">
@@ -45,16 +60,27 @@ export default function TextTemplateSelector({ onSelect }: TextTemplateSelectorP
         {/* Templates Grid */}
         <div className="grid grid-cols-2 gap-4">
           {filteredTemplates.map(template => (
-            <button
+            <div
               key={template.id}
+              className="relative p-4 border border-gray-200 rounded-lg hover:border-indigo-600 transition-colors text-left group cursor-pointer"
               onClick={() => onSelect(template)}
-              className="p-4 border border-gray-200 rounded-lg hover:border-indigo-600 transition-colors text-left"
             >
               <h4 className="font-medium text-gray-900 mb-2">{template.name}</h4>
               <p className="text-sm text-gray-500">
-                {template.layers.length} couches de texte
+                {template.layers.length} couche{template.layers.length > 1 ? 's' : ''} de texte
               </p>
-            </button>
+
+              {/* Delete button for user templates */}
+              {'userId' in template && (
+                <button
+                  onClick={(e) => handleDeleteTemplate(template.id, e)}
+                  className="absolute top-2 right-2 p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                  title="Supprimer le template"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              )}
+            </div>
           ))}
         </div>
       </div>

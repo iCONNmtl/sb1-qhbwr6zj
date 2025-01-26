@@ -1,9 +1,10 @@
 import React from 'react';
-import { Trash2, Type, Palette, Square } from 'lucide-react';
+import { Trash2, Type, Palette, Square, Bold, Italic, AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
 import FontSelector from './FontSelector';
 import FontSizeControl from './FontSizeControl';
 import ColorPicker from './ColorPicker';
 import StyleSliderControl from './StyleSliderControl';
+import clsx from 'clsx';
 import type { TextStyle } from '../../types/mockup';
 
 interface TextLayerEditorProps {
@@ -20,12 +21,10 @@ const PADDING_PRESETS = [0, 8, 16, 24, 32];
 const BORDER_RADIUS_PRESETS = [0, 4, 8, 16, 24];
 
 export default function TextLayerEditor({ layer, onUpdate, onDelete }: TextLayerEditorProps) {
-  // Parse numeric values with fallbacks
   const fontSize = parseInt(layer.style.fontSize) || 24;
   const padding = parseInt(layer.style.padding || '0') || 0;
   const borderRadius = parseInt(layer.style.borderRadius || '0') || 0;
 
-  // Helper to update style while preserving other properties
   const updateStyle = (updates: Partial<TextStyle>) => {
     onUpdate({
       style: {
@@ -51,64 +50,137 @@ export default function TextLayerEditor({ layer, onUpdate, onDelete }: TextLayer
         />
       </div>
 
+      {/* Text Style Controls */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Style de texte
+        </label>
+        <div className="flex items-center space-x-2 mb-4">
+          <button
+            onClick={() => updateStyle({ fontWeight: layer.style.fontWeight === 'bold' ? 'normal' : 'bold' })}
+            className={clsx(
+              'p-2 rounded-lg transition-colors',
+              layer.style.fontWeight === 'bold' 
+                ? 'bg-indigo-100 text-indigo-600' 
+                : 'hover:bg-gray-100 text-gray-600'
+            )}
+            title="Gras"
+          >
+            <Bold className="h-5 w-5" />
+          </button>
+          <button
+            onClick={() => updateStyle({ fontStyle: layer.style.fontStyle === 'italic' ? 'normal' : 'italic' })}
+            className={clsx(
+              'p-2 rounded-lg transition-colors',
+              layer.style.fontStyle === 'italic'
+                ? 'bg-indigo-100 text-indigo-600'
+                : 'hover:bg-gray-100 text-gray-600'
+            )}
+            title="Italique"
+          >
+            <Italic className="h-5 w-5" />
+          </button>
+          <div className="h-6 border-l border-gray-200 mx-2" />
+          <button
+            onClick={() => updateStyle({ textAlign: 'left' })}
+            className={clsx(
+              'p-2 rounded-lg transition-colors',
+              layer.style.textAlign === 'left'
+                ? 'bg-indigo-100 text-indigo-600'
+                : 'hover:bg-gray-100 text-gray-600'
+            )}
+            title="Aligner à gauche"
+          >
+            <AlignLeft className="h-5 w-5" />
+          </button>
+          <button
+            onClick={() => updateStyle({ textAlign: 'center' })}
+            className={clsx(
+              'p-2 rounded-lg transition-colors',
+              layer.style.textAlign === 'center'
+                ? 'bg-indigo-100 text-indigo-600'
+                : 'hover:bg-gray-100 text-gray-600'
+            )}
+            title="Centrer"
+          >
+            <AlignCenter className="h-5 w-5" />
+          </button>
+          <button
+            onClick={() => updateStyle({ textAlign: 'right' })}
+            className={clsx(
+              'p-2 rounded-lg transition-colors',
+              layer.style.textAlign === 'right'
+                ? 'bg-indigo-100 text-indigo-600'
+                : 'hover:bg-gray-100 text-gray-600'
+            )}
+            title="Aligner à droite"
+          >
+            <AlignRight className="h-5 w-5" />
+          </button>
+        </div>
+      </div>
+
       {/* Font Controls */}
-      <FontSelector
-        value={layer.style.fontFamily}
-        onChange={(font) => updateStyle({ fontFamily: font })}
-      />
+      <div className="space-y-4">
+        <FontSelector
+          value={layer.style.fontFamily}
+          onChange={(font) => updateStyle({ fontFamily: font })}
+        />
 
-      {/* Font Size */}
-      <FontSizeControl
-        value={fontSize}
-        onChange={(size) => updateStyle({ fontSize: `${size}px` })}
-      />
-
-      {/* Text Color */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          <Palette className="h-4 w-4 inline-block mr-2" />
-          Couleur du texte
-        </label>
-        <ColorPicker
-          value={layer.style.color}
-          onChange={(color) => updateStyle({ color })}
+        <FontSizeControl
+          value={fontSize}
+          onChange={(size) => updateStyle({ fontSize: `${size}px` })}
         />
       </div>
 
-      {/* Background Color */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          <Square className="h-4 w-4 inline-block mr-2" />
-          Couleur de fond
-        </label>
-        <ColorPicker
-          value={layer.style.backgroundColor || 'transparent'}
-          onChange={(color) => updateStyle({ backgroundColor: color })}
-          allowTransparent
-        />
+      {/* Colors */}
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            <Palette className="h-4 w-4 inline-block mr-2" />
+            Couleur du texte
+          </label>
+          <ColorPicker
+            value={layer.style.color}
+            onChange={(color) => updateStyle({ color })}
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            <Square className="h-4 w-4 inline-block mr-2" />
+            Couleur de fond
+          </label>
+          <ColorPicker
+            value={layer.style.backgroundColor || 'transparent'}
+            onChange={(color) => updateStyle({ backgroundColor: color })}
+            allowTransparent
+          />
+        </div>
       </div>
 
-      {/* Padding */}
-      <StyleSliderControl
-        label="Espacement interne"
-        value={padding}
-        onChange={(value) => updateStyle({ padding: `${value}px` })}
-        min={0}
-        max={50}
-        step={1}
-        presets={PADDING_PRESETS}
-      />
+      {/* Spacing & Borders */}
+      <div className="space-y-4">
+        <StyleSliderControl
+          label="Espacement interne"
+          value={padding}
+          onChange={(value) => updateStyle({ padding: `${value}px` })}
+          min={0}
+          max={50}
+          step={1}
+          presets={PADDING_PRESETS}
+        />
 
-      {/* Border Radius */}
-      <StyleSliderControl
-        label="Arrondi des coins"
-        value={borderRadius}
-        onChange={(value) => updateStyle({ borderRadius: `${value}px` })}
-        min={0}
-        max={50}
-        step={1}
-        presets={BORDER_RADIUS_PRESETS}
-      />
+        <StyleSliderControl
+          label="Arrondi des coins"
+          value={borderRadius}
+          onChange={(value) => updateStyle({ borderRadius: `${value}px` })}
+          min={0}
+          max={50}
+          step={1}
+          presets={BORDER_RADIUS_PRESETS}
+        />
+      </div>
 
       {/* Delete Button */}
       <button

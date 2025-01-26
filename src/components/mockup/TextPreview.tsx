@@ -3,11 +3,26 @@ import { Image, Instagram, ArrowDown, Move, Layout } from 'lucide-react';
 import clsx from 'clsx';
 import ImageLoader from '../ImageLoader';
 import MockupPreviewSlider from './MockupPreviewSlider';
-import type { TextStyle } from '../../types/mockup';
+import { PREVIEW_DIMENSIONS, GRID_DIMENSIONS, calculateImagePosition } from '../../utils/scaling';
+import type { TextLayer, ImageLayer } from '../../types/mockup';
 import type { PreviewFormat } from './PreviewFormatSelector';
 import type { Mockup } from '../../types/mockup';
 
-const MAX_HEIGHT = 600;
+interface TextPreviewProps {
+  mockups: Mockup[];
+  layers: (TextLayer | ImageLayer)[];
+  selectedLayerId: string | null;
+  onSelectLayer: (id: string) => void;
+  onUpdatePosition: (id: string, updates: Partial<{ position: { x: number; y: number } }>) => void;
+  format: PreviewFormat;
+  onFormatChange: (format: PreviewFormat) => void;
+  cropPosition: { x: number; y: number };
+  onCropPositionChange: (position: { x: number; y: number }) => void;
+  cropSize: { width: number; height: number };
+  onCropSizeChange: (size: { width: number; height: number }) => void;
+  onGridConfigChange: (config: { width: number; marginLeft: number }) => void;
+  onPreviewWidthChange: (width: number) => void;
+}
 
 const FORMATS = [
   {
@@ -35,29 +50,9 @@ const FORMATS = [
   }
 ];
 
-interface TextPreviewProps {
-  mockups: Mockup[];
-  textLayers: Array<{
-    id: string;
-    text: string;
-    style: TextStyle;
-    position: { x: number; y: number };
-  }>;
-  selectedLayerId: string | null;
-  onSelectLayer: (id: string) => void;
-  onUpdatePosition: (id: string, updates: Partial<{ position: { x: number; y: number } }>) => void;
-  format: PreviewFormat;
-  onFormatChange: (format: PreviewFormat) => void;
-  cropPosition: { x: number; y: number };
-  onCropPositionChange: (position: { x: number; y: number }) => void;
-  cropSize: { width: number; height: number };
-  onCropSizeChange: (size: { width: number; height: number }) => void;
-  onGridConfigChange: (config: { width: number; marginLeft: number }) => void;
-}
-
 export default function TextPreview({
   mockups,
-  textLayers,
+  layers,
   selectedLayerId,
   onSelectLayer,
   onUpdatePosition,
@@ -67,18 +62,24 @@ export default function TextPreview({
   onCropPositionChange,
   cropSize,
   onCropSizeChange,
-  onGridConfigChange
+  onGridConfigChange,
+  onPreviewWidthChange
 }: TextPreviewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
-  const [dragType, setDragType] = useState<'text' | 'crop' | null>(null);
+  const [dragType, setDragType] = useState<'layer' | 'crop' | null>(null);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [initialPosition, setInitialPosition] = useState({ x: 0, y: 0 });
   const [currentMockupIndex, setCurrentMockupIndex] = useState(0);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
+  const [isDragging, setIsDragging] = useState(false);
 
   const currentMockup = mockups[currentMockupIndex];
-  const selectedFormat = FORMATS.find(f => f.id === format);
+
+  const getValidOpacity = (value: string | undefined): number => {
+    const parsed = parseFloat(value || '1');
+    return isNaN(parsed) ? 1 : Math.max(0, Math.min(1, parsed));
+  };
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -87,23 +88,24 @@ export default function TextPreview({
       const container = containerRef.current;
       if (!container) return;
 
-      const width = container.clientWidth;
-      const height = Math.min(width, MAX_HEIGHT);
-      setContainerSize({ width, height });
-      setScale(width / 1000);
+      const width = Math.min(container.clientWidth, PREVIEW_DIMENSIONS.width);
+      setContainerSize({ width, height: width });
+      setScale(width / PREVIEW_DIMENSIONS.width);
+      onPreviewWidthChange(width);
 
-      // Update grid config
-      const gridWidth = width * 0.8; // 80% de la largeur
+      const gridWidth = width * 0.8;
       const marginLeft = (width - gridWidth) / 2;
       onGridConfigChange({ width: gridWidth, marginLeft });
     };
 
     updateSize();
-    window.addEventListener('resize', updateSize);
-    return () => window.removeEventListener('resize', updateSize);
-  }, [onGridConfigChange]);
 
-  // Reset crop position when format changes
+    const resizeObserver = new ResizeObserver(updateSize);
+    resizeObserver.observe(containerRef.current);
+
+    return () => resizeObserver.disconnect();
+  }, [onGridConfigChange, onPreviewWidthChange]);
+
   useEffect(() => {
     if (format === 'original') return;
     
@@ -112,7 +114,7 @@ export default function TextPreview({
     
     onCropPositionChange({
       x: (containerSize.width - cropWidth) / 2,
-      y: (containerSize.height - cropHeight) / 2
+      y: 0
     });
     
     onCropSizeChange({
@@ -122,29 +124,18 @@ export default function TextPreview({
   }, [format, containerSize, onCropPositionChange, onCropSizeChange]);
 
   const getCropWidth = () => {
-    if (!selectedFormat || format === 'original') return containerSize.width;
-    return containerSize.height * selectedFormat.aspectRatio;
+    if (format === 'original') return containerSize.width;
+    const gridDimensions = GRID_DIMENSIONS[format as 'instagram' | 'pinterest'];
+    return containerSize.height * gridDimensions.aspectRatio;
   };
 
   const getCropHeight = () => {
-    if (!selectedFormat || format === 'original') return containerSize.height;
+    if (format === 'original') return containerSize.height;
     return containerSize.height;
   };
 
-  const handleTextMouseDown = (e: React.MouseEvent, layerId: string) => {
-    e.stopPropagation();
-    onSelectLayer(layerId);
-    
-    const layer = textLayers.find(l => l.id === layerId);
-    if (!layer) return;
-
-    setDragType('text');
-    setDragStart({ x: e.clientX, y: e.clientY });
-    setInitialPosition(layer.position);
-  };
-
   const handleCropMouseDown = (e: React.MouseEvent) => {
-    if (dragType === 'text') return;
+    if (dragType === 'layer') return;
 
     e.preventDefault();
     e.stopPropagation();
@@ -154,10 +145,25 @@ export default function TextPreview({
     setInitialPosition(cropPosition);
   };
 
+  const handleLayerMouseDown = (e: React.MouseEvent, layerId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    onSelectLayer(layerId);
+    
+    const layer = layers.find(l => l.id === layerId);
+    if (!layer) return;
+
+    setIsDragging(true);
+    setDragType('layer');
+    setDragStart({ x: e.clientX, y: e.clientY });
+    setInitialPosition(layer.position);
+  };
+
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!dragType || !containerRef.current) return;
 
-    if (dragType === 'text' && selectedLayerId) {
+    if (dragType === 'layer' && isDragging && selectedLayerId) {
       const deltaX = (e.clientX - dragStart.x) / scale;
       const deltaY = (e.clientY - dragStart.y) / scale;
 
@@ -169,28 +175,27 @@ export default function TextPreview({
       onUpdatePosition(selectedLayerId, { position: newPosition });
     } else if (dragType === 'crop') {
       const deltaX = e.clientX - dragStart.x;
-      const deltaY = e.clientY - dragStart.y;
-
+      const maxX = containerSize.width - getCropWidth();
+      
       const newX = Math.max(0, Math.min(
         initialPosition.x + deltaX,
-        containerSize.width - getCropWidth()
-      ));
-      const newY = Math.max(0, Math.min(
-        initialPosition.y + deltaY,
-        containerSize.height - getCropHeight()
+        maxX
       ));
 
-      onCropPositionChange({ x: newX, y: newY });
+      onCropPositionChange({ 
+        x: newX,
+        y: 0
+      });
     }
   };
 
   const handleMouseUp = () => {
+    setIsDragging(false);
     setDragType(null);
   };
 
   return (
     <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-      {/* En-tête avec titre et description */}
       <div className="p-6 border-b border-gray-100">
         <h3 className="text-lg font-semibold text-gray-900 mb-1">
           Prévisualisation
@@ -200,7 +205,6 @@ export default function TextPreview({
         </p>
       </div>
 
-      {/* Sélecteur de format */}
       <div className="px-6 py-4 bg-gray-50 border-b border-gray-100">
         <div className="grid grid-cols-3 gap-4">
           {FORMATS.map((f) => {
@@ -239,7 +243,6 @@ export default function TextPreview({
                   </div>
                 </div>
 
-                {/* Indicateur de sélection */}
                 {isSelected && (
                   <div className="absolute -top-1 -right-1 w-6 h-6 bg-indigo-600 rounded-full flex items-center justify-center">
                     <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -253,14 +256,13 @@ export default function TextPreview({
         </div>
       </div>
 
-      {/* Zone de prévisualisation */}
       <div className="p-6">
         <div 
           ref={containerRef}
-          className="relative rounded-lg overflow-hidden bg-gray-100" 
+          className="relative w-full aspect-square rounded-lg overflow-hidden" 
           style={{ 
-            height: `${containerSize.height}px`,
-            maxHeight: `${MAX_HEIGHT}px`
+            maxWidth: `${PREVIEW_DIMENSIONS.width}px`,
+            maxHeight: `${PREVIEW_DIMENSIONS.height}px`
           }}
           onClick={() => onSelectLayer('')}
           onMouseMove={handleMouseMove}
@@ -302,36 +304,65 @@ export default function TextPreview({
                 </div>
               )}
 
-              {textLayers.map(layer => {
-                const fontSize = parseInt(layer.style.fontSize);
-                
-                return (
-                  <div
-                    key={layer.id}
-                    className={clsx(
-                      'absolute cursor-move',
-                      selectedLayerId === layer.id && 'outline outline-2 outline-indigo-500 outline-offset-2'
-                    )}
-                    style={{
-                      ...layer.style,
-                      fontSize: `${fontSize * scale}px`,
-                      transform: `translate(${layer.position.x * scale}px, ${layer.position.y * scale}px)`,
-                      userSelect: 'none',
-                      left: 0,
-                      top: 0,
-                      zIndex: 20
-                    }}
-                    onMouseDown={(e) => handleTextMouseDown(e, layer.id)}
-                  >
-                    {layer.text}
-                  </div>
-                );
+              {layers.map(layer => {
+                if (layer.type === 'text') {
+                  const fontSize = parseInt(layer.style.fontSize) || 24;
+                  return (
+                    <div
+                      key={layer.id}
+                      className={clsx(
+                        'absolute cursor-move',
+                        selectedLayerId === layer.id && 'outline outline-2 outline-indigo-500 outline-offset-2'
+                      )}
+                      style={{
+                        ...layer.style,
+                        fontSize: `${fontSize * scale}px`,
+                        transform: `translate(${layer.position.x * scale}px, ${layer.position.y * scale}px)`,
+                        userSelect: 'none',
+                        left: 0,
+                        top: 0,
+                        zIndex: 20
+                      }}
+                      onMouseDown={(e) => handleLayerMouseDown(e, layer.id)}
+                    >
+                      {layer.text}
+                    </div>
+                  );
+                } else {
+                  const width = parseInt(layer.style.width) || 100;
+                  const opacity = getValidOpacity(layer.style.opacity);
+                  return (
+                    <div
+                      key={layer.id}
+                      className={clsx(
+                        'absolute cursor-move',
+                        selectedLayerId === layer.id && 'outline outline-2 outline-indigo-500 outline-offset-2'
+                      )}
+                      style={{
+                        transform: `translate(${layer.position.x * scale}px, ${layer.position.y * scale}px)`,
+                        width: `${width * scale}px`,
+                        opacity,
+                        userSelect: 'none',
+                        left: 0,
+                        top: 0,
+                        zIndex: 20
+                      }}
+                      onMouseDown={(e) => handleLayerMouseDown(e, layer.id)}
+                    >
+                      <img
+                        src={layer.url}
+                        alt="Logo"
+                        className="w-full h-auto object-contain"
+                        draggable={false}
+                      />
+                    </div>
+                  );
+                }
               })}
             </div>
           ) : (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center">
-                <Image className="h-12 w-12 text-gray-400 mx-auto mb-2" />
                 <p className="text-sm text-gray-500">
                   Sélectionnez un mockup pour voir la prévisualisation
                 </p>
@@ -340,7 +371,6 @@ export default function TextPreview({
           )}
         </div>
 
-        {/* Slider de mockups */}
         {mockups.length > 1 && (
           <div className="mt-6 pt-6 border-t border-gray-100">
             <MockupPreviewSlider

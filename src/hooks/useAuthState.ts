@@ -25,7 +25,8 @@ export function useAuthState() {
               credits: 5,
               active: true
             },
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString(),
+            emailVerified: false
           };
           await setDoc(userRef, newUser);
         }

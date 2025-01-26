@@ -1,12 +1,18 @@
-import type { TextTemplate } from '../types/textTemplate';
+import type { TemplateLayer } from '../types/textTemplate';
 
-export const TEXT_TEMPLATES: TextTemplate[] = [
-  {
+export const TEXT_TEMPLATES: {
+  id: string;
+  name: string;
+  category: string;
+  layers: TemplateLayer[];
+}[] = [
+{
     id: 'promo-modern',
     name: 'Réduction',
     category: 'Promotions',
     layers: [
       {
+       type: 'text',
         text: 'SOLDES',
         style: {
           fontFamily: 'Roboto',
@@ -22,6 +28,7 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
         position: { x: 539, y: 38 }
       },
       {
+        type: 'text',
         text: '-50%',
         style: {
           fontFamily: 'Roboto',
@@ -37,6 +44,7 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
         position: { x: 727, y: 147 }
       },
       {
+        type: 'text',
         text: 'ACHETEZ MAINTENANT',
         style: {
           fontFamily: 'Roboto',
@@ -59,6 +67,7 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
     category: 'Promotions',
     layers: [
       {
+        type: 'text',
         text: 'NOUVEAUTÉ',
         style: {
           fontFamily: 'Poppins',
@@ -74,6 +83,7 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
         position: { x: 54, y: 50 }
       },
       {
+        type: 'text',
         text: 'Découvrez notre dernière collection',
         style: {
           fontFamily: 'Roboto',
@@ -93,9 +103,10 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
   {
     id: 'customer-favorite',
     name: 'Coup de Coeur',
-    category: 'Produit',
+    category: 'Produits’,
     layers: [
       {
+        type: 'text',
         text: 'COUP DE COEUR',
         style: {
           fontFamily: 'Montserrat',
@@ -118,6 +129,7 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
     category: 'Promotions',
     layers: [
       {
+        type: 'text',
         text: 'ÉDITION LIMITÉE',
         style: {
           fontFamily: 'Playfair Display',
@@ -133,6 +145,7 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
         position: { x: 50, y: 50 }
       },
       {
+        type: 'text',
         text: 'Disponible jusqu\'à épuisement',
         style: {
           fontFamily: 'Montserrat',
@@ -152,9 +165,10 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
   {
     id: 'product-guarantee',
     name: 'Garantie et Satisfaction',
-    category: 'Produit',
+    category: 'Produits’,
     layers: [
       {
+        type: 'text',
         text: '100% Satisfaction',
         style: {
           fontFamily: 'Montserrat',
@@ -170,6 +184,7 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
         position: { x: 55, y: 41 }
       },
       {
+        type: 'text',
         text: 'Livraison rapide',
         style: {
           fontFamily: 'Roboto',
@@ -185,6 +200,7 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
         position: { x: 55, y: 272 }
       },
       {
+        type: 'text',
         text: 'Fabriqué avec soin au Québec',
         style: {
           fontFamily: 'Roboto',
@@ -204,9 +220,10 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
   {
     id: 'product-benefits',
     name: 'Arguments',
-    category: 'Produit',
+    category: 'Produits’,
     layers: [
       {
+        type: 'text',
         text: 'Pourquoi choisir nos affiches ?',
         style: {
           fontFamily: 'Poppins',
@@ -222,6 +239,7 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
         position: { x: 79, y: 37 }
       },
       {
+        type: 'text',
         text: '- Papier de haute qualité',
         style: {
           fontFamily: 'Roboto',
@@ -237,6 +255,7 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
         position: { x: 85, y: 150 }
       },
       {
+        type: 'text',
         text: '- Couleurs vibrantes et durables',
         style: {
           fontFamily: 'Roboto',
@@ -252,6 +271,7 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
         position: { x: 85, y: 200 }
       },
       {
+        type: 'text',
         text: '- Disponible avec ou sans cadre',
         style: {
           fontFamily: 'Roboto',
@@ -274,6 +294,7 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
     category: 'Promotions',
     layers: [
       {
+        type: 'text',
         text: 'MEILLEURE VENTE',
         style: {
           fontFamily: 'Lora',
@@ -289,6 +310,7 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
         position: { x: 430, y: 655 }
       },
       {
+        type: 'text',
         text: 'Déjà plus de 1000 ventes !',
         style: {
           fontFamily: 'Montserrat',
@@ -308,9 +330,10 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
   {
     id: 'faq-guide',
     name: 'Guide et FAQ',
-    category: 'Produit',
+    category: 'Produits’,
     layers: [
       {
+        type: 'text',
         text: 'Comment accrocher votre affiche ?',
         style: {
           fontFamily: 'Montserrat',
@@ -326,6 +349,7 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
         position: { x: 54, y: 39 }
       },
       {
+        type: 'text',
         text: '1. Choisissez un mur bien éclairé',
         style: {
           fontFamily: 'Roboto',
@@ -341,6 +365,7 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
         position: { x: 60, y: 170 }
       },
       {
+        type: 'text',
         text: '2. Utilisez nos cadres ou adhésifs',
         style: {
           fontFamily: 'Roboto',
@@ -356,6 +381,7 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
         position: { x: 60, y: 230 }
       },
       {
+        type: 'text',
         text: '3. Admirez votre décor personnalisé !',
         style: {
           fontFamily: 'Roboto',
@@ -375,9 +401,10 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
   {
     id: 'social-vibrant',
     name: 'Suivez Nous',
-    category: 'Réseaux Sociaux',
+    category: ’Social Media’,
     layers: [
       {
+        type: 'text',
         text: 'SUIVEZ-NOUS',
         style: {
           fontFamily: 'Roboto',
@@ -393,6 +420,7 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
         position: { x: 569, y: 621 }
       },
       {
+        type: 'text',
         text: '@votremarque',
         style: {
           fontFamily: 'Montserrat',
@@ -412,9 +440,10 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
   {
     id: 'quote-minimal',
     name: 'Avis Clients',
-    category: 'Produit',
+    category: 'Produits’,
     layers: [
       {
+        type: 'text',
         text: '"Les affiches sont magnifiques !"',
         style: {
           fontFamily: 'Playfair Display',
@@ -430,6 +459,7 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
         position: { x: 420, y: 40 }
       },
       {
+        type: 'text',
         text: '"Je suis ravie, je reviendrai"',
         style: {
           fontFamily: 'Playfair Display',
@@ -446,11 +476,12 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
       }
     ]
   }
+
 ];
 
 export const TEMPLATE_CATEGORIES = [
   'Tous',
   'Promotions',
-  'Produit',
-  'Réseaux Sociaux'
+  'Produits',
+  'Social Media'
 ];

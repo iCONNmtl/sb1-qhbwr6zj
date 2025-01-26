@@ -11,6 +11,12 @@ import toast from 'react-hot-toast';
 import type { UserProfile } from '../types/user';
 import type { ExportFormat } from '../types/mockup';
 
+interface TextCustomization {
+  enabled: boolean;
+  appliedMockups: number[];
+  html: string;
+}
+
 export function useMockupGeneration() {
   const [isGenerating, setIsGenerating] = useState(false);
   const { user, addGeneration } = useStore();
@@ -22,7 +28,8 @@ export function useMockupGeneration() {
     selectedMockupData: any[],
     userProfile: UserProfile,
     exportFormat: ExportFormat,
-    customHtml?: string
+    customHtml?: string,
+    customizedMockups: number[] = []
   ) => {
     if (!user) {
       toast.error('Vous devez être connecté');
@@ -39,8 +46,13 @@ export function useMockupGeneration() {
       return;
     }
 
-    if ((userProfile.subscription.credits || 0) < selectedMockups.length) {
-      toast.error('Crédits insuffisants');
+    // Calculer le coût total en crédits
+    const baseCredits = selectedMockups.length * 5; // 5 crédits par mockup
+    const customizationCredits = customizedMockups.length * 5; // 5 crédits supplémentaires par mockup personnalisé
+    const totalCredits = baseCredits + customizationCredits;
+
+    if ((userProfile.subscription.credits || 0) < totalCredits) {
+      toast.error(`Crédits insuffisants. Il vous faut ${totalCredits} crédits pour cette génération.`);
       return;
     }
 
@@ -49,7 +61,7 @@ export function useMockupGeneration() {
 
     try {
       const processedDesign = await processDesignFile(designFile);
-      await updateUserCredits(user.uid, selectedMockups.length);
+      await updateUserCredits(user.uid, totalCredits);
       
       const uuidPairs = selectedMockupData.map(m => ({
         mockupUuid: m.mockupUuid,
@@ -72,6 +84,8 @@ export function useMockupGeneration() {
           mockups: result.mockups,
           exportFormat,
           customHtml,
+          customizedMockups,
+          creditsUsed: totalCredits,
           createdAt: new Date().toISOString()
         };
 

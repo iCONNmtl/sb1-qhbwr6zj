@@ -98,25 +98,43 @@ export default function MockupGenerator() {
   const handleGenerate = () => {
     if (!user || !userProfile || !designFile) return;
 
-    const textCustomization = {
-      enabled: isTextCustomizationEnabled,
-      appliedMockups: customizedMockups,
-      html: customHtml
-    };
+    // Calculer les mockups personnalisés
+    const customizedMockupsList = isTextCustomizationEnabled ? customizedMockups : [];
 
-    generateMockups(
-      designFile, 
-      selectedMockups, 
-      selectedMockupData, 
-      userProfile, 
-      exportFormat,
-      textCustomization
-    );
+    // Calculer le coût total en crédits
+    const baseCredits = selectedMockups.length * 5;
+    const customizationCredits = customizedMockupsList.length * 5;
+    const totalCredits = baseCredits + customizationCredits;
+
+    // Vérifier les crédits disponibles
+    if ((userProfile.subscription.credits || 0) < totalCredits) {
+      toast.error(`Crédits insuffisants. Il vous faut ${totalCredits} crédits pour cette génération.`);
+      return;
+    }
+
+    // Afficher une confirmation avec le détail des crédits
+    if (window.confirm(
+      `Cette génération va utiliser ${totalCredits} crédits :\n` +
+      `- ${selectedMockups.length} mockup(s) × 5 crédits = ${baseCredits} crédits\n` +
+      (customizedMockupsList.length > 0 ? 
+        `- ${customizedMockupsList.length} mockup(s) personnalisé(s) × 5 crédits = ${customizationCredits} crédits\n` : '') +
+      `\nVoulez-vous continuer ?`
+    )) {
+      generateMockups(
+        designFile, 
+        selectedMockups, 
+        selectedMockupData, 
+        userProfile, 
+        exportFormat,
+        isTextCustomizationEnabled ? customHtml : undefined,
+        customizedMockupsList
+      );
+    }
   };
 
   const handleCategoryChange = (categoryId: string) => {
     setSelectedCategory(categoryId);
-    setCurrentPage(1); // Reset to first page when changing category
+    setCurrentPage(1);
   };
 
   return (
@@ -200,7 +218,7 @@ export default function MockupGenerator() {
       {selectedMockups.length > 0 && (
         <section>
           <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            3. Personnalisez vos mockups
+            3. Personnalisez votre texte
           </h2>
           
           <div className="space-y-6">
@@ -214,6 +232,8 @@ export default function MockupGenerator() {
                 selectedMockups={selectedMockupData}
                 onGenerateHtml={setCustomHtml}
                 onCustomizedMockupsChange={setCustomizedMockups}
+                userId={user?.uid}
+                userLogo={userProfile?.logoUrl}
               />
             )}
           </div>
@@ -238,6 +258,8 @@ export default function MockupGenerator() {
         isGenerating={isGenerating}
         onGenerate={handleGenerate}
         designFile={designFile}
+        isTextCustomizationEnabled={isTextCustomizationEnabled}
+        customizedMockups={customizedMockups}
       />
     </div>
   );

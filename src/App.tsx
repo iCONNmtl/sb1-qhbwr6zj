@@ -20,6 +20,7 @@ import LegalNotice from './pages/legal/LegalNotice';
 import TermsOfService from './pages/legal/TermsOfService';
 import TermsOfSale from './pages/legal/TermsOfSale';
 import PrivacyPolicy from './pages/legal/PrivacyPolicy';
+import ScheduledPosts from './pages/ScheduledPosts';
 import AuthGuard from './components/AuthGuard';
 import AdminGuard from './components/AdminGuard';
 import { useStore } from './store/useStore';
@@ -60,6 +61,11 @@ export default function App() {
             <Route path="/dashboard" element={
               <AuthGuard>
                 <Dashboard />
+              </AuthGuard>
+            } />
+            <Route path="/scheduled" element={
+              <AuthGuard>
+                <ScheduledPosts />
               </AuthGuard>
             } />
             <Route path="/settings" element={

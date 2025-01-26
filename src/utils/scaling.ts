@@ -1,32 +1,58 @@
-export interface ScalingConfig {
-    previewWidth: number;
-    previewHeight: number;
-    exportWidth: number;
-    exportHeight: number;
+// Constantes pour les dimensions
+export const PREVIEW_DIMENSIONS = {
+  width: 1000,  // Largeur de base de la prévisualisation
+  height: 1000  // Hauteur de base de la prévisualisation
+};
+
+export const GRID_DIMENSIONS = {
+  instagram: {
+    width: 800,
+    height: 1000,
+    aspectRatio: 4/5
+  },
+  pinterest: {
+    width: 667,
+    height: 1000,
+    aspectRatio: 2/3
   }
+};
+
+// Calcule le multiplicateur de scaling basé sur la taille actuelle de prévisualisation
+export function calculateScalingMultiplier(previewWidth: number): number {
+  // Le multiplicateur est le ratio entre la largeur de base et la largeur actuelle
+  return PREVIEW_DIMENSIONS.width / previewWidth;
+}
+
+// Calcule les limites de déplacement de la grille
+export function calculateGridBoundaries(format: 'instagram' | 'pinterest') {
+  const gridWidth = GRID_DIMENSIONS[format].width;
+  const previewWidth = PREVIEW_DIMENSIONS.width;
   
-  // Convertit une position en pourcentages
-  export function positionToPercentage(position: { x: number; y: number }, containerSize: { width: number; height: number }) {
-    return {
-      x: (position.x / containerSize.width) * 100,
-      y: (position.y / containerSize.height) * 100
-    };
-  }
+  return {
+    minX: 0,
+    maxX: previewWidth - gridWidth,
+    minY: 0,
+    maxY: 0 // La grille ne se déplace pas verticalement
+  };
+}
+
+// Calcule la position de l'image par rapport à la grille
+export function calculateImagePosition(
+  gridPosition: { x: number }, 
+  format: 'instagram' | 'pinterest',
+  previewWidth: number
+) {
+  const gridWidth = GRID_DIMENSIONS[format].width;
+  const maxGridOffset = previewWidth - gridWidth;
+  const maxImageOffset = previewWidth - gridWidth;
+  const gridPercent = gridPosition.x / maxGridOffset;
   
-  // Convertit un pourcentage en position absolue
-  export function percentageToPosition(percentage: { x: number; y: number }, containerSize: { width: number; height: number }) {
-    return {
-      x: Math.round((percentage.x * containerSize.width) / 100),
-      y: Math.round((percentage.y * containerSize.height) / 100)
-    };
-  }
+  // Utiliser le multiplicateur de scaling pour ajuster le déplacement
+  const scalingMultiplier = calculateScalingMultiplier(previewWidth);
+  const x = -maxImageOffset * gridPercent * scalingMultiplier;
   
-  // Calcule la taille de police relative en fonction de la largeur du conteneur
-  export function calculateRelativeFontSize(fontSize: number, containerWidth: number) {
-    return (fontSize / containerWidth) * 100;
-  }
-  
-  // Convertit une taille de police relative en pixels
-  export function relativeFontSizeToPixels(relativeFontSize: number, containerWidth: number) {
-    return Math.round((relativeFontSize * containerWidth) / 100);
-  }
+  return {
+    x,
+    y: 0
+  };
+}

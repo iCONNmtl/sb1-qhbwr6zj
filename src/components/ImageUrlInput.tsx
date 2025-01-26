@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Link } from 'lucide-react';
-import { validateImageUrl, getGoogleDriveImageUrl } from '../utils/validation';
 import toast from 'react-hot-toast';
 
 interface ImageUrlInputProps {
@@ -14,18 +13,26 @@ export default function ImageUrlInput({ mockupId, currentUrl, onUpdate }: ImageU
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const validateImageUrl = (url: string): boolean => {
+    try {
+      const urlObj = new URL(url);
+      return urlObj.protocol === 'https:';
+    } catch {
+      return false;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validateImageUrl(url)) {
-      toast.error('URL Google Drive invalide');
+      toast.error('URL invalide. Veuillez entrer une URL HTTPS valide');
       return;
     }
 
     setLoading(true);
     try {
-      const formattedUrl = getGoogleDriveImageUrl(url);
-      await onUpdate(formattedUrl);
+      await onUpdate(url);
       setIsEditing(false);
       setUrl('');
       toast.success('Image mise à jour avec succès');
@@ -54,7 +61,7 @@ export default function ImageUrlInput({ mockupId, currentUrl, onUpdate }: ImageU
         type="text"
         value={url}
         onChange={(e) => setUrl(e.target.value)}
-        placeholder="URL Google Drive"
+        placeholder="URL de l'image"
         className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
       />
       <div className="flex space-x-1">

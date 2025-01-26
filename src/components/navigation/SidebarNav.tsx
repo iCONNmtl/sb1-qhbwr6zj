@@ -1,12 +1,8 @@
 import React from 'react';
-import { LayoutDashboard, Wand2, CreditCard, Settings } from 'lucide-react';
+import { LayoutDashboard, Wand2, CreditCard, Settings, Calendar } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import SidebarLink from './SidebarLink';
 import clsx from 'clsx';
-
-interface SidebarNavProps {
-  isCollapsed: boolean;
-}
 
 interface NavSection {
   title: string;
@@ -16,6 +12,10 @@ interface NavSection {
     label: string;
     primary?: boolean;
   }[];
+}
+
+interface SidebarNavProps {
+  isCollapsed: boolean;
 }
 
 export default function SidebarNav({ isCollapsed }: SidebarNavProps) {
@@ -35,6 +35,11 @@ export default function SidebarNav({ isCollapsed }: SidebarNavProps) {
           to: '/dashboard',
           icon: LayoutDashboard,
           label: 'Vos mockups'
+        },
+        {
+          to: '/scheduled',
+          icon: Calendar,
+          label: 'Publications'
         }
       ]
     },
