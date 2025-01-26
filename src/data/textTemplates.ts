@@ -103,7 +103,7 @@ export const TEXT_TEMPLATES: {
   {
     id: 'customer-favorite',
     name: 'Coup de Coeur',
-    category: 'Produits’,
+    category: 'Produits',
     layers: [
       {
         type: 'text',
@@ -165,7 +165,7 @@ export const TEXT_TEMPLATES: {
   {
     id: 'product-guarantee',
     name: 'Garantie et Satisfaction',
-    category: 'Produits’,
+    category: 'Produits',
     layers: [
       {
         type: 'text',
@@ -220,7 +220,7 @@ export const TEXT_TEMPLATES: {
   {
     id: 'product-benefits',
     name: 'Arguments',
-    category: 'Produits’,
+    category: 'Produits',
     layers: [
       {
         type: 'text',
@@ -315,7 +315,7 @@ export const TEXT_TEMPLATES: {
         style: {
           fontFamily: 'Montserrat',
           fontSize: '30px',
-          fontWeight: 'italic',
+          fontWeight: 'normal',
           fontStyle: 'italic',
           color: '#000000',
           backgroundColor: 'transparent',
@@ -330,7 +330,7 @@ export const TEXT_TEMPLATES: {
   {
     id: 'faq-guide',
     name: 'Guide et FAQ',
-    category: 'Produits’,
+    category: 'Produits',
     layers: [
       {
         type: 'text',
@@ -401,7 +401,7 @@ export const TEXT_TEMPLATES: {
   {
     id: 'social-vibrant',
     name: 'Suivez Nous',
-    category: ’Social Media’,
+    category: 'Social Media',
     layers: [
       {
         type: 'text',
@@ -440,7 +440,7 @@ export const TEXT_TEMPLATES: {
   {
     id: 'quote-minimal',
     name: 'Avis Clients',
-    category: 'Produits’,
+    category: 'Produits',
     layers: [
       {
         type: 'text',
