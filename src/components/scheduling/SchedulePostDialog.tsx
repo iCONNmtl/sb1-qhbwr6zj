@@ -44,6 +44,7 @@ export default function SchedulePostDialog({
   const handleSchedule = async () => {
     setLoading(true);
     try {
+      // Créer le document de programmation dans Firestore
       const scheduledPost: Omit<ScheduledPost, 'id'> = {
         userId,
         mockups,
@@ -53,8 +54,28 @@ export default function SchedulePostDialog({
         createdAt: new Date().toISOString()
       };
 
-      await addDoc(collection(db, 'scheduledPosts'), scheduledPost);
-      
+      // Ajouter à Firestore
+      const docRef = await addDoc(collection(db, 'scheduledPosts'), scheduledPost);
+
+      // Appeler le webhook Make
+      const response = await fetch('https://hook.eu1.make.com/1brcdh36omu22jrtb06fwrpkb39nkw9b', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          postId: docRef.id,
+          userId,
+          mockups,
+          platforms,
+          scheduledFor: scheduledDate.toISOString()
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de la programmation');
+      }
+
       toast.success('Publication programmée avec succès');
       onClose();
     } catch (error) {

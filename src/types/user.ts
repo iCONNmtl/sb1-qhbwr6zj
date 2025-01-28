@@ -16,6 +16,11 @@ export interface PlatformAccount {
   name: string;
 }
 
+interface PinterestAuth {
+  tokens: string; // Token crypté en base64
+  connectedAt: string;
+}
+
 export interface UserProfile {
   email: string;
   subscription: UserSubscription;
@@ -23,4 +28,5 @@ export interface UserProfile {
   favorites?: string[];
   platformAccounts?: PlatformAccount[];
   logoUrl?: string;
+  pinterestAuth?: PinterestAuth;
 }

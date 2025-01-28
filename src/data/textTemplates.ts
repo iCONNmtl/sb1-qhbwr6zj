@@ -1,11 +1,21 @@
 import type { TemplateLayer } from '../types/textTemplate';
 
+// Images pour les templates visuels
+const VISUAL_ASSETS = {
+  pixmockLogo: "https://d2v7vpg8oce97p.cloudfront.net/Branding/LogoPixmock.png",
+  watermark: "https://d2v7vpg8oce97p.cloudfront.net/Branding/WatermarkPixmock.png",
+  badge: "https://d2v7vpg8oce97p.cloudfront.net/Branding/BadgePixmock.png",
+  seal: "https://d2v7vpg8oce97p.cloudfront.net/Branding/SealPixmock.png"
+};
+
 export const TEXT_TEMPLATES: {
   id: string;
   name: string;
   category: string;
+  preview?: string;
   layers: TemplateLayer[];
 }[] = [
+  // Templates texte
 {
     id: 'promo-modern',
     name: 'Réduction',
@@ -475,12 +485,117 @@ export const TEXT_TEMPLATES: {
         position: { x: 40, y: 682 }
       }
     ]
-  }
+  },
+  
+// Templates visuels avec aperçus
+{
+  id: 'logo-top-left',
+  name: 'Logo en haut à gauche',
+  category: 'Éléments visuels',
+  preview: VISUAL_ASSETS.pixmockLogo,
+  layers: [
+    {
+      type: 'image',
+      url: VISUAL_ASSETS.pixmockLogo,
+      style: {
+        width: '100px',
+        opacity: '1'
+      },
+      position: { x: 20, y: 20 }
+    }
+  ]
+},
+{
+  id: 'logo-top-right',
+  name: 'Logo en haut à droite',
+  category: 'Éléments visuels',
+  preview: VISUAL_ASSETS.pixmockLogo,
+  layers: [
+    {
+      type: 'image',
+      url: VISUAL_ASSETS.pixmockLogo,
+      style: {
+        width: '100px',
+        opacity: '1'
+      },
+      position: { x: 880, y: 20 }
+    }
+  ]
+},
+{
+  id: 'badge-bottom-right',
+  name: 'Badge en bas à droite',
+  category: 'Éléments visuels',
+  preview: VISUAL_ASSETS.badge,
+  layers: [
+    {
+      type: 'image',
+      url: VISUAL_ASSETS.badge,
+      style: {
+        width: '120px',
+        opacity: '1'
+      },
+      position: { x: 860, y: 860 }
+    }
+  ]
+},
+{
+  id: 'seal-bottom-left',
+  name: 'Sceau en bas à gauche',
+  category: 'Éléments visuels',
+  preview: VISUAL_ASSETS.seal,
+  layers: [
+    {
+      type: 'image',
+      url: VISUAL_ASSETS.seal,
+      style: {
+        width: '150px',
+        opacity: '1'
+      },
+      position: { x: 20, y: 830 }
+    }
+  ]
+},
+{
+  id: 'watermark-center',
+  name: 'Filigrane centré',
+  category: 'Éléments visuels',
+  preview: VISUAL_ASSETS.watermark,
+  layers: [
+    {
+      type: 'image',
+      url: VISUAL_ASSETS.watermark,
+      style: {
+        width: '300px',
+        opacity: '0.3'
+      },
+      position: { x: 350, y: 350 }
+    }
+  ]
+},
+{
+  id: 'watermark-bottom',
+  name: 'Filigrane en bas',
+  category: 'Éléments visuels',
+  preview: VISUAL_ASSETS.watermark,
+  layers: [
+    {
+      type: 'image',
+      url: VISUAL_ASSETS.watermark,
+      style: {
+        width: '200px',
+        opacity: '0.3'
+      },
+      position: { x: 400, y: 850 }
+    }
+  ]
+}
 ];
 
 export const TEMPLATE_CATEGORIES = [
-  'Tous',
-  'Promotions',
-  'Produits',
-  'Social Media'
-];
+'Tous',
+'Promotions',
+'Produits', 
+'Social Media',
+'Éléments visuels'
+] as const;

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Layout, ChevronDown, Trash2 } from 'lucide-react';
+import { Layout, ChevronDown, Trash2, Image } from 'lucide-react';
 import { TEXT_TEMPLATES, TEMPLATE_CATEGORIES } from '../../data/textTemplates';
 import { deleteTemplate } from '../../services/templateService';
+import ImageLoader from '../ImageLoader';
 import toast from 'react-hot-toast';
 import type { TextTemplate } from '../../types/textTemplate';
 import clsx from 'clsx';
@@ -35,7 +36,7 @@ export default function TextTemplateSelector({ onSelect, userTemplates }: TextTe
     <div className="bg-white rounded-xl shadow-sm p-6">
       <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
         <Layout className="h-5 w-5 mr-2" />
-        Templates de texte
+        Templates
       </h3>
 
       <div className="space-y-4">
@@ -65,10 +66,37 @@ export default function TextTemplateSelector({ onSelect, userTemplates }: TextTe
               className="relative p-4 border border-gray-200 rounded-lg hover:border-indigo-600 transition-colors text-left group cursor-pointer"
               onClick={() => onSelect(template)}
             >
-              <h4 className="font-medium text-gray-900 mb-2">{template.name}</h4>
-              <p className="text-sm text-gray-500">
-                {template.layers.length} couche{template.layers.length > 1 ? 's' : ''} de texte
-              </p>
+              {/* Preview Image for Visual Templates */}
+              {template.category === 'Éléments visuels' && template.preview && (
+                <div className="mb-3 aspect-square bg-gray-50 rounded-lg overflow-hidden">
+                  <ImageLoader
+                    src={template.preview}
+                    alt={template.name}
+                    className="w-full h-full object-contain p-2"
+                  />
+                </div>
+              )}
+
+              <div className="flex items-start justify-between">
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-1">{template.name}</h4>
+                  <p className="text-sm text-gray-500">
+                    {template.layers.length} calque{template.layers.length > 1 ? 's' : ''}
+                  </p>
+                </div>
+
+                {/* Icon indicator */}
+                <div className={clsx(
+                  'p-2 rounded-lg',
+                  template.category === 'Éléments visuels' ? 'bg-indigo-50' : 'bg-gray-50'
+                )}>
+                  {template.category === 'Éléments visuels' ? (
+                    <Image className="h-4 w-4 text-indigo-600" />
+                  ) : (
+                    <Layout className="h-4 w-4 text-gray-400" />
+                  )}
+                </div>
+              </div>
 
               {/* Delete button for user templates */}
               {'userId' in template && (

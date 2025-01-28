@@ -4,6 +4,9 @@ import { db } from '../lib/firebase';
 import { useStore } from '../store/useStore';
 import { ShoppingBag, Camera, BookmarkIcon, Save, Loader2, Plus, Trash2, Edit } from 'lucide-react';
 import LogoUploader from '../components/settings/LogoUploader';
+import PinterestAuthButton from '../components/settings/PinterestAuthButton';
+import PinterestCallback from '../components/settings/PinterestCallback';
+import { useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import type { UserProfile, PlatformAccount } from '../types/user';
 
@@ -12,7 +15,7 @@ const PLATFORMS = [
   { id: 'shopify', label: 'Shopify', icon: ShoppingBag },
   { id: 'pinterest', label: 'Pinterest', icon: BookmarkIcon },
   { id: 'instagram', label: 'Instagram', icon: Camera },
-];
+] as const;
 
 const TABS = [
   { id: 'platforms', label: 'Plateformes' },
@@ -22,6 +25,7 @@ const TABS = [
 type Tab = typeof TABS[number]['id'];
 
 export default function Settings() {
+  const [searchParams] = useSearchParams();
   const { user } = useStore();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [platformAccounts, setPlatformAccounts] = useState<PlatformAccount[]>([]);
@@ -96,6 +100,14 @@ export default function Settings() {
 
   return (
     <div className="max-w-4xl space-y-8">
+      {/* Callback Pinterest */}
+      {searchParams.has('code') && user && (
+        <PinterestCallback 
+          userId={user.uid} 
+          onSuccess={() => window.location.href = '/settings'} 
+        />
+      )}
+
       <h1 className="text-2xl font-bold text-gray-900">
         Paramètres
       </h1>
@@ -152,19 +164,36 @@ export default function Settings() {
                         }</p>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() => setEditingAccount(account)}
-                        className="p-2 text-gray-600 hover:bg-gray-200 rounded-lg transition"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteAccount(account.id)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                    <div className="flex items-center space-x-4">
+                      {/* Bouton de connexion Pinterest */}
+                      {account.platform === 'pinterest' && user && !userProfile?.pinterestAuth && (
+                        <PinterestAuthButton 
+                          userId={user.uid}
+                          onSuccess={() => {
+                            // Le callback se chargera de rafraîchir la page
+                          }}
+                        />
+                      )}
+                      {/* Statut de connexion Pinterest */}
+                      {account.platform === 'pinterest' && userProfile?.pinterestAuth && (
+                        <span className="text-sm text-green-600 bg-green-50 px-3 py-1 rounded-full">
+                          Connecté
+                        </span>
+                      )}
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => setEditingAccount(account)}
+                          className="p-2 text-gray-600 hover:bg-gray-200 rounded-lg transition"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteAccount(account.id)}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}

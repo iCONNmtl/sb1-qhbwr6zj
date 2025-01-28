@@ -10,45 +10,19 @@ import SchedulePostDialog from '../components/scheduling/SchedulePostDialog';
 import { downloadImage } from '../utils/download';
 import clsx from 'clsx';
 import toast from 'react-hot-toast';
-
-// Components
-import DesignUploader from '../components/DesignUploader';
-import CategoryCount from '../components/CategoryCount';
-import MockupGrid from '../components/mockup/MockupGrid';
-import MockupPagination from '../components/mockup/MockupPagination';
-import GenerationFooter from '../components/mockup/GenerationFooter';
-import GenerationProgress from '../components/generation/GenerationProgress';
-import ExportFormatSelector from '../components/mockup/ExportFormatSelector';
-import TextEditor from '../components/mockup/TextEditor';
-import TextCustomizationToggle from '../components/mockup/TextCustomizationToggle';
-
-// Hooks
-import { useMockupGeneration } from '../hooks/useMockupGeneration';
-import { useMockupSelection } from '../hooks/useMockupSelection';
-import { useMockups } from '../hooks/useMockups';
-import { useCategories } from '../hooks/useCategories';
-
-// Types
-import type { UserProfile, PlatformAccount } from '../types/user';
-import type { ExportFormat } from '../types/mockup';
-
-interface PlatformData {
-  accountId: string;
-  content?: string;
-  productId?: string;
-}
+import type { UserProfile } from '../types/user';
 
 export default function Dashboard() {
   const { user, generations } = useStore();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [selectedMockups, setSelectedMockups] = useState<string[]>([]);
   const [selectedPlatformAccounts, setSelectedPlatformAccounts] = useState<string[]>([]);
-  const [platformData, setPlatformData] = useState<Record<string, PlatformData>>({});
+  const [platformData, setPlatformData] = useState<Record<string, any>>({});
   const [isPublishing, setIsPublishing] = useState(false);
   const [previewMockup, setPreviewMockup] = useState<{id: string; name: string; url: string} | null>(null);
-  const [randomCount, setRandomCount] = useState<number>(1);
+  const [selectedMockups, setSelectedMockups] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'instagram' | 'pinterest'>('all');
   const [showScheduleDialog, setShowScheduleDialog] = useState(false);
+  const [randomCount, setRandomCount] = useState<number>(1);
 
   // Get all mockups from all generations
   const allMockups = generations.flatMap(generation => generation.mockups);
@@ -145,16 +119,28 @@ export default function Dashboard() {
         .filter(mockup => selectedMockups.includes(mockup.id));
 
       // Transformer les données pour le webhook
-      const platformsData = selectedPlatformAccounts.map(accountId => {
+      const platformsData = await Promise.all(selectedPlatformAccounts.map(async accountId => {
         const account = userProfile?.platformAccounts?.find(a => a.id === accountId);
         const data = platformData[accountId];
+
+        // Si c'est un compte Pinterest, ajouter les tokens
+        let authData = {};
+        if (account?.platform === 'pinterest' && userProfile?.pinterestAuth?.tokens) {
+          const tokens = JSON.parse(atob(userProfile.pinterestAuth.tokens));
+          authData = {
+            accessToken: tokens.access_token,
+            refreshToken: tokens.refresh_token
+          };
+        }
+
         return {
           accountId,
           platform: account?.platform,
           name: account?.name,
-          ...data
+          ...data,
+          ...authData
         };
-      });
+      }));
 
       const response = await fetch('https://hook.eu1.make.com/1brcdh36omu22jrtb06fwrpkb39nkw9b', {
         method: 'POST',
