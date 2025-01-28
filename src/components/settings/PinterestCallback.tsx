@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import toast from 'react-hot-toast';
@@ -16,6 +16,7 @@ const REDIRECT_URI = `${window.location.origin}/settings`;
 export default function PinterestCallback({ userId, onSuccess }: PinterestCallbackProps) {
   const [searchParams] = useSearchParams();
   const [processing, setProcessing] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const processAuth = async () => {
@@ -25,6 +26,7 @@ export default function PinterestCallback({ userId, onSuccess }: PinterestCallba
 
       if (!code || !state || state !== storedState) {
         toast.error('Erreur de validation Pinterest');
+        navigate('/settings');
         return;
       }
 
@@ -70,6 +72,7 @@ export default function PinterestCallback({ userId, onSuccess }: PinterestCallba
       } catch (error) {
         console.error('Pinterest token exchange error:', error);
         toast.error('Erreur lors de la connexion du compte Pinterest');
+        navigate('/settings');
       } finally {
         setProcessing(false);
       }
@@ -78,7 +81,7 @@ export default function PinterestCallback({ userId, onSuccess }: PinterestCallba
     if (searchParams.has('code')) {
       processAuth();
     }
-  }, [searchParams, userId, onSuccess]);
+  }, [searchParams, userId, onSuccess, navigate]);
 
   if (processing) {
     return (

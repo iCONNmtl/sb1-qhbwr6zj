@@ -6,7 +6,7 @@ import { ShoppingBag, Camera, BookmarkIcon, Save, Loader2, Plus, Trash2, Edit } 
 import LogoUploader from '../components/settings/LogoUploader';
 import PinterestAuthButton from '../components/settings/PinterestAuthButton';
 import PinterestCallback from '../components/settings/PinterestCallback';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import type { UserProfile, PlatformAccount } from '../types/user';
 
@@ -26,6 +26,7 @@ type Tab = typeof TABS[number]['id'];
 
 export default function Settings() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const { user } = useStore();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [platformAccounts, setPlatformAccounts] = useState<PlatformAccount[]>([]);
@@ -98,13 +99,18 @@ export default function Settings() {
     setPlatformAccounts(prev => prev.filter(account => account.id !== accountId));
   };
 
+  const handlePinterestSuccess = () => {
+    navigate('/settings');
+    window.location.reload();
+  };
+
   return (
     <div className="max-w-4xl space-y-8">
       {/* Callback Pinterest */}
       {searchParams.has('code') && user && (
         <PinterestCallback 
           userId={user.uid} 
-          onSuccess={() => window.location.href = '/settings'} 
+          onSuccess={handlePinterestSuccess}
         />
       )}
 
@@ -169,9 +175,7 @@ export default function Settings() {
                       {account.platform === 'pinterest' && user && !userProfile?.pinterestAuth && (
                         <PinterestAuthButton 
                           userId={user.uid}
-                          onSuccess={() => {
-                            // Le callback se chargera de rafraîchir la page
-                          }}
+                          onSuccess={handlePinterestSuccess}
                         />
                       )}
                       {/* Statut de connexion Pinterest */}

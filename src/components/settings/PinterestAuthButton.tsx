@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import { BookmarkIcon, Loader2 } from 'lucide-react';
-import { doc, updateDoc } from 'firebase/firestore';
-import { db } from '../../lib/firebase';
 import toast from 'react-hot-toast';
 
 interface PinterestAuthButtonProps {
