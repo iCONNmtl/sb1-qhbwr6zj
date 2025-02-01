@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from '../lib/firebase';
@@ -13,7 +13,14 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [resetMode, setResetMode] = useState(false);
   const navigate = useNavigate();
-  const { setUser } = useStore();
+  const { user, setUser } = useStore();
+
+  // Rediriger vers le générateur si déjà connecté
+  useEffect(() => {
+    if (user) {
+      navigate('/generator');
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,7 +30,7 @@ export default function Login() {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       setUser(userCredential.user);
       toast.success('Connexion réussie');
-      navigate('/dashboard');
+      navigate('/generator');
     } catch (error) {
       toast.error('Identifiants incorrects');
     } finally {
@@ -45,6 +52,11 @@ export default function Login() {
       setLoading(false);
     }
   };
+
+  // Si l'utilisateur est déjà connecté, ne pas afficher le formulaire
+  if (user) {
+    return null;
+  }
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center">

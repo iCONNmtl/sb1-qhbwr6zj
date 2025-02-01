@@ -3,7 +3,7 @@ import { useStore } from '../store/useStore';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { Link } from 'react-router-dom';
-import { ShoppingBag, Camera, BookmarkIcon, Share2, Loader2, Eye, Download, Shuffle, Instagram, Image as ImageIcon, Calendar, Plus } from 'lucide-react';
+import { Plus, Camera, BookmarkIcon, Share2, Loader2, Eye, Download, Shuffle, Instagram, Image as ImageIcon, Calendar } from 'lucide-react';
 import ImageLoader from '../components/ImageLoader';
 import MockupPreviewModal from '../components/mockup/MockupPreviewModal';
 import SchedulePostDialog from '../components/scheduling/SchedulePostDialog';
@@ -11,6 +11,8 @@ import { downloadImage } from '../utils/download';
 import clsx from 'clsx';
 import toast from 'react-hot-toast';
 import type { UserProfile, PlatformAccount } from '../types/user';
+
+const ITEMS_PER_PAGE = 25; // Nombre d'éléments par page
 
 export default function Dashboard() {
   const { user, generations } = useStore();
@@ -25,6 +27,7 @@ export default function Dashboard() {
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'instagram' | 'pinterest'>('all');
   const [showScheduleDialog, setShowScheduleDialog] = useState(false);
   const [randomCount, setRandomCount] = useState<number>(1);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const isAdmin = user?.uid === 'Juvh6BgsXhYsi3loKegWfzRIphG2';
 
@@ -42,6 +45,17 @@ export default function Dashboard() {
   const filteredMockups = allMockups.filter(mockup => 
     selectedCategory === 'all' ? true : mockup.platform === selectedCategory
   );
+
+  // Pagination
+  const totalPages = Math.ceil(filteredMockups.length / ITEMS_PER_PAGE);
+  const indexOfLastMockup = currentPage * ITEMS_PER_PAGE;
+  const indexOfFirstMockup = indexOfLastMockup - ITEMS_PER_PAGE;
+  const currentMockups = filteredMockups.slice(indexOfFirstMockup, indexOfLastMockup);
+
+  // Reset to page 1 when category changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory]);
 
   useEffect(() => {
     if (!user) {
@@ -133,12 +147,10 @@ export default function Dashboard() {
         .flatMap(gen => gen.mockups)
         .filter(mockup => selectedMockups.includes(mockup.id));
 
-      // Transformer les données pour le webhook
       const platformsData = await Promise.all(selectedPlatformAccounts.map(async accountId => {
         const account = userProfile?.platformAccounts?.find(a => a.id === accountId);
         const data = platformData[accountId];
 
-        // Si c'est un compte Pinterest, ajouter les tokens
         let authData = {};
         if (account?.platform === 'pinterest' && userProfile?.pinterestAuth?.tokens) {
           const tokens = JSON.parse(atob(userProfile.pinterestAuth.tokens));
@@ -221,7 +233,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Categories */}
         <div className="flex space-x-4 mb-6 overflow-x-auto pb-2">
           {[
             { id: 'all', name: 'Tous', icon: ImageIcon },
@@ -266,71 +277,90 @@ export default function Dashboard() {
             Aucune génération pour le moment
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {filteredMockups.map((mockup, index) => (
-              <div
-                key={`${mockup.id}-${index}`}
-                onClick={() => setSelectedMockups(prev => 
-                  prev.includes(mockup.id)
-                    ? prev.filter(id => id !== mockup.id)
-                    : [...prev, mockup.id]
-                )}
-                className={clsx(
-                  "group relative aspect-square bg-gray-50 rounded-lg overflow-hidden cursor-pointer transition-all duration-300",
-                  "hover:scale-105 hover:shadow-lg",
-                  selectedMockups.includes(mockup.id) && "ring-4 ring-indigo-600 scale-95 hover:scale-100"
-                )}
-              >
-                {/* Platform Badge */}
-                {mockup.platform && (
+          <>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              {currentMockups.map((mockup, index) => (
+                <div
+                  key={`${mockup.id}-${index}`}
+                  onClick={() => setSelectedMockups(prev => 
+                    prev.includes(mockup.id)
+                      ? prev.filter(id => id !== mockup.id)
+                      : [...prev, mockup.id]
+                  )}
+                  className={clsx(
+                    "group relative aspect-square bg-gray-50 rounded-lg overflow-hidden cursor-pointer transition-all duration-300",
+                    "hover:scale-105 hover:shadow-lg",
+                    selectedMockups.includes(mockup.id) && "ring-4 ring-indigo-600 scale-95 hover:scale-100"
+                  )}
+                >
+                  {mockup.platform && (
+                    <div className={clsx(
+                      'absolute top-2 right-2 z-10 px-2 py-1 rounded-lg text-xs font-medium text-white',
+                      mockup.platform === 'instagram' ? 'bg-pink-500' : 'bg-red-500'
+                    )}>
+                      {mockup.platform === 'instagram' ? 'Instagram' : 'Pinterest'}
+                    </div>
+                  )}
+
+                  <ImageLoader
+                    src={mockup.url}
+                    alt={mockup.name}
+                    className="absolute inset-0 object-cover w-full h-full"
+                  />
+                  
+                  {selectedMockups.includes(mockup.id) && (
+                    <div className="absolute inset-0 bg-indigo-600/20 backdrop-blur-sm" />
+                  )}
+
                   <div className={clsx(
-                    'absolute top-2 right-2 z-10 px-2 py-1 rounded-lg text-xs font-medium text-white',
-                    mockup.platform === 'instagram' ? 'bg-pink-500' : 'bg-red-500'
+                    "absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100",
+                    "flex items-center justify-center gap-4 transition-all duration-300"
                   )}>
-                    {mockup.platform === 'instagram' ? 'Instagram' : 'Pinterest'}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setPreviewMockup(mockup);
+                      }}
+                      className="p-2 bg-white text-gray-600 rounded-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 hover:bg-indigo-50 hover:text-indigo-600"
+                    >
+                      <Eye className="h-5 w-5" />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDownload(mockup);
+                      }}
+                      className="p-2 bg-white text-gray-600 rounded-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 hover:bg-indigo-50 hover:text-indigo-600"
+                    >
+                      <Download className="h-5 w-5" />
+                    </button>
                   </div>
-                )}
-
-                <ImageLoader
-                  src={mockup.url}
-                  alt={mockup.name}
-                  className="absolute inset-0 object-cover w-full h-full"
-                />
-                
-                {selectedMockups.includes(mockup.id) && (
-                  <div className="absolute inset-0 bg-indigo-600/20 backdrop-blur-sm" />
-                )}
-
-                <div className={clsx(
-                  "absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100",
-                  "flex items-center justify-center gap-4 transition-all duration-300"
-                )}>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setPreviewMockup(mockup);
-                    }}
-                    className="p-2 bg-white text-gray-600 rounded-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 hover:bg-indigo-50 hover:text-indigo-600"
-                  >
-                    <Eye className="h-5 w-5" />
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDownload(mockup);
-                    }}
-                    className="p-2 bg-white text-gray-600 rounded-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 hover:bg-indigo-50 hover:text-indigo-600"
-                  >
-                    <Download className="h-5 w-5" />
-                  </button>
                 </div>
+              ))}
+            </div>
+
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 mt-8">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={clsx(
+                      'w-10 h-10 rounded-lg transition-all duration-200',
+                      currentPage === page
+                        ? 'gradient-bg text-white'
+                        : 'text-gray-600 hover:bg-gray-100'
+                    )}
+                  >
+                    {page}
+                  </button>
+                ))}
               </div>
-            ))}
-          </div>
+            )}
+          </>
         )}
       </div>
 
-      {/* Section Publication - Visible uniquement pour l'admin */}
       {isAdmin && selectedMockups.length > 0 && (
         <div className="bg-white rounded-xl shadow-sm p-6 space-y-6">
           <div className="space-y-4">
@@ -353,7 +383,7 @@ export default function Dashboard() {
                     {React.createElement(
                       account.platform === 'instagram' ? Instagram :
                       account.platform === 'pinterest' ? BookmarkIcon :
-                      ShoppingBag,
+                      Plus,
                       { className: "h-5 w-5 text-gray-500" }
                     )}
                     <div className="text-left">
@@ -367,7 +397,6 @@ export default function Dashboard() {
               ))}
             </div>
 
-            {/* Champs spécifiques aux plateformes */}
             {selectedPlatformAccounts.length > 0 && (
               <div className="space-y-4 mt-4">
                 {selectedPlatformAccounts.map(accountId => {
