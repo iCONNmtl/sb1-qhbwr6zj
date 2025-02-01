@@ -79,7 +79,7 @@ export default function FeaturesSlider() {
                       "group flex items-center transition-all duration-300",
                       "min-w-[280px] lg:min-w-0 p-3 rounded-xl",
                       activeIndex === index 
-                        ? "bg-gradient-to-r from-indigo-300 via-indigo-500 to-indigo-700 shadow-lg" 
+                        ? "bg-gradient-to-r from-indigo-400 via-indigo-500 to-indigo-600 shadow-lg" 
                         : "hover:bg-white/50"
                     )}
                   >
