@@ -72,43 +72,6 @@ export default function Home() {
         Pas d'engagement
       </span>
     </div>
-
-    {/* Avatars et texte de confiance */}
-    <div className="flex items-center rounded-full border border-gray-200 bg-white p-1 shadow shadow-black/5">
-      <div className="flex -space-x-1.5">
-        <img
-          className="rounded-full ring-1 ring-white"
-          src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=64&h=64&fit=crop&crop=faces"
-          width={20}
-          height={20}
-          alt="Avatar 01"
-        />
-        <img
-          className="rounded-full ring-1 ring-white"
-          src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=64&h=64&fit=crop&crop=faces"
-          width={20}
-          height={20}
-          alt="Avatar 02"
-        />
-        <img
-          className="rounded-full ring-1 ring-white"
-          src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=64&h=64&fit=crop&crop=faces"
-          width={20}
-          height={20}
-          alt="Avatar 03"
-        />
-        <img
-          className="rounded-full ring-1 ring-white"
-          src="https://images.unsplash.com/photo-1488161628813-04466f872be2?w=64&h=64&fit=crop&crop=faces"
-          width={20}
-          height={20}
-          alt="Avatar 04"
-        />
-      </div>
-      <p className="px-2 text-xs text-gray-500">
-        Utilisé par <strong className="font-medium text-gray-900">60K+</strong> designers
-      </p>
-    </div>
   </div>
 )}
 

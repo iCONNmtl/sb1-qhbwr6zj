@@ -95,42 +95,41 @@ export default function MockupGenerator() {
     return () => unsubscribe();
   }, [user, selectedCategory]);
 
-  const handleGenerate = () => {
-    if (!user || !userProfile || !designFile) return;
+const handleGenerate = () => {
+  if (!user || !userProfile || !designFile) return;
 
-    // Calculer les mockups personnalisés
-    const customizedMockupsList = isTextCustomizationEnabled ? customizedMockups : [];
+  // Calculer les mockups personnalisés
+  const customizedMockupsList = isTextCustomizationEnabled ? customizedMockups : [];
 
-    // Calculer le coût total en crédits
-    const baseCredits = selectedMockups.length * 5;
-    const customizationCredits = customizedMockupsList.length * 5;
-    const totalCredits = baseCredits + customizationCredits;
+  // Calculer le coût total en crédits
+  const baseCredits = selectedMockups.length * 5;
+  const customizationCredits = customizedMockupsList.length * 5;
+  const totalCredits = baseCredits + customizationCredits;
 
-    // Vérifier les crédits disponibles
-    if ((userProfile.subscription.credits || 0) < totalCredits) {
-      toast.error(`Crédits insuffisants. Il vous faut ${totalCredits} crédits pour cette génération.`);
-      return;
-    }
+  // Vérifier les crédits disponibles
+  if ((userProfile.subscription.credits || 0) < totalCredits) {
+    toast.error(`Crédits insuffisants. Il vous faut ${totalCredits} crédits pour cette génération.`);
+    return;
+  }
 
-    // Afficher une confirmation avec le détail des crédits
-    if (window.confirm(
-      `Cette génération va utiliser ${totalCredits} crédits :\n` +
-      `- ${selectedMockups.length} mockup(s) × 5 crédits = ${baseCredits} crédits\n` +
-      (customizedMockupsList.length > 0 ? 
-        `- ${customizedMockupsList.length} mockup(s) personnalisé(s) × 5 crédits = ${customizationCredits} crédits\n` : '') +
-      `\nVoulez-vous continuer ?`
-    )) {
-      generateMockups(
-        designFile, 
-        selectedMockups, 
-        selectedMockupData, 
-        userProfile, 
-        exportFormat,
-        isTextCustomizationEnabled ? customHtml : undefined,
-        customizedMockupsList
-      );
-    }
+  // Créer l'objet de personnalisation du texte
+  const textCustomization = {
+    enabled: isTextCustomizationEnabled,
+    appliedMockups: customizedMockupsList,
+    html: isTextCustomizationEnabled ? customHtml : ''
   };
+
+  // Lancer la génération directement sans confirmation
+  generateMockups(
+    designFile, 
+    selectedMockups, 
+    selectedMockupData, 
+    userProfile, 
+    exportFormat,
+    textCustomization
+  );
+};
+
 
   const handleCategoryChange = (categoryId: string) => {
     setSelectedCategory(categoryId);
