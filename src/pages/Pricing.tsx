@@ -27,7 +27,17 @@ export default function Pricing() {
   const handlePlanSelection = (planId: string) => {
     if (!user) {
       navigate('/signup');
+      return;
     }
+
+    // Liens de paiement Stripe directs
+    const stripeLinks = {
+      pro: 'https://buy.stripe.com/test_14k7vfbb25j8c929AA',
+      expert: 'https://buy.stripe.com/test_8wMcPz1Ash1Qa0UfYZ'
+    };
+
+    const checkoutUrl = `${stripeLinks[planId as keyof typeof stripeLinks]}?client_reference_id=${user.uid}`;
+    window.open(checkoutUrl, '_blank');
   };
 
   if (plansLoading || profileLoading) {
@@ -139,7 +149,7 @@ export default function Pricing() {
               onClick={() => handlePlanSelection('pro')}
               className="w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:opacity-90 transition mt-8"
             >
-              Commencer
+              {user ? 'Acheter maintenant' : 'Commencer'}
             </button>
           </div>
         </div>
@@ -180,7 +190,7 @@ export default function Pricing() {
               onClick={() => handlePlanSelection('expert')}
               className="w-full py-3 px-4 bg-black text-white rounded-xl hover:bg-black/90 transition mt-8"
             >
-              Commencer
+              {user ? 'Acheter maintenant' : 'Commencer'}
             </button>
           </div>
         </div>
