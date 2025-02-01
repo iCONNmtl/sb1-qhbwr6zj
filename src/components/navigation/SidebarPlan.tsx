@@ -20,7 +20,7 @@ export default function SidebarPlan({ isCollapsed }: SidebarPlanProps) {
         className="px-2 py-1.5 text-center" 
         title={`${subscription.credits} crédits - Plan ${subscription.plan}`}
       >
-        <span className="text-lg font-bold text-indigo-600">
+        <span className="text-lg font-bold text-purple-600">
           {subscription.credits}
         </span>
       </div>
@@ -30,7 +30,7 @@ export default function SidebarPlan({ isCollapsed }: SidebarPlanProps) {
   return (
     <div className="px-4 py-1.5">
       <div className="flex items-baseline justify-center space-x-1.5">
-        <span className="text-xl font-bold text-indigo-600">{subscription.credits}</span>
+        <span className="text-xl font-bold text-purple-600">{subscription.credits}</span>
         <span className="text-sm text-gray-500">crédits</span>
       </div>
       <div className="flex items-center justify-center text-xs text-gray-400 font-medium mt-0.5">

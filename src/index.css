@@ -11,7 +11,7 @@
 
 @layer components {
   .gradient-bg {
-    background: linear-gradient(90deg, #613DC1, #4E148C);
+    background: linear-gradient(90deg, #9333ea, #4D309A);
   }
   
   .glass-card {
