@@ -24,13 +24,13 @@ export default function ROISection() {
             <div>
               <div className="flex items-center gap-2 text-indigo-600 mb-6">
                 <TrendingUp className="h-5 w-5" />
-                <span className="text-sm font-medium uppercase tracking-wider">Retour sur investissement</span>
+                <span className="text-sm font-medium uppercase tracking-wider">Augmentation des ventes</span>
               </div>
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                Faites exploser vos ventes avec des mockups professionnels
+                Gagnez plus et dépensez moins
               </h2>
               <p className="text-xl text-gray-600 leading-relaxed">
-                Transformez vos designs en présentations percutantes et augmentez significativement vos taux de conversion.
+                Augmentez significativement votre taux de conversion tout en réduisant vos coûts.
               </p>
             </div>
 
@@ -42,10 +42,10 @@ export default function ROISection() {
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      Augmentez vos taux de conversion
+                      Augmentez vos revenus
                     </h3>
                     <p className="text-gray-600">
-                      Des mockups professionnels peuvent augmenter vos taux de conversion jusqu'à 40%
+                      Des visuels professionnels augmentent votre taux de conversion et votre panier moyen.
                     </p>
                   </div>
                 </div>
@@ -58,10 +58,10 @@ export default function ROISection() {
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      Maximisez votre ROI
+                      Réduisez vos dépenses
                     </h3>
                     <p className="text-gray-600">
-                      Investissez quelques euros par mockup et générez des milliers d'euros de ventes supplémentaires
+                      L'outils tout en un, qui vous fait économiser plusieurs centaines de dollars chaque mois.
                     </p>
                   </div>
                 </div>
@@ -74,10 +74,10 @@ export default function ROISection() {
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      Économisez du temps et de l'argent
+                      Économisez votre temps
                     </h3>
                     <p className="text-gray-600">
-                      Réduisez vos coûts de production de 90% comparé à un photographe professionnel
+                      Gagnez des heures chaques semaines, pour vous développer beaucoup plus rapidement.
                     </p>
                   </div>
                 </div>

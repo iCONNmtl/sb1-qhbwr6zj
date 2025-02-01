@@ -3,39 +3,39 @@ import React from 'react';
 const TESTIMONIALS = [
   {
     name: 'Alice Johnson',
-    username: '@alicejohnson',
+    username: 'E-commerce Etsy',
     avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=128&h=128&q=80',
-    content: "I'm blown away by the versatility of the components in this library. They make UI development a breeze!"
+    content: "Franchement, super pratique ! En deux clics, je fais mes mockups et je peux les adapter direct pour Pinterest. Un vrai gain de temps !"
   },
   {
     name: 'David Smith',
-    username: '@davidsmith',
+    username: 'Community Manager',
     avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=128&h=128&q=80',
-    content: 'Using this component library has significantly speed up our development process. The quality and ease of integration are remarkable!'
+    content: 'Je trouve toujours un mockup qui correspond à ce que je veux. C’est rapide, facile à utiliser et les résultats sont vraiment pros.'
   },
   {
     name: 'Emma Brown',
-    username: '@emmabrown',
+    username: 'Freelance',
     avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&auto=format&fit=crop&w=128&h=128&q=80',
-    content: "The components in this library are not just well-designed but also highly customizable. It's a developer's dream!"
+    content: 'Le fait de pouvoir personnaliser avec du texte ou des images, c’est top. Et ça prend littéralement quelques secondes !'
   },
   {
     name: 'James Wilson',
-    username: '@jameswilson',
+    username: 'Designer Graphique',
     avatar: 'https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?ixlib=rb-1.2.1&auto=format&fit=crop&w=128&h=128&q=80',
-    content: 'I love how intuitive and well-documented this component library is. It has significantly improved our UI consistency across projects.'
+    content: 'Générer plusieurs mockups d’un coup, ça change tout. Plus besoin de galérer, tout est prêt hyper vite.'
   },
   {
     name: 'Sophia Lee',
-    username: '@sophialee',
+    username: 'Freelance',
     avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&auto=format&fit=crop&w=128&h=128&q=80',
-    content: "Implementing this component library was a game-changer for our team. It has elevated our product's UI to a whole new level!"
+    content: 'J’adore qu’il y ait des nouveautés régulièrement, on sent que l’outil s’adapte à ce qu’on attend. Hyper cool !'
   },
   {
     name: 'Michael Davis',
-    username: '@michaeldavis',
+    username: 'E-commerce',
     avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=crop&w=128&h=128&q=80',
-    content: 'Using this library has been a game-changer for our product development.'
+    content: 'La qualité est dingue, et tout est optimisé pour les réseaux. Je ne peux plus m’en passer pour mes fiches produits !'
   }
 ];
 
@@ -45,10 +45,10 @@ export default function Testimonials() {
       <div className="max-w-7xl mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            Read what people are saying
+          Découvrez ce que les gens en disent
           </h2>
           <p className="text-gray-600">
-            Dummy feedback from virtual customers using our component library.
+          Des avis authentiques de nos utilisateurs sur leur expérience avec Pixmock.
           </p>
         </div>
 

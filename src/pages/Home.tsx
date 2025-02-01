@@ -20,14 +20,14 @@ export default function Home() {
         <div className="relative z-10 max-w-6xl mx-auto space-y-6 md:space-y-8 text-center px-4 md:px-8">
           <div className="space-y-4">
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-gray-900 leading-tight">
-              La plateforme de{' '}
+            Créez des{' '}
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600">
-                génération de mockups
+              mockups ultra-réalistes
               </span>{' '}
-              qui livre des résultats professionnels
+              en quelques secondes !
             </h1>
             <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto">
-              Des mockups de qualité professionnelle en quelques secondes. Transformez vos designs en présentations percutantes.
+              Des mockups de qualité professionnelle pour augmenter la valeur de vos affiches et faire exploser vos ventes.
             </p>
           </div>
 

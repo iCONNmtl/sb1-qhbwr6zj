@@ -77,15 +77,11 @@ export default function FAQ() {
   return (
     <section className="max-w-3xl mx-auto">
       <div className="text-center mb-12">
-        <div className="flex items-center justify-center gap-2 mb-4">
-          <HelpCircle className="h-6 w-6 text-indigo-600" />
-          <span className="text-sm font-medium uppercase tracking-wider text-indigo-600">FAQ</span>
-        </div>
         <h2 className="text-3xl font-bold text-gray-900 mb-4">
           Questions fréquentes
         </h2>
         <p className="text-gray-600">
-          Tout ce que vous devez savoir sur MockupPro
+          Tout ce que vous devez savoir sur Pixmock
         </p>
       </div>
 

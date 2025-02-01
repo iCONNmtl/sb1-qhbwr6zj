@@ -104,7 +104,7 @@ export default function Pricing() {
             {/* Price */}
             <div className="flex items-baseline gap-1 mb-2">
               <span className="text-4xl font-bold">0</span>
-              <span className="text-xl">€</span>
+              <span className="text-xl">$</span>
             </div>
             <div className="space-y-1">
               <p className="text-sm text-gray-600">Sans engagement</p>
@@ -137,7 +137,7 @@ export default function Pricing() {
             {/* Price */}
             <div className="flex items-baseline gap-1 mb-2">
               <span className="text-4xl font-bold">19</span>
-              <span className="text-xl">€</span>
+              <span className="text-xl">$</span>
             </div>
             <div className="space-y-1">
               <p className="text-sm text-gray-600">Sans engagement</p>
@@ -178,7 +178,7 @@ export default function Pricing() {
             {/* Price */}
             <div className="flex items-baseline gap-1 mb-2">
               <span className="text-4xl font-bold">49</span>
-              <span className="text-xl">€</span>
+              <span className="text-xl">$</span>
             </div>
             <div className="space-y-1">
               <p className="text-sm text-gray-600">Sans engagement</p>
