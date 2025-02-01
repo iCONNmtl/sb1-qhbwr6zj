@@ -10,11 +10,12 @@ import SchedulePostDialog from '../components/scheduling/SchedulePostDialog';
 import { downloadImage } from '../utils/download';
 import clsx from 'clsx';
 import toast from 'react-hot-toast';
-import type { UserProfile } from '../types/user';
+import type { UserProfile, PlatformAccount } from '../types/user';
 
 export default function Dashboard() {
   const { user, generations } = useStore();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [platformAccounts, setPlatformAccounts] = useState<PlatformAccount[]>([]);
   const [selectedPlatformAccounts, setSelectedPlatformAccounts] = useState<string[]>([]);
   const [platformData, setPlatformData] = useState<Record<string, any>>({});
   const [isPublishing, setIsPublishing] = useState(false);
@@ -23,6 +24,8 @@ export default function Dashboard() {
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'instagram' | 'pinterest'>('all');
   const [showScheduleDialog, setShowScheduleDialog] = useState(false);
   const [randomCount, setRandomCount] = useState<number>(1);
+
+  const isAdmin = user?.uid === 'Juvh6BgsXhYsi3loKegWfzRIphG2';
 
   // Get all mockups from all generations
   const allMockups = generations.flatMap(generation => generation.mockups);
@@ -48,6 +51,7 @@ export default function Dashboard() {
         if (doc.exists()) {
           const data = doc.data() as UserProfile;
           setUserProfile(data);
+          setPlatformAccounts(data.platformAccounts || []);
         }
       }
     );
@@ -311,7 +315,8 @@ export default function Dashboard() {
         )}
       </div>
 
-      {selectedMockups.length > 0 && (
+      {/* Section Publication - Visible uniquement pour l'admin */}
+      {isAdmin && selectedMockups.length > 0 && (
         <div className="bg-white rounded-xl shadow-sm p-6 space-y-6">
           <div className="space-y-4">
             <h3 className="font-medium text-gray-900">

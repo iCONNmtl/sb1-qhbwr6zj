@@ -11,6 +11,7 @@ interface NavSection {
     icon: any;
     label: string;
     primary?: boolean;
+    adminOnly?: boolean;
   }[];
 }
 
@@ -20,6 +21,7 @@ interface SidebarNavProps {
 
 export default function SidebarNav({ isCollapsed }: SidebarNavProps) {
   const { user } = useStore();
+  const isAdmin = user?.uid === 'Juvh6BgsXhYsi3loKegWfzRIphG2';
 
   const navSections: NavSection[] = [
     {
@@ -34,12 +36,13 @@ export default function SidebarNav({ isCollapsed }: SidebarNavProps) {
         {
           to: '/dashboard',
           icon: LayoutDashboard,
-          label: 'Vos mockups'
+          label: 'Tableau de bord'
         },
         {
           to: '/scheduled',
           icon: Calendar,
-          label: 'Publications'
+          label: 'Publications',
+          adminOnly: true
         }
       ]
     },
@@ -61,7 +64,7 @@ export default function SidebarNav({ isCollapsed }: SidebarNavProps) {
   ];
 
   // Add admin section if user is admin
-  if (user?.uid === 'Juvh6BgsXhYsi3loKegWfzRIphG2') {
+  if (isAdmin) {
     navSections.push({
       title: 'Administration',
       items: [
@@ -84,19 +87,21 @@ export default function SidebarNav({ isCollapsed }: SidebarNavProps) {
             </h3>
           )}
           <div className="space-y-1 px-3">
-            {section.items.map((item) => (
-              <SidebarLink
-                key={item.to}
-                to={item.to}
-                icon={item.icon}
-                label={item.label}
-                isCollapsed={isCollapsed}
-                className={clsx(
-                  item.primary && 'gradient-bg text-white hover:opacity-90',
-                  isCollapsed && 'justify-center'
-                )}
-              />
-            ))}
+            {section.items
+              .filter(item => !item.adminOnly || isAdmin)
+              .map((item) => (
+                <SidebarLink
+                  key={item.to}
+                  to={item.to}
+                  icon={item.icon}
+                  label={item.label}
+                  isCollapsed={isCollapsed}
+                  className={clsx(
+                    item.primary && 'gradient-bg text-white hover:opacity-90',
+                    isCollapsed && 'justify-center'
+                  )}
+                />
+              ))}
           </div>
         </div>
       ))}

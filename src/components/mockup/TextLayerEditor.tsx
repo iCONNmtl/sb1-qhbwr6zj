@@ -1,8 +1,8 @@
 import React from 'react';
-import { Trash2, Type, Palette, Square, Bold, Italic, AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
+import { Trash2, Type, Palette, Square, Bold, Italic, AlignLeft, AlignCenter, AlignRight, ChevronDown } from 'lucide-react';
 import FontSelector from './FontSelector';
 import FontSizeControl from './FontSizeControl';
-import ColorPicker from './ColorPicker';
+import { ColorPicker } from '../ui/color-picker';
 import StyleSliderControl from './StyleSliderControl';
 import clsx from 'clsx';
 import type { TextStyle } from '../../types/mockup';
@@ -142,8 +142,19 @@ export default function TextLayerEditor({ layer, onUpdate, onDelete }: TextLayer
           </label>
           <ColorPicker
             value={layer.style.color}
-            onChange={(color) => updateStyle({ color })}
-          />
+            onValueChange={(color) => updateStyle({ color: color.hex })}
+          >
+            <button className="w-full flex items-center justify-between px-4 py-2 bg-white border border-gray-300 rounded-lg hover:border-indigo-500 transition-colors">
+              <div className="flex items-center">
+                <div 
+                  className="w-4 h-4 rounded-full border border-gray-200 mr-2" 
+                  style={{ backgroundColor: layer.style.color }}
+                />
+                <span>{layer.style.color}</span>
+              </div>
+              <ChevronDown className="h-4 w-4 opacity-50" />
+            </button>
+          </ColorPicker>
         </div>
 
         <div>
@@ -153,9 +164,25 @@ export default function TextLayerEditor({ layer, onUpdate, onDelete }: TextLayer
           </label>
           <ColorPicker
             value={layer.style.backgroundColor || 'transparent'}
-            onChange={(color) => updateStyle({ backgroundColor: color })}
-            allowTransparent
-          />
+            onValueChange={(color) => updateStyle({ backgroundColor: color.hex })}
+            hideContrastRatio
+          >
+            <button className="w-full flex items-center justify-between px-4 py-2 bg-white border border-gray-300 rounded-lg hover:border-indigo-500 transition-colors">
+              <div className="flex items-center">
+                <div 
+                  className="w-4 h-4 rounded-full border border-gray-200 mr-2" 
+                  style={{ 
+                    backgroundColor: layer.style.backgroundColor || 'transparent',
+                    backgroundImage: layer.style.backgroundColor ? 'none' : 'linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%)',
+                    backgroundSize: '8px 8px',
+                    backgroundPosition: '0 0, 0 4px, 4px -4px, -4px 0px'
+                  }}
+                />
+                <span>{layer.style.backgroundColor || 'Transparent'}</span>
+              </div>
+              <ChevronDown className="h-4 w-4 opacity-50" />
+            </button>
+          </ColorPicker>
         </div>
       </div>
 

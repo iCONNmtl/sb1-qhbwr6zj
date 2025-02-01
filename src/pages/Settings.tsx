@@ -18,7 +18,6 @@ const PLATFORMS = [
 ] as const;
 
 const TABS = [
-  { id: 'platforms', label: 'Plateformes' },
   { id: 'branding', label: 'Branding' }
 ] as const;
 
@@ -31,10 +30,15 @@ export default function Settings() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [platformAccounts, setPlatformAccounts] = useState<PlatformAccount[]>([]);
   const [isSaving, setIsSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<Tab>('platforms');
+  const [activeTab, setActiveTab] = useState<Tab>('branding');
   const [editingAccount, setEditingAccount] = useState<PlatformAccount | null>(null);
   const [newAccount, setNewAccount] = useState<Partial<PlatformAccount>>({});
   const [showNewAccountForm, setShowNewAccountForm] = useState(false);
+
+  const isAdmin = user?.uid === 'Juvh6BgsXhYsi3loKegWfzRIphG2';
+
+  // Si l'utilisateur est admin, ajouter l'onglet plateformes
+  const allTabs = isAdmin ? [...TABS, { id: 'platforms' as const, label: 'Plateformes' }] : TABS;
 
   useEffect(() => {
     if (!user) return;
@@ -121,7 +125,7 @@ export default function Settings() {
       {/* Tabs */}
       <div className="border-b border-gray-200">
         <nav className="-mb-px flex space-x-8">
-          {TABS.map((tab) => (
+          {allTabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
@@ -141,7 +145,7 @@ export default function Settings() {
 
       {/* Content */}
       <div className="bg-white rounded-xl shadow-sm p-6 space-y-6">
-        {activeTab === 'platforms' && (
+        {activeTab === 'platforms' && isAdmin && (
           <>
             <div>
               <h2 className="text-lg font-semibold text-gray-900 mb-4">

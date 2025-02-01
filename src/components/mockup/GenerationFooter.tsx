@@ -1,6 +1,11 @@
 import React from 'react';
-import { Loader2, CreditCard } from 'lucide-react';
+import { Loader2, CreditCard, HelpCircle } from 'lucide-react';
 import type { UserProfile } from '../../types/user';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '../ui/popover';
 
 interface GenerationFooterProps {
   userProfile: UserProfile | null;
@@ -29,67 +34,77 @@ export default function GenerationFooter({
   return (
     <section className="bg-white border border-gray-200 rounded-xl p-4 mt-8">
       <div className="flex items-center justify-between gap-8">
-        {/* Crédits disponibles */}
-        <div className="flex items-center gap-2">
-          <div className="p-2 bg-indigo-100 rounded-lg">
-            <CreditCard className="h-5 w-5 text-indigo-600" />
+        {/* Crédits */}
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2">
+            <div className="p-2 bg-indigo-100 rounded-lg">
+              <CreditCard className="h-5 w-5 text-indigo-600" />
+            </div>
+            <div className="flex items-baseline gap-2">
+              <div className="text-xl font-bold text-indigo-600">
+                {userProfile?.subscription.credits || 0}
+              </div>
+              <div className="text-sm text-gray-500">crédits disponibles</div>
+            </div>
           </div>
-          <div>
-            <p className="text-sm text-gray-600">Crédits disponibles</p>
-            <p className="text-xl font-bold text-indigo-600">
-              {userProfile?.subscription.credits || 0}
-            </p>
-          </div>
+
+          {selectedMockups.length > 0 && (
+            <div className="flex items-center gap-2">
+              <div className="text-xl font-bold text-indigo-600">
+                {totalCredits}
+              </div>
+              <div className="text-sm text-gray-500">coût total</div>
+              <Popover>
+                <PopoverTrigger>
+                  <HelpCircle className="h-4 w-4 text-gray-400 hover:text-gray-600 transition-colors" />
+                </PopoverTrigger>
+                <PopoverContent className="w-80 bg-white p-4">
+                  <div className="space-y-2">
+                    <h4 className="font-medium text-gray-900">Détails des crédits</h4>
+                    <div className="space-y-1 text-sm text-gray-600">
+                      <p>• {selectedMockups.length} mockup{selectedMockups.length > 1 ? 's' : ''} × 5 = {baseCredits} crédits</p>
+                      {isTextCustomizationEnabled && customizedMockups.length > 0 && (
+                        <p>• {customizedMockups.length} personnalisation{customizedMockups.length > 1 ? 's' : ''} × 5 = {customizationCredits} crédits</p>
+                      )}
+                      <div className="pt-2 mt-2 border-t border-gray-200">
+                        <p className="font-medium">Total : {totalCredits} crédits</p>
+                      </div>
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
+          )}
         </div>
 
-        {/* Coût et bouton de génération */}
+        {/* Bouton de génération */}
         {selectedMockups.length > 0 && (
-          <div className="flex items-center gap-8">
-            {/* Récapitulatif */}
-            <div className="text-sm text-gray-500">
-              <div>1 mockup × 5 = {baseCredits} crédits</div>
-              {isTextCustomizationEnabled && customizedMockups.length > 0 && (
-                <div>2 personnalisations × 5 = {customizationCredits} crédits</div>
-              )}
-            </div>
-
-            {/* Total et bouton */}
-            <div className="flex items-center gap-8">
-              <div>
-                <p className="text-sm text-gray-600">Total</p>
-                <p className="text-xl font-bold text-indigo-600">
-                  {totalCredits} crédits
-                </p>
-              </div>
-
-              <button
-                onClick={onGenerate}
-                disabled={
-                  isGenerating || 
-                  !designFile || 
-                  selectedMockups.length === 0 || 
-                  (userProfile?.subscription.credits || 0) < totalCredits
-                }
-                className="gradient-bg text-white px-8 py-3 rounded-xl hover:opacity-90 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isGenerating ? (
-                  <span className="flex items-center justify-center">
-                    <Loader2 className="h-5 w-5 animate-spin mr-2" />
-                    Génération en cours...
-                  </span>
-                ) : (
-                  <span className="flex flex-col items-center">
-                    <span className="font-medium">
-                      Générer {selectedMockups.length > 0 ? `${selectedMockups.length} mockup${selectedMockups.length > 1 ? 's' : ''}` : ''}
-                    </span>
-                    <span className="text-xs text-white/80">
-                      La génération prendra quelques secondes
-                    </span>
-                  </span>
-                )}
-              </button>
-            </div>
-          </div>
+          <button
+            onClick={onGenerate}
+            disabled={
+              isGenerating || 
+              !designFile || 
+              selectedMockups.length === 0 || 
+              (userProfile?.subscription.credits || 0) < totalCredits
+            }
+            className="gradient-bg text-white px-8 py-3 rounded-xl hover:opacity-90 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isGenerating ? (
+              <span className="flex items-center justify-center">
+                <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                Génération en cours...
+              </span>
+            ) : (
+              <span className="flex flex-col items-center">
+                <span className="font-medium">
+                  Générer {selectedMockups.length > 0 ? `${selectedMockups.length} mockup${selectedMockups.length > 1 ? 's' : ''}` : ''}
+                </span>
+                <span className="text-xs text-white/80">
+                  La génération prendra quelques secondes
+                </span>
+              </span>
+            )}
+          </button>
         )}
       </div>
     </section>
