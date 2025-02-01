@@ -1,64 +1,136 @@
-import React from 'react';
-import { HelpCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { ChevronDown, HelpCircle } from 'lucide-react';
+import clsx from 'clsx';
 
 const FAQ_ITEMS = [
   {
-    question: "Comment fonctionne Pixmock ?",
-    answer: "Pixmock est une plateforme qui vous permet de générer des mockups professionnels en quelques clics. Uploadez votre design, sélectionnez les mockups souhaités et générez !"
+    question: "Comment fonctionne MockupPro ?",
+    answer: [
+      "MockupPro est une plateforme intuitive qui transforme vos designs en mockups professionnels en quelques clics :",
+      "1. Uploadez votre design au format WebP ou JPEG",
+      "2. Sélectionnez vos mockups préférés dans notre bibliothèque",
+      "3. Personnalisez le texte et les éléments si besoin",
+      "4. Générez vos mockups instantanément en haute qualité"
+    ]
   },
   {
     question: "Quels formats de fichiers sont acceptés ?",
-    answer: "Nous acceptons les fichiers au format WebP et JPEG. Pour une qualité optimale, nous recommandons des images en bonne résolution."
+    answer: [
+      "Nous acceptons deux formats optimisés pour le web :",
+      "• WebP : Format moderne recommandé pour une qualité optimale",
+      "• JPEG : Format universel compatible avec tous les logiciels",
+      "Pour des résultats optimaux, nous recommandons :",
+      "• Résolution minimale : 2000px de large",
+      "• Ratio : Adapté à votre design final",
+      "• Qualité : Export en haute qualité"
+    ]
   },
   {
     question: "Puis-je créer mes propres mockups ?",
-    answer: "Oui ! Les utilisateurs peuvent créer et ajouter leurs propres mockups personnalisés. Il vous suffit d'uploader votre fichier PSD en suivant notre guide de structure."
+    answer: [
+      "Oui ! Les utilisateurs Pro et Expert peuvent créer leurs mockups personnalisés :",
+      "• Upload de fichiers PSD structurés",
+      "• Positionnement intelligent des designs",
+      "• Personnalisation complète des effets",
+      "• Intégration dans votre bibliothèque privée",
+      "Un guide détaillé est fourni pour vous accompagner dans le processus."
+    ]
   },
   {
     question: "Comment fonctionne la bibliothèque de mockups ?",
-    answer: "Notre bibliothèque contient une large sélection de mockups professionnels, organisés par catégories. Vous pouvez marquer vos mockups favoris pour y accéder rapidement et les retrouver facilement."
+    answer: [
+      "Notre bibliothèque est organisée pour une expérience fluide :",
+      "• Catégories intuitives (Devices, Print, Packaging...)",
+      "• Filtres avancés (Format, Style, Orientation)",
+      "• Système de favoris pour un accès rapide",
+      "• Prévisualisation instantanée",
+      "• Mise à jour régulière avec de nouveaux mockups"
+    ]
   },
   {
     question: "Les mockups générés sont-ils de bonne qualité ?",
-    answer: "Absolument ! Tous nos mockups sont optimisés pour un rendu professionnel. Vous pouvez les exporter en haute résolution, parfaits pour vos présentations clients ou vos fiches produits."
+    answer: [
+      "Absolument ! Nos mockups sont optimisés pour un usage professionnel :",
+      "• Résolution 4K pour une qualité maximale",
+      "• Rendu photoréaliste avec ombres et reflets",
+      "• Respect des perspectives et déformations",
+      "• Export en haute définition",
+      "• Parfaits pour les présentations clients et portfolios"
+    ]
   },
   {
     question: "Puis-je utiliser les mockups générés commercialement ?",
-    answer: "Oui, tous les mockups générés peuvent être utilisés dans un cadre commercial. Vous pouvez les utiliser pour vos clients, votre portfolio ou tout autre projet professionnel."
+    answer: [
+      "Oui, tous nos mockups sont libres de droits pour un usage commercial :",
+      "• Utilisation illimitée pour vos clients",
+      "• Intégration dans vos portfolios",
+      "• Présentation sur les réseaux sociaux",
+      "• Marketing et publicité",
+      "• Projets personnels et professionnels"
+    ]
   }
 ];
 
 export default function FAQ() {
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+
   return (
-    <section className="bg-gray-50 rounded-2xl p-12">
+    <section className="max-w-3xl mx-auto">
       <div className="text-center mb-12">
+        <div className="flex items-center justify-center gap-2 mb-4">
+          <HelpCircle className="h-6 w-6 text-indigo-600" />
+          <span className="text-sm font-medium uppercase tracking-wider text-indigo-600">FAQ</span>
+        </div>
         <h2 className="text-3xl font-bold text-gray-900 mb-4">
           Questions fréquentes
         </h2>
-        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          Tout ce que vous devez savoir sur Pixmock
+        <p className="text-gray-600">
+          Tout ce que vous devez savoir sur MockupPro
         </p>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+      <div className="bg-white rounded-2xl shadow-sm divide-y divide-gray-100">
         {FAQ_ITEMS.map((item, index) => (
-          <div 
-            key={index}
-            className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-200"
-          >
-            <div className="flex gap-4">
-              <div className="flex-shrink-0">
-                <div className="p-2 bg-indigo-50 rounded-lg">
-                  <HelpCircle className="h-5 w-5 text-indigo-600" />
-                </div>
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-2">
-                  {item.question}
-                </h3>
-                <p className="text-gray-600">
-                  {item.answer}
-                </p>
+          <div key={index} className="overflow-hidden">
+            <button
+              onClick={() => setOpenIndex(openIndex === index ? null : index)}
+              className="flex items-center justify-between w-full p-6 text-left hover:bg-gray-50 transition-colors"
+            >
+              <span className="font-medium text-gray-900">{item.question}</span>
+              <ChevronDown 
+                className={clsx(
+                  "h-5 w-5 text-gray-500 transition-transform duration-200 flex-shrink-0 ml-4",
+                  openIndex === index ? "rotate-180" : ""
+                )}
+              />
+            </button>
+            
+            <div 
+              className={clsx(
+                "transition-all duration-200 ease-in-out bg-gray-50",
+                openIndex === index 
+                  ? "max-h-[500px] opacity-100" 
+                  : "max-h-0 opacity-0"
+              )}
+            >
+              <div className="p-6 space-y-4">
+                {Array.isArray(item.answer) ? (
+                  item.answer.map((paragraph, i) => (
+                    <p 
+                      key={i} 
+                      className={clsx(
+                        "text-gray-600",
+                        i === 0 ? "font-medium text-gray-700" : "",
+                        paragraph.startsWith('•') ? "pl-4" : "",
+                        paragraph.startsWith('1.') ? "pl-4" : ""
+                      )}
+                    >
+                      {paragraph}
+                    </p>
+                  ))
+                ) : (
+                  <p className="text-gray-600">{item.answer}</p>
+                )}
               </div>
             </div>
           </div>

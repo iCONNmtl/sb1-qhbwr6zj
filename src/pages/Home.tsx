@@ -5,6 +5,7 @@ import { useStore } from '../store/useStore';
 import { BackgroundBeamsWithCollision } from '../components/ui/background-beams-with-collision';
 import TrustedCompanies from '../components/home/TrustedCompanies';
 import Features from '../components/home/Features';
+import ROISection from '../components/home/ROISection';
 import Testimonials from '../components/home/Testimonials';
 import FAQ from '../components/home/FAQ';
 import CTASection from '../components/home/CTASection';
@@ -78,6 +79,9 @@ export default function Home() {
           </div>
         </div>
       </BackgroundBeamsWithCollision>
+
+      {/* ROI Section */}
+      <ROISection />
 
       {/* Features */}
       <Features />
