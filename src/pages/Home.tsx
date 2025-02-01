@@ -76,9 +76,6 @@ export default function Home() {
         </div>
       </BackgroundBeamsWithCollision>
 
-      {/* Trusted Companies */}
-      <TrustedCompanies />
-
       {/* Features */}
       <Features />
 
