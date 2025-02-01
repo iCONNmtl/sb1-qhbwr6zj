@@ -7,8 +7,16 @@ export async function downloadImage(url: string, filename: string): Promise<void
     const response = await fetch(url);
     const blob = await response.blob();
 
+    // Déterminer l'extension en fonction du type MIME
+    let extension = 'jpg'; // Par défaut
+    if (blob.type === 'image/webp') {
+      extension = 'webp';
+    } else if (blob.type === 'image/png') {
+      extension = 'png';
+    }
+
     // Télécharger avec file-saver
-    saveAs(blob, `${filename}.jpg`);
+    saveAs(blob, `${filename}.${extension}`);
     
     toast.success('Image téléchargée avec succès');
   } catch (error) {
