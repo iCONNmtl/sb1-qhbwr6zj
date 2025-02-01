@@ -15,6 +15,7 @@ import type { UserProfile, PlatformAccount } from '../types/user';
 export default function Dashboard() {
   const { user, generations } = useStore();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
   const [platformAccounts, setPlatformAccounts] = useState<PlatformAccount[]>([]);
   const [selectedPlatformAccounts, setSelectedPlatformAccounts] = useState<string[]>([]);
   const [platformData, setPlatformData] = useState<Record<string, any>>({});
@@ -42,34 +43,38 @@ export default function Dashboard() {
     selectedCategory === 'all' ? true : mockup.platform === selectedCategory
   );
 
-// Dans useEffect au début du composant Dashboard
-useEffect(() => {
-  if (!user) return;
-
-  const unsubscribe = onSnapshot(
-    query(
-      collection(db, 'generations'),
-      where('userId', '==', user.uid),
-      orderBy('createdAt', 'desc')
-    ),
-    (snapshot) => {
-      const generationsData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as Generation[];
-      setGenerations(generationsData);
+  useEffect(() => {
+    if (!user) {
+      setLoading(false);
+      return;
     }
-  );
 
-  return () => unsubscribe();
-}, [user]);
+    const unsubscribe = onSnapshot(
+      doc(db, 'users', user.uid),
+      (doc) => {
+        if (doc.exists()) {
+          const data = doc.data() as UserProfile;
+          setUserProfile(data);
+          setPlatformAccounts(data.platformAccounts || []);
+        }
+        setLoading(false);
+      },
+      (error) => {
+        console.error('Error fetching user profile:', error);
+        toast.error('Erreur lors du chargement du profil');
+        setLoading(false);
+      }
+    );
 
+    return () => unsubscribe();
+  }, [user]);
 
   const handleDownload = async (mockup: { name: string; url: string }) => {
     try {
       await downloadImage(mockup.url, mockup.name);
     } catch (error) {
       console.error('Error downloading image:', error);
+      toast.error('Erreur lors du téléchargement');
     }
   };
 
@@ -252,15 +257,19 @@ useEffect(() => {
           })}
         </div>
 
-        {filteredMockups.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto text-gray-400" />
+          </div>
+        ) : filteredMockups.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
             Aucune génération pour le moment
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {filteredMockups.map((mockup) => (
+            {filteredMockups.map((mockup, index) => (
               <div
-                key={mockup.id}
+                key={`${mockup.id}-${index}`}
                 onClick={() => setSelectedMockups(prev => 
                   prev.includes(mockup.id)
                     ? prev.filter(id => id !== mockup.id)
