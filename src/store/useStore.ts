@@ -5,6 +5,7 @@ import type { GenerationPlatform } from '../types/mockup';
 
 interface Generation {
   id: string;
+  userId: string; // Ajout du userId
   designName: string;
   mockups: {
     id: string;
@@ -31,7 +32,13 @@ export const useStore = create<Store>()(
   persist(
     (set) => ({
       user: null,
-      setUser: (user) => set({ user }),
+      setUser: (user) => {
+        set({ user });
+        // Réinitialiser les générations quand l'utilisateur change
+        if (!user) {
+          set({ generations: [] });
+        }
+      },
       credits: 5,
       setCredits: (credits) => set({ credits }),
       generations: [],
@@ -45,7 +52,7 @@ export const useStore = create<Store>()(
     {
       name: 'mockup-pro-storage',
       partialize: (state) => ({
-        generations: state.generations,
+        generations: state.generations.filter(gen => gen.userId === state.user?.uid), // Filtrer par userId
         credits: state.credits,
         isSidebarCollapsed: state.isSidebarCollapsed
       }),

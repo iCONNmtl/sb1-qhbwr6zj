@@ -42,22 +42,28 @@ export default function Dashboard() {
     selectedCategory === 'all' ? true : mockup.platform === selectedCategory
   );
 
-  useEffect(() => {
-    if (!user) return;
+// Dans useEffect au début du composant Dashboard
+useEffect(() => {
+  if (!user) return;
 
-    const unsubscribe = onSnapshot(
-      doc(db, 'users', user.uid),
-      (doc) => {
-        if (doc.exists()) {
-          const data = doc.data() as UserProfile;
-          setUserProfile(data);
-          setPlatformAccounts(data.platformAccounts || []);
-        }
-      }
-    );
+  const unsubscribe = onSnapshot(
+    query(
+      collection(db, 'generations'),
+      where('userId', '==', user.uid),
+      orderBy('createdAt', 'desc')
+    ),
+    (snapshot) => {
+      const generationsData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as Generation[];
+      setGenerations(generationsData);
+    }
+  );
 
-    return () => unsubscribe();
-  }, [user]);
+  return () => unsubscribe();
+}, [user]);
+
 
   const handleDownload = async (mockup: { name: string; url: string }) => {
     try {
