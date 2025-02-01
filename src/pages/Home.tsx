@@ -20,7 +20,7 @@ export default function Home() {
           <div className="space-y-4">
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-gray-900 leading-tight">
               La plateforme de{' '}
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 via-indigo-100 to-indigo-800">
                 génération de mockups
               </span>{' '}
               qui livre des résultats professionnels
