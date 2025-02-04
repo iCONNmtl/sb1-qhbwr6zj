@@ -24,7 +24,7 @@ export default function ROISection() {
             <div>
               <div className="flex items-center gap-2 text-indigo-600 mb-6">
                 <TrendingUp className="h-5 w-5" />
-                <span className="text-sm font-medium uppercase tracking-wider">Boost des ventes</span>
+                <span className="text-sm font-medium uppercase tracking-wider">Boostez vos ventes</span>
               </div>
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
                 Gagnez plus et dépensez moins

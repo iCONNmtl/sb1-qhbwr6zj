@@ -14,7 +14,7 @@ export default function Home() {
   const { user } = useStore();
 
   return (
-    <div className="pt-12 md:pt-20">
+    <div className="pt-12">
       {/* Hero Section avec Background Beams */}
       <BackgroundBeamsWithCollision className="mb-20">
         <div className="relative z-10 max-w-6xl mx-auto space-y-6 md:space-y-8 text-center px-4 md:px-8">
@@ -22,12 +22,12 @@ export default function Home() {
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-gray-900 leading-tight">
             Créez des{' '}
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600">
-              mockups ultra-réalistes
+              visuels ultra-réalistes
               </span>{' '}
               en quelques secondes !
             </h1>
             <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto">
-              Des mockups de qualité professionnelle pour augmenter la valeur de vos affiches et faire exploser vos ventes.
+              L'outil indispensable pour augmenter la valeur de vos affiches et faire exploser vos ventes.
             </p>
           </div>
 
