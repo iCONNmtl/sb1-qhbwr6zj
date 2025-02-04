@@ -16,7 +16,7 @@ export default function Home() {
   return (
     <div className="pt-12">
       {/* Hero Section avec Background Beams */}
-      <BackgroundBeamsWithCollision className="mb-20">
+      <BackgroundBeamsWithCollision className="">
         <div className="relative z-10 max-w-6xl mx-auto space-y-6 md:space-y-8 text-center px-4 md:px-8">
           <div className="space-y-4">
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-gray-900 leading-tight">
