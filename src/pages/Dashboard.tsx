@@ -3,21 +3,28 @@ import { useStore } from '../store/useStore';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { Link } from 'react-router-dom';
-import { Plus, Camera, BookmarkIcon, Share2, Loader2, Eye, Download, Shuffle, Instagram, Image as ImageIcon, Calendar } from 'lucide-react';
-import ImageLoader from '../components/ImageLoader';
-import MockupPreviewModal from '../components/mockup/MockupPreviewModal';
-import SchedulePostDialog from '../components/scheduling/SchedulePostDialog';
+import { Plus, Shuffle, Image as ImageIcon, Instagram, BookmarkIcon, Eye, Download, Share2, Calendar, Loader2 } from 'lucide-react';
+import { useGenerations } from '../hooks/useGenerations';
 import { downloadImage } from '../utils/download';
-import clsx from 'clsx';
 import toast from 'react-hot-toast';
+import clsx from 'clsx';
+
+// Components
+import MockupGrid from '../components/mockup/MockupGrid';
+import MockupPagination from '../components/mockup/MockupPagination';
+import MockupPreviewModal from '../components/mockup/MockupPreviewModal';
+import GenerationProgress from '../components/generation/GenerationProgress';
+import GenerationFooter from '../components/mockup/GenerationFooter';
+import SchedulePostDialog from '../components/scheduling/SchedulePostDialog';
+
+// Types
 import type { UserProfile, PlatformAccount } from '../types/user';
 
-const ITEMS_PER_PAGE = 25; // Nombre d'éléments par page
+const ITEMS_PER_PAGE = 20; // Nombre d'éléments par page
 
 export default function Dashboard() {
-  const { user, generations } = useStore();
+  const { user } = useStore();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(true);
   const [platformAccounts, setPlatformAccounts] = useState<PlatformAccount[]>([]);
   const [selectedPlatformAccounts, setSelectedPlatformAccounts] = useState<string[]>([]);
   const [platformData, setPlatformData] = useState<Record<string, any>>({});
@@ -28,6 +35,7 @@ export default function Dashboard() {
   const [showScheduleDialog, setShowScheduleDialog] = useState(false);
   const [randomCount, setRandomCount] = useState<number>(1);
   const [currentPage, setCurrentPage] = useState(1);
+  const { generations, loading } = useGenerations();
 
   const isAdmin = user?.uid === 'Juvh6BgsXhYsi3loKegWfzRIphG2';
 
@@ -58,25 +66,20 @@ export default function Dashboard() {
   }, [selectedCategory]);
 
   useEffect(() => {
-    if (!user) {
-      setLoading(false);
-      return;
-    }
+    if (!user) return;
 
     const unsubscribe = onSnapshot(
       doc(db, 'users', user.uid),
       (doc) => {
         if (doc.exists()) {
-          const data = doc.data() as UserProfile;
-          setUserProfile(data);
-          setPlatformAccounts(data.platformAccounts || []);
+          const userData = doc.data() as UserProfile;
+          setUserProfile(userData);
+          setPlatformAccounts(userData.platformAccounts || []);
         }
-        setLoading(false);
       },
       (error) => {
         console.error('Error fetching user profile:', error);
         toast.error('Erreur lors du chargement du profil');
-        setLoading(false);
       }
     );
 
@@ -302,7 +305,7 @@ export default function Dashboard() {
                     </div>
                   )}
 
-                  <ImageLoader
+                  <img
                     src={mockup.url}
                     alt={mockup.name}
                     className="absolute inset-0 object-cover w-full h-full"
