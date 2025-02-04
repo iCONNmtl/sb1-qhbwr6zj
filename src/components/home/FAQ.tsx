@@ -4,9 +4,9 @@ import clsx from 'clsx';
 
 const FAQ_ITEMS = [
   {
-    question: "Comment fonctionne MockupPro ?",
+    question: "Comment fonctionne Pixmock ?",
     answer: [
-      "MockupPro est une plateforme intuitive qui transforme vos designs en mockups professionnels en quelques clics :",
+      "Pixmock est une plateforme intuitive qui transforme vos designs en mockups professionnels en quelques clics :",
       "1. Uploadez votre design au format WebP ou JPEG",
       "2. Sélectionnez vos mockups préférés dans notre bibliothèque",
       "3. Personnalisez le texte et les éléments si besoin",
