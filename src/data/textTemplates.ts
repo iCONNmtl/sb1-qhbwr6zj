@@ -2,10 +2,17 @@ import type { TemplateLayer } from '../types/textTemplate';
 
 // Images pour les templates visuels
 const VISUAL_ASSETS = {
-  pixmockLogo: "https://d2v7vpg8oce97p.cloudfront.net/Branding/LogoPixmock.png",
-  watermark: "https://d2v7vpg8oce97p.cloudfront.net/Branding/WatermarkPixmock.png",
-  badge: "https://d2v7vpg8oce97p.cloudfront.net/Branding/BadgePixmock.png",
-  seal: "https://d2v7vpg8oce97p.cloudfront.net/Branding/SealPixmock.png"
+  custom: "https://d2v7vpg8oce97p.cloudfront.net/Branding/Custom.webp",
+  color: "https://d2v7vpg8oce97p.cloudfront.net/Branding/Colors.webp",
+  ancre: "https://d2v7vpg8oce97p.cloudfront.net/Branding/Ancre.webp",
+  shipping: "https://d2v7vpg8oce97p.cloudfront.net/Branding/Shipping.webp",
+  contact: "https://d2v7vpg8oce97p.cloudfront.net/Branding/Contact.webp",
+  gift: "https://d2v7vpg8oce97p.cloudfront.net/Branding/Gift.webp",
+  question: "https://d2v7vpg8oce97p.cloudfront.net/Branding/Question.webp",
+  fsc: "https://d2v7vpg8oce97p.cloudfront.net/Branding/FSC.webp",
+  size: "https://d2v7vpg8oce97p.cloudfront.net/Branding/Size.webp",
+  download: "https://d2v7vpg8oce97p.cloudfront.net/Branding/Download.webp",
+  checkbox: "https://d2v7vpg8oce97p.cloudfront.net/Branding/Checkbox.webp"
 };
 
 export const TEXT_TEMPLATES: {
@@ -489,104 +496,189 @@ export const TEXT_TEMPLATES: {
   
 // Templates visuels avec aperçus
 {
-  id: 'logo-top-left',
-  name: 'Logo en haut à gauche',
+  id: 'icon-colors',
+  name: 'Couleurs',
   category: 'Éléments visuels',
-  preview: VISUAL_ASSETS.pixmockLogo,
+  preview: VISUAL_ASSETS.color,
   layers: [
     {
       type: 'image',
-      url: VISUAL_ASSETS.pixmockLogo,
+      url: VISUAL_ASSETS.color,
       style: {
         width: '100px',
         opacity: '1'
       },
-      position: { x: 20, y: 20 }
+      position: { x: 50, y: 50 }
     }
   ]
 },
 {
-  id: 'logo-top-right',
-  name: 'Logo en haut à droite',
+  id: 'icon-download',
+  name: 'Téléchargement',
   category: 'Éléments visuels',
-  preview: VISUAL_ASSETS.pixmockLogo,
+  preview: VISUAL_ASSETS.download,
   layers: [
     {
       type: 'image',
-      url: VISUAL_ASSETS.pixmockLogo,
+      url: VISUAL_ASSETS.download,
       style: {
         width: '100px',
         opacity: '1'
       },
-      position: { x: 880, y: 20 }
+      position: { x: 50, y: 50 }
     }
   ]
 },
 {
-  id: 'badge-bottom-right',
-  name: 'Badge en bas à droite',
+  id: 'icon-ancre',
+  name: 'Ancre',
   category: 'Éléments visuels',
-  preview: VISUAL_ASSETS.badge,
+  preview: VISUAL_ASSETS.ancre,
   layers: [
     {
       type: 'image',
-      url: VISUAL_ASSETS.badge,
+      url: VISUAL_ASSETS.ancre,
       style: {
         width: '120px',
         opacity: '1'
       },
-      position: { x: 860, y: 860 }
+      position: { x: 50, y: 50 }
     }
   ]
 },
 {
-  id: 'seal-bottom-left',
-  name: 'Sceau en bas à gauche',
+  id: 'icon-size',
+  name: 'Taille',
   category: 'Éléments visuels',
-  preview: VISUAL_ASSETS.seal,
+  preview: VISUAL_ASSETS.size,
   layers: [
     {
       type: 'image',
-      url: VISUAL_ASSETS.seal,
+      url: VISUAL_ASSETS.size,
       style: {
         width: '150px',
         opacity: '1'
       },
-      position: { x: 20, y: 830 }
+      position: { x: 50, y: 50 }
     }
   ]
 },
 {
-  id: 'watermark-center',
-  name: 'Filigrane centré',
+  id: 'icon-fsc',
+  name: 'FSC',
   category: 'Éléments visuels',
-  preview: VISUAL_ASSETS.watermark,
+  preview: VISUAL_ASSETS.fsc,
   layers: [
     {
       type: 'image',
-      url: VISUAL_ASSETS.watermark,
+      url: VISUAL_ASSETS.fsc,
       style: {
         width: '300px',
         opacity: '0.3'
       },
-      position: { x: 350, y: 350 }
+      position: { x: 50, y: 50 }
     }
   ]
 },
 {
-  id: 'watermark-bottom',
-  name: 'Filigrane en bas',
+  id: 'icon-custom',
+  name: 'Personnalisation',
   category: 'Éléments visuels',
-  preview: VISUAL_ASSETS.watermark,
+  preview: VISUAL_ASSETS.custom,
   layers: [
     {
       type: 'image',
-      url: VISUAL_ASSETS.watermark,
+      url: VISUAL_ASSETS.custom,
       style: {
         width: '200px',
         opacity: '0.3'
       },
-      position: { x: 400, y: 850 }
+      position: { x: 50, y: 50 }
+    }
+  ]
+},
+{
+  id: 'icon-question',
+  name: 'Question',
+  category: 'Éléments visuels',
+  preview: VISUAL_ASSETS.question,
+  layers: [
+    {
+      type: 'image',
+      url: VISUAL_ASSETS.question,
+      style: {
+        width: '200px',
+        opacity: '0.3'
+      },
+      position: { x: 50, y: 50 }
+    }
+  ]
+},
+{
+  id: 'icon-shipping',
+  name: 'Livraison',
+  category: 'Éléments visuels',
+  preview: VISUAL_ASSETS.shipping,
+  layers: [
+    {
+      type: 'image',
+      url: VISUAL_ASSETS.shipping,
+      style: {
+        width: '200px',
+        opacity: '0.3'
+      },
+      position: { x: 50, y: 50 }
+    }
+  ]
+},
+{
+  id: 'icon-gift',
+  name: 'Cadeau',
+  category: 'Éléments visuels',
+  preview: VISUAL_ASSETS.gift,
+  layers: [
+    {
+      type: 'image',
+      url: VISUAL_ASSETS.gift,
+      style: {
+        width: '200px',
+        opacity: '0.3'
+      },
+      position: { x: 50, y: 50 }
+    }
+  ]
+},
+{
+  id: 'icon-contact',
+  name: 'Contact',
+  category: 'Éléments visuels',
+  preview: VISUAL_ASSETS.contact,
+  layers: [
+    {
+      type: 'image',
+      url: VISUAL_ASSETS.contact,
+      style: {
+        width: '200px',
+        opacity: '0.3'
+      },
+      position: { x: 50, y: 50 }
+    }
+  ]
+},
+{
+  id: 'icon-checkbox',
+  name: 'Checkbox',
+  category: 'Éléments visuels',
+  preview: VISUAL_ASSETS.checkbox,
+  layers: [
+    {
+      type: 'image',
+      url: VISUAL_ASSETS.checkbox,
+      style: {
+        width: '200px',
+        opacity: '0.3'
+      },
+      position: { x: 50, y: 50 }
     }
   ]
 }
