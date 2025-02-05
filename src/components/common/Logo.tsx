@@ -9,7 +9,7 @@ interface LogoProps {
   showText?: boolean;
 }
 
-const LOGO_URL = "https://d2v7vpg8oce97p.cloudfront.net/Branding/LogoPixmock.png";
+const LOGO_URL = "https://d2v7vpg8oce97p.cloudfront.net/Branding/LogoPixmock.webp";
 
 export default function Logo({ className, size = 'md', showText = true }: LogoProps) {
   const [imageError, setImageError] = useState(false);

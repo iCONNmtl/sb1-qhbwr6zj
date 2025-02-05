@@ -8,6 +8,7 @@ const FEATURES = [
     title: "Créez vos affiches à partir de votre design",
     description: "Transformez instantanément vos designs en mockups professionnels. Notre technologie avancée s'occupe de tout : positionnement intelligent, ajustement des perspectives et rendu photoréaliste. Importez simplement votre design et laissez la magie opérer.",
     icon: Wand2,
+    image: "https://images.unsplash.com/photo-1561070791-2526d30994b5?q=80&w=2000&auto=format&fit=crop",
     highlights: [
       "Importation simple par glisser-déposer",
       "Positionnement automatique intelligent",
@@ -19,6 +20,7 @@ const FEATURES = [
     title: "Créez des visuels professionnels et percutants",
     description: "Donnez vie à vos designs avec notre collection exclusive de mockups haute qualité. Chaque template est soigneusement conçu pour mettre en valeur votre travail et impressionner vos clients avec des rendus dignes des plus grandes marques.",
     icon: Palette,
+    image: "https://images.unsplash.com/photo-1542744094-3a31f272c490?q=80&w=2000&auto=format&fit=crop",
     highlights: [
       "Mockups en haute résolution 4K",
       "Effets de lumière et d'ombre réalistes",
@@ -30,6 +32,7 @@ const FEATURES = [
     title: "Éditez et adaptez pour les réseaux sociaux",
     description: "Un outil complet de personnalisation pour adapter vos mockups à chaque plateforme. Ajoutez du texte, votre logo, des images et optimisez automatiquement les formats pour Instagram, Pinterest et bien plus encore.",
     icon: Layout,
+    image: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=80&w=2000&auto=format&fit=crop",
     highlights: [
       "Formats optimisés pour chaque réseau",
       "Éditeur de texte avancé",
@@ -41,6 +44,7 @@ const FEATURES = [
     title: "Générez des revenus sur les marketplaces",
     description: "Transformez vos designs en source de revenus passive. Publiez directement vos créations sur Etsy, Shopify et d'autres marketplaces populaires. Notre système automatisé gère tout le processus de publication et de mise en ligne.",
     icon: ShoppingBag,
+    image: "https://images.unsplash.com/photo-1472289065668-ce650ac443d2?q=80&w=2000&auto=format&fit=crop",
     highlights: [
       "Publication automatisée sur Etsy",
       "Intégration Shopify native",
@@ -120,6 +124,15 @@ export default function FeaturesSlider() {
             onMouseLeave={() => setIsPaused(false)}
           >
             <div className="bg-white rounded-2xl overflow-hidden shadow-xl">
+              {/* Image */}
+              <div className="aspect-[2/1] overflow-hidden">
+                <img 
+                  src={FEATURES[activeIndex].image}
+                  alt={FEATURES[activeIndex].title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              
               <div className="p-6 md:p-8 lg:p-12">
 
 
