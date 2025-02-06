@@ -1,5 +1,5 @@
 import React from 'react';
-import { Instagram, Image } from 'lucide-react';
+import { Instagram,Pin, Image } from 'lucide-react';
 import clsx from 'clsx';
 
 export type PreviewFormat = 'original' | 'instagram' | 'pinterest';
@@ -26,7 +26,7 @@ const FORMATS = [
   {
     id: 'pinterest',
     name: 'Pinterest',
-    icon: Instagram,
+    icon: Pin,
     description: '1000x1500px (2:3)',
     aspectRatio: '2:3'
   }

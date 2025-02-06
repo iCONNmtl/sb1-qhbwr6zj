@@ -9,12 +9,13 @@ import clsx from 'clsx';
 
 const FEATURES = [
   { name: 'Accès à tous les mockups', starter: true, pro: true, enterprise: true },
-  { name: 'Export PNG haute qualité', starter: true, pro: true, enterprise: true },
-  { name: 'Export WEBP haute qualité', starter: false, pro: true, enterprise: true },
+  { name: 'Export WEBP / PNG haute qualité', starter: true, pro: true, enterprise: true },
+  { name: 'Générations', starter: '≈ 5', pro: '≈ 150', enterprise: "≈ 500" },
   { name: 'Support par email 24/7', starter: true, pro: true, enterprise: true },
   { name: 'Pas de filigrane', starter: true, pro: true, enterprise: true },
   { name: 'Personnalisation des mockups', starter: true, pro: true, enterprise: true },
   { name: 'Générations simultanées', starter: '1', pro: '10', enterprise: '15' },
+  { name: 'Ajouter vos mockup PSD', starter: false, pro: true, enterprise: true },
   { name: 'Accès au Pixmock Club', starter: false, pro: false, enterprise: true },
 ];
 
@@ -32,8 +33,8 @@ export default function Pricing() {
 
     // Liens de paiement Stripe directs
     const stripeLinks = {
-      pro: 'https://buy.stripe.com/test_14k7vfbb25j8c929AA',
-      expert: 'https://buy.stripe.com/test_8wMcPz1Ash1Qa0UfYZ'
+      pro: 'https://buy.stripe.com/28o9Dwgt22UbeaYfZ1',
+      expert: 'https://buy.stripe.com/fZeaHA4Kk7ar8QE9AC'
     };
 
     const checkoutUrl = `${stripeLinks[planId as keyof typeof stripeLinks]}?client_reference_id=${user.uid}`;
@@ -251,7 +252,7 @@ export default function Pricing() {
       <div className="mt-12 text-center">
         <p className="text-gray-600">
           Des questions ? {" "}
-          <a href="mailto:support@mockuppro.com" className="text-purple-600 hover:text-purple-500">
+          <a href="mailto:contact@pixmock.com" className="text-purple-600 hover:text-purple-500">
             Contactez-nous
           </a>
         </p>

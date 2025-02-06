@@ -157,7 +157,7 @@ const handleGenerate = () => {
           <div className="flex items-center gap-4">
             <Link
               to="/custom-mockup"
-              className="flex items-center px-4 py-2 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors"
+              className="flex items-center px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:bg-indigo-600 rounded-lg transition-colors"
             >
               <Plus className="h-5 w-5 mr-2" />
               <span>Ajouter votre mockup</span>
