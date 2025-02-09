@@ -31,6 +31,8 @@ export default function DesignUploader({ onUpload, uploadedFile }: DesignUploade
     }
   });
 
+  const { ref: dropzoneRef, ...rootProps } = getRootProps();
+
   return (
     <div className="bg-white rounded-xl shadow-sm p-6">
       <h2 className="text-lg font-semibold text-gray-900 mb-4">
@@ -45,16 +47,20 @@ export default function DesignUploader({ onUpload, uploadedFile }: DesignUploade
               {(uploadedFile.size / 1024 / 1024).toFixed(2)} MB
             </p>
           </div>
-          <button
-            onClick={() => onUpload(uploadedFile)}
-            className="px-3 py-1 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
-          >
-            Changer
-          </button>
+          <div {...getRootProps()}>
+            <input {...getInputProps()} />
+            <button
+              type="button"
+              className="px-3 py-1 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+            >
+              Changer
+            </button>
+          </div>
         </div>
       ) : (
         <div
-          {...getRootProps()}
+          {...rootProps}
+          ref={dropzoneRef}
           className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition ${
             isDragActive
               ? 'border-indigo-600 bg-indigo-50'
