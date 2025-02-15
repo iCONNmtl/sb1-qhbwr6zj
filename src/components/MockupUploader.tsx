@@ -12,14 +12,61 @@ interface MockupUploaderProps {
   onSuccess: () => void;
 }
 
-const aspectRatios: { value: AspectRatio; label: string }[] = [
-  { value: '16:9', label: 'Paysage 16:9' },
-  { value: '3:2', label: 'Paysage 3:2' },
-  { value: '4:3', label: 'Paysage 4:3' },
-  { value: '1:1', label: 'Carré 1:1' },
-  { value: '9:16', label: 'Portrait 16:9' },
-  { value: '2:3', label: 'Portrait 3:2' },
-  { value: '3:4', label: 'Portrait 4:3' }
+// Groupes de formats similaires
+const ASPECT_RATIO_GROUPS = [
+  {
+    label: 'Format 8x10',
+    ratios: [
+      { value: '8x10', label: '8x10"', description: '20x25cm' }
+    ]
+  },
+  {
+    label: 'Formats rectangulaires larges',
+    ratios: [
+      { value: '8x12', label: '8x12"', description: '21x29,7cm' },
+      { value: '12x18', label: '12x18"', description: '30x45cm' },
+      { value: '24x36', label: '24x36"', description: '60x90cm' }
+    ]
+  },
+  {
+    label: 'Format 11x14',
+    ratios: [
+      { value: '11x14', label: '11x14"', description: '27x35cm' }
+    ]
+  },
+  {
+    label: 'Format 11x17',
+    ratios: [
+      { value: '11x17', label: '11x17"', description: '28x43cm' }
+    ]
+  },
+  {
+    label: 'Format 18x24',
+    ratios: [
+      { value: '18x24', label: '18x24"', description: '45x60cm' }
+    ]
+  },
+  {
+    label: 'Formats standards variés',
+    ratios: [
+      { value: 'A4', label: 'A4', description: '21x29,7cm' },
+      { value: '5x7', label: '5x7"', description: '13x18cm' },
+      { value: '20x28', label: '20x28"', description: '50x70cm' },
+      { value: '28x40', label: '28x40"', description: '70x100cm' }
+    ]
+  },
+  {
+    label: 'Formats classiques',
+    ratios: [
+      { value: '16:9', label: 'Paysage 16:9' },
+      { value: '3:2', label: 'Paysage 3:2' },
+      { value: '4:3', label: 'Paysage 4:3' },
+      { value: '1:1', label: 'Carré 1:1' },
+      { value: '9:16', label: 'Portrait 16:9' },
+      { value: '2:3', label: 'Portrait 3:2' },
+      { value: '3:4', label: 'Portrait 4:3' }
+    ]
+  }
 ];
 
 export default function MockupUploader({ onClose, onSuccess }: MockupUploaderProps) {
@@ -30,7 +77,7 @@ export default function MockupUploader({ onClose, onSuccess }: MockupUploaderPro
   const [mockupData, setMockupData] = useState({
     name: '',
     category: '',
-    aspectRatio: '16:9' as AspectRatio,
+    aspectRatio: '8x10' as AspectRatio,
     mockupUuid: '',
     smartObjectUuid: ''
   });
@@ -99,7 +146,6 @@ export default function MockupUploader({ onClose, onSuccess }: MockupUploaderPro
     try {
       const mockupId = nanoid(10);
       
-      // Create Firestore document
       await addDoc(collection(db, 'mockups'), {
         id: mockupId,
         name: mockupData.name.trim(),
@@ -186,10 +232,14 @@ export default function MockupUploader({ onClose, onSuccess }: MockupUploaderPro
               onChange={(e) => setMockupData({ ...mockupData, aspectRatio: e.target.value as AspectRatio })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
             >
-              {aspectRatios.map((ratio) => (
-                <option key={ratio.value} value={ratio.value}>
-                  {ratio.label}
-                </option>
+              {ASPECT_RATIO_GROUPS.map((group) => (
+                <optgroup key={group.label} label={group.label}>
+                  {group.ratios.map((ratio) => (
+                    <option key={ratio.value} value={ratio.value}>
+                      {ratio.label}{ratio.description ? ` - ${ratio.description}` : ''}
+                    </option>
+                  ))}
+                </optgroup>
               ))}
             </select>
           </div>

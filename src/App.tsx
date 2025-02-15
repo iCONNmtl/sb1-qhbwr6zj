@@ -11,6 +11,10 @@ import Dashboard from './pages/Dashboard';
 import MockupGenerator from './pages/MockupGenerator';
 import MockupLibrary from './pages/MockupLibrary';
 import CustomMockup from './pages/CustomMockup';
+import Product from './pages/Product';
+import Products from './pages/Products';
+import MyProducts from './pages/MyProducts';
+import ProductDetails from './pages/ProductDetails';
 import AdminDashboard from './pages/AdminDashboard';
 import Settings from './pages/Settings';
 import Pricing from './pages/Pricing';
@@ -56,6 +60,26 @@ export default function App() {
             <Route path="/custom-mockup" element={
               <AuthGuard>
                 <CustomMockup />
+              </AuthGuard>
+            } />
+            <Route path="/product" element={
+              <AuthGuard>
+                <Product />
+              </AuthGuard>
+            } />
+            <Route path="/products" element={
+              <AuthGuard>
+                <Products />
+              </AuthGuard>
+            } />
+            <Route path="/products/:id" element={
+              <AuthGuard>
+                <ProductDetails />
+              </AuthGuard>
+            } />
+            <Route path="/my-products" element={
+              <AuthGuard>
+                <MyProducts />
               </AuthGuard>
             } />
             <Route path="/dashboard" element={

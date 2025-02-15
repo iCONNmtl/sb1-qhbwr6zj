@@ -13,6 +13,7 @@ interface GenerationFooterProps {
   isGenerating: boolean;
   onGenerate: () => void;
   designFile?: File;
+  designUrl?: string;
   isTextCustomizationEnabled?: boolean;
   customizedMockups?: number[];
 }
@@ -23,18 +24,21 @@ export default function GenerationFooter({
   isGenerating,
   onGenerate,
   designFile,
+  designUrl,
   isTextCustomizationEnabled = false,
   customizedMockups = []
 }: GenerationFooterProps) {
-  // Calculer le coût total en crédits
+  // Calculate total credits needed
   const baseCredits = selectedMockups.length * 5;
   const customizationCredits = isTextCustomizationEnabled ? customizedMockups.length * 5 : 0;
   const totalCredits = baseCredits + customizationCredits;
 
+  const hasDesign = Boolean(designFile || designUrl);
+
   return (
     <section className="bg-white border border-gray-200 rounded-xl p-4 mt-8">
       <div className="flex items-center justify-between gap-8">
-        {/* Crédits */}
+        {/* Credits */}
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-2">
             <div className="p-2 bg-indigo-100 rounded-lg">
@@ -77,13 +81,13 @@ export default function GenerationFooter({
           )}
         </div>
 
-        {/* Bouton de génération */}
+        {/* Generation Button */}
         {selectedMockups.length > 0 && (
           <button
             onClick={onGenerate}
             disabled={
               isGenerating || 
-              !designFile || 
+              !hasDesign || 
               selectedMockups.length === 0 || 
               (userProfile?.subscription.credits || 0) < totalCredits
             }
