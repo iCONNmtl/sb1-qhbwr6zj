@@ -16,6 +16,7 @@ import GenerationProgress from '../components/generation/GenerationProgress';
 import ExportFormatSelector from '../components/mockup/ExportFormatSelector';
 import TextEditor from '../components/mockup/TextEditor';
 import TextCustomizationToggle from '../components/mockup/TextCustomizationToggle';
+import DesignSelector from '../components/DesignSelector';
 
 // Hooks
 import { useMockupGeneration } from '../hooks/useMockupGeneration';
@@ -27,9 +28,12 @@ import { useCategories } from '../hooks/useCategories';
 import type { UserProfile } from '../types/user';
 import type { ExportFormat } from '../types/mockup';
 
+const ITEMS_PER_PAGE = 20;
+
 export default function MockupGenerator() {
   const { user } = useStore();
   const [designFile, setDesignFile] = useState<File>();
+  const [designUrl, setDesignUrl] = useState<string>();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [exportFormat, setExportFormat] = useState<ExportFormat>('webp');
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -38,7 +42,6 @@ export default function MockupGenerator() {
   const [isTextCustomizationEnabled, setIsTextCustomizationEnabled] = useState(false);
   const [customizedMockups, setCustomizedMockups] = useState<number[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(20);
 
   const { mockups, loading: mockupsLoading } = useMockups();
   const { categories } = useCategories(mockups, favorites);
@@ -56,7 +59,7 @@ export default function MockupGenerator() {
   });
 
   // Calculate total pages
-  const totalPages = Math.ceil(filteredMockups.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredMockups.length / ITEMS_PER_PAGE);
 
   // Reset to page 1 when category changes or if current page is beyond total pages
   useEffect(() => {
@@ -66,8 +69,8 @@ export default function MockupGenerator() {
   }, [selectedCategory, totalPages, currentPage]);
 
   // Get current mockups
-  const indexOfLastMockup = currentPage * itemsPerPage;
-  const indexOfFirstMockup = indexOfLastMockup - itemsPerPage;
+  const indexOfLastMockup = currentPage * ITEMS_PER_PAGE;
+  const indexOfFirstMockup = indexOfLastMockup - ITEMS_PER_PAGE;
   const currentMockups = filteredMockups.slice(indexOfFirstMockup, indexOfLastMockup);
 
   useEffect(() => {
@@ -95,41 +98,20 @@ export default function MockupGenerator() {
     return () => unsubscribe();
   }, [user, selectedCategory]);
 
-const handleGenerate = () => {
-  if (!user || !userProfile || !designFile) return;
+  const handleGenerate = () => {
+    if (!user || !userProfile) return;
 
-  // Calculer les mockups personnalisés
-  const customizedMockupsList = isTextCustomizationEnabled ? customizedMockups : [];
-
-  // Calculer le coût total en crédits
-  const baseCredits = selectedMockups.length * 5;
-  const customizationCredits = customizedMockupsList.length * 5;
-  const totalCredits = baseCredits + customizationCredits;
-
-  // Vérifier les crédits disponibles
-  if ((userProfile.subscription.credits || 0) < totalCredits) {
-    toast.error(`Crédits insuffisants. Il vous faut ${totalCredits} crédits pour cette génération.`);
-    return;
-  }
-
-  // Créer l'objet de personnalisation du texte
-  const textCustomization = {
-    enabled: isTextCustomizationEnabled,
-    appliedMockups: customizedMockupsList,
-    html: isTextCustomizationEnabled ? customHtml : ''
+    generateMockups(
+      designFile || null,
+      designUrl,
+      selectedMockups,
+      selectedMockupData,
+      userProfile,
+      exportFormat,
+      isTextCustomizationEnabled ? customHtml : undefined,
+      customizedMockups
+    );
   };
-
-  // Lancer la génération directement sans confirmation
-  generateMockups(
-    designFile, 
-    selectedMockups, 
-    selectedMockupData, 
-    userProfile, 
-    exportFormat,
-    textCustomization
-  );
-};
-
 
   const handleCategoryChange = (categoryId: string) => {
     setSelectedCategory(categoryId);
@@ -140,12 +122,18 @@ const handleGenerate = () => {
     <div className="space-y-8">
       {isGenerating && <GenerationProgress totalMockups={selectedMockups.length} />}
 
-      {/* Design Upload */}
+      {/* Design Selection */}
       <section>
         <h2 className="text-xl font-semibold text-gray-900 mb-4">
-          1. Uploadez votre design
+          1. Choisissez votre design
         </h2>
-        <DesignUploader onUpload={setDesignFile} uploadedFile={designFile} />
+        <DesignSelector
+          userId={user?.uid || ''}
+          onSelect={(url) => {
+            setDesignUrl(url);
+            setDesignFile(undefined);
+          }}
+        />
       </section>
 
       {/* Mockup Selection */}
@@ -157,7 +145,7 @@ const handleGenerate = () => {
           <div className="flex items-center gap-4">
             <Link
               to="/custom-mockup"
-              className="flex items-center px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:bg-indigo-600 rounded-lg transition-colors"
+              className="flex items-center px-4 py-2 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors"
             >
               <Plus className="h-5 w-5 mr-2" />
               <span>Ajouter votre mockup</span>
@@ -257,6 +245,7 @@ const handleGenerate = () => {
         isGenerating={isGenerating}
         onGenerate={handleGenerate}
         designFile={designFile}
+        designUrl={designUrl}
         isTextCustomizationEnabled={isTextCustomizationEnabled}
         customizedMockups={customizedMockups}
       />

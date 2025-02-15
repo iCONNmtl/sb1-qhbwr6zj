@@ -1,7 +1,76 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Truck, Package, Shield, Clock } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Truck, Package, Shield, Clock, Info } from 'lucide-react';
 import clsx from 'clsx';
+
+const SIZES = [
+  { 
+    id: '8x10', 
+    dimensions: { inches: '8x10"', cm: '20x25cm' },
+    cost: 5,
+    price: 15
+  },
+  { 
+    id: '8x12', 
+    dimensions: { inches: '8x12"', cm: '21x29,7cm' },
+    cost: 7,
+    price: 18
+  },
+  { 
+    id: '12x18', 
+    dimensions: { inches: '12x18"', cm: '30x45cm' },
+    cost: 12,
+    price: 25
+  },
+  { 
+    id: '24x36', 
+    dimensions: { inches: '24x36"', cm: '60x90cm' },
+    cost: 25,
+    price: 45
+  },
+  { 
+    id: '11x14', 
+    dimensions: { inches: '11x14"', cm: '27x35cm' },
+    cost: 8,
+    price: 20
+  },
+  { 
+    id: '11x17', 
+    dimensions: { inches: '11x17"', cm: '28x43cm' },
+    cost: 10,
+    price: 22
+  },
+  { 
+    id: '18x24', 
+    dimensions: { inches: '18x24"', cm: '45x60cm' },
+    cost: 18,
+    price: 35
+  },
+  { 
+    id: 'A4', 
+    dimensions: { inches: 'A4', cm: '21x29,7cm' },
+    cost: 7,
+    price: 18
+  },
+  { 
+    id: '5x7', 
+    dimensions: { inches: '5x7"', cm: '13x18cm' },
+    cost: 3,
+    price: 10
+  },
+  { 
+    id: '20x28', 
+    dimensions: { inches: '20x28"', cm: '50x70cm' },
+    cost: 20,
+    price: 40
+  },
+  { 
+    id: '28x40', 
+    dimensions: { inches: '28x40"', cm: '70x100cm' },
+    cost: 30,
+    price: 55
+  }
+];
 
 const PRODUCT_IMAGES = {
   'poster-mat': [
@@ -32,13 +101,7 @@ const PRODUCTS = {
       'Idéal pour la décoration',
       'Certifié FSC'
     ],
-    sizes: [
-      { id: '20x30', name: '20x30 cm', price: 15 },
-      { id: '30x40', name: '30x40 cm', price: 25 },
-      { id: '40x60', name: '40x60 cm', price: 35 },
-      { id: '50x70', name: '50x70 cm', price: 45 },
-      { id: '60x90', name: '60x90 cm', price: 65 }
-    ]
+    sizes: SIZES
   },
   'poster-glossy': {
     name: 'Poster Brillant Premium',
@@ -50,13 +113,11 @@ const PRODUCTS = {
       'Idéal pour les photos',
       'Certifié FSC'
     ],
-    sizes: [
-      { id: '20x30', name: '20x30 cm', price: 18 },
-      { id: '30x40', name: '30x40 cm', price: 28 },
-      { id: '40x60', name: '40x60 cm', price: 38 },
-      { id: '50x70', name: '50x70 cm', price: 48 },
-      { id: '60x90', name: '60x90 cm', price: 68 }
-    ]
+    sizes: SIZES.map(size => ({
+      ...size,
+      cost: Math.round(size.cost * 1.2),
+      price: Math.round(size.price * 1.2)
+    }))
   },
   'poster-frame': {
     name: 'Poster Encadré',
@@ -68,13 +129,11 @@ const PRODUCTS = {
       'Prêt à accrocher',
       'Protection UV'
     ],
-    sizes: [
-      { id: '20x30', name: '20x30 cm', price: 35 },
-      { id: '30x40', name: '30x40 cm', price: 55 },
-      { id: '40x60', name: '40x60 cm', price: 85 },
-      { id: '50x70', name: '50x70 cm', price: 115 },
-      { id: '60x90', name: '60x90 cm', price: 165 }
-    ]
+    sizes: SIZES.map(size => ({
+      ...size,
+      cost: Math.round(size.cost * 3),
+      price: Math.round(size.price * 2.5)
+    }))
   }
 } as const;
 
@@ -82,22 +141,50 @@ const SHIPPING = [
   {
     country: 'France',
     price: 5.90,
-    time: '2-3 jours ouvrés'
+    time: '2-3 jours ouvrés',
+    icon: '🇫🇷'
   },
   {
     country: 'Belgique',
     price: 7.90,
-    time: '3-4 jours ouvrés'
+    time: '3-4 jours ouvrés',
+    icon: '🇧🇪'
   },
   {
     country: 'Suisse',
     price: 9.90,
-    time: '4-5 jours ouvrés'
+    time: '4-5 jours ouvrés',
+    icon: '🇨🇭'
   },
   {
     country: 'Luxembourg',
     price: 7.90,
-    time: '3-4 jours ouvrés'
+    time: '3-4 jours ouvrés',
+    icon: '🇱🇺'
+  },
+  {
+    country: 'Allemagne',
+    price: 7.90,
+    time: '3-4 jours ouvrés',
+    icon: '🇩🇪'
+  },
+  {
+    country: 'Italie',
+    price: 8.90,
+    time: '4-5 jours ouvrés',
+    icon: '🇮🇹'
+  },
+  {
+    country: 'Espagne',
+    price: 8.90,
+    time: '4-5 jours ouvrés',
+    icon: '🇪🇸'
+  },
+  {
+    country: 'Pays-Bas',
+    price: 7.90,
+    time: '3-4 jours ouvrés',
+    icon: '🇳🇱'
   }
 ];
 
@@ -132,6 +219,7 @@ export default function ProductDetails() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-12">
+      {/* Product Info Section */}
       <div className="grid md:grid-cols-2 gap-12">
         {/* Image Slider */}
         <div className="space-y-4">
@@ -204,34 +292,6 @@ export default function ProductDetails() {
             </ul>
           </div>
 
-          {/* Sizes */}
-          <div className="space-y-4">
-            <h2 className="text-lg font-semibold text-gray-900">
-              Tailles disponibles
-            </h2>
-            <div className="grid grid-cols-2 gap-4">
-              {product.sizes.map((size) => (
-                <button
-                  key={size.id}
-                  onClick={() => setSelectedSize(size.id)}
-                  className={clsx(
-                    'p-4 rounded-xl border-2 transition-all duration-200',
-                    selectedSize === size.id
-                      ? 'border-indigo-600 bg-indigo-50 ring-1 ring-indigo-600'
-                      : 'border-gray-200 hover:border-gray-300'
-                  )}
-                >
-                  <div className="font-medium text-gray-900">
-                    {size.name}
-                  </div>
-                  <div className="text-lg font-bold text-indigo-600">
-                    {size.price}€
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-
           {/* Action Button */}
           <Link
             to={`/product?type=${id}`}
@@ -242,67 +302,180 @@ export default function ProductDetails() {
           >
             Choisir ce produit
           </Link>
+        </div>
+      </div>
 
-          {/* Shipping */}
-          <div className="space-y-4 pt-8 border-t border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">
-              Livraison
-            </h2>
-            <div className="grid grid-cols-2 gap-4">
-              {SHIPPING.map((option) => (
-                <div
-                  key={option.country}
-                  className="p-4 bg-gray-50 rounded-xl"
-                >
-                  <div className="font-medium text-gray-900 mb-1">
-                    {option.country}
+      {/* Sizes Section - Full width */}
+      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div className="p-6 border-b border-gray-200">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-indigo-100 rounded-lg">
+              <Package className="h-5 w-5 text-indigo-600" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">
+                Tailles disponibles
+              </h2>
+              <p className="text-sm text-gray-600">
+                Choisissez parmi nos différents formats d'impression
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-6">
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {product.sizes.map((size) => (
+              <button
+                key={size.id}
+                onClick={() => setSelectedSize(size.id)}
+                className={clsx(
+                  'p-4 rounded-xl border-2 transition-all duration-200',
+                  selectedSize === size.id
+                    ? 'border-indigo-600 bg-indigo-50 ring-1 ring-indigo-600'
+                    : 'border-gray-200 hover:border-gray-300'
+                )}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div className="text-gray-900">
+                    <span className="font-medium">{size.dimensions.inches}</span>
+                    <span className="text-gray-500 ml-2">({size.dimensions.cm})</span>
                   </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600">{option.time}</span>
+                  <div className="text-indigo-600 font-medium">
+                    {size.cost}€
+                  </div>
+                </div>
+
+                <div className="relative group">
+                  <div className="flex items-center text-sm text-gray-600">
+                    <Info className="h-4 w-4 mr-1" />
+                    Voir détails
+                  </div>
+                  
+                  {/* Tooltip */}
+                  <div className="absolute bottom-full left-0 mb-2 w-64 p-3 bg-gray-900 text-white text-sm rounded-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                    <div className="font-medium mb-2">Détails du prix</div>
+                    <div className="space-y-1">
+                      <div className="flex justify-between">
+                        <span>Prix de vente suggéré:</span>
+                        <span className="font-medium">{size.price}€</span>
+                      </div>
+                      <div className="flex justify-between text-green-400">
+                        <span>Bénéfice potentiel:</span>
+                        <span className="font-medium">+{size.price - size.cost}€</span>
+                      </div>
+                      <div className="mt-2 pt-2 border-t border-white/20 text-xs text-white/70">
+                        Prix HT • TVA non incluse
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Shipping Section - Full width */}
+      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div className="p-6 border-b border-gray-200">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-indigo-100 rounded-lg">
+              <Truck className="h-5 w-5 text-indigo-600" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">
+                Livraison internationale
+              </h2>
+              <p className="text-sm text-gray-600">
+                Expédition sécurisée dans des tubes rigides pour une protection optimale
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-6">
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {SHIPPING.map((option) => (
+              <div
+                key={option.country}
+                className="p-4 bg-gray-50 rounded-xl space-y-3"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">{option.icon}</span>
+                  <span className="font-medium text-gray-900">
+                    {option.country}
+                  </span>
+                </div>
+                
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Prix</span>
                     <span className="font-medium text-indigo-600">
-                      {option.price}€
+                      {option.price.toFixed(2)}€
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Délai</span>
+                    <span className="text-sm text-gray-900">
+                      {option.time}
                     </span>
                   </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
 
-          {/* Additional Info */}
-          <div className="grid grid-cols-3 gap-4 pt-8 border-t border-gray-200">
-            <div className="text-center">
-              <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mx-auto mb-2">
-                <Truck className="h-6 w-6 text-indigo-600" />
-              </div>
-              <div className="text-sm font-medium text-gray-900">
-                Livraison rapide
-              </div>
-              <div className="text-xs text-gray-600">
-                2-5 jours ouvrés
-              </div>
-            </div>
-            <div className="text-center">
-              <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mx-auto mb-2">
-                <Package className="h-6 w-6 text-indigo-600" />
-              </div>
-              <div className="text-sm font-medium text-gray-900">
-                Emballage sécurisé
-              </div>
-              <div className="text-xs text-gray-600">
-                Tube rigide
+          <div className="mt-6 p-4 bg-indigo-50 rounded-xl">
+            <div className="flex items-start gap-3">
+              <Info className="h-5 w-5 text-indigo-600 mt-0.5" />
+              <div className="text-sm text-indigo-900">
+                <p className="font-medium mb-1">Informations importantes</p>
+                <ul className="space-y-1 list-disc pl-4">
+                  <li>Les délais de livraison sont estimatifs et peuvent varier selon la destination</li>
+                  <li>Suivi en ligne disponible pour toutes les commandes</li>
+                  <li>Assurance incluse jusqu'à 100€ par colis</li>
+                  <li>Livraison express disponible sur demande (supplément)</li>
+                </ul>
               </div>
             </div>
-            <div className="text-center">
-              <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mx-auto mb-2">
-                <Shield className="h-6 w-6 text-indigo-600" />
-              </div>
-              <div className="text-sm font-medium text-gray-900">
-                Garantie qualité
-              </div>
-              <div className="text-xs text-gray-600">
-                Satisfait ou remboursé
-              </div>
-            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Additional Info */}
+      <div className="grid grid-cols-3 gap-4 pt-8 border-t border-gray-200">
+        <div className="text-center">
+          <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mx-auto mb-2">
+            <Truck className="h-6 w-6 text-indigo-600" />
+          </div>
+          <div className="text-sm font-medium text-gray-900">
+            Livraison rapide
+          </div>
+          <div className="text-xs text-gray-600">
+            2-5 jours ouvrés
+          </div>
+        </div>
+        <div className="text-center">
+          <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mx-auto mb-2">
+            <Package className="h-6 w-6 text-indigo-600" />
+          </div>
+          <div className="text-sm font-medium text-gray-900">
+            Emballage sécurisé
+          </div>
+          <div className="text-xs text-gray-600">
+            Tube rigide
+          </div>
+        </div>
+        <div className="text-center">
+          <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mx-auto mb-2">
+            <Shield className="h-6 w-6 text-indigo-600" />
+          </div>
+          <div className="text-sm font-medium text-gray-900">
+            Garantie qualité
+          </div>
+          <div className="text-xs text-gray-600">
+            Satisfait ou remboursé
           </div>
         </div>
       </div>
