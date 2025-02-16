@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs, getDoc, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useStore } from '../store/useStore';
-import { Package, Truck, Clock, CheckCircle, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
+import { Package, Truck, Clock, CheckCircle, ChevronDown, ChevronUp, Loader2, Mail, ArrowRight, Check } from 'lucide-react';
 import OrderStats from './OrderStats';
 import toast from 'react-hot-toast';
 import clsx from 'clsx';
 import type { Order } from '../types/order';
+import type { UserProfile } from '../types/user';
 
 const STATUS_LABELS = {
   pending: 'En attente',
@@ -29,11 +30,97 @@ const STATUS_ICONS = {
   delivered: Package
 } as const;
 
+const SETUP_STEPS = [
+  {
+    title: "Configuration rapide",
+    icon: Mail,
+    description: "Importez automatiquement vos commandes en 3 étapes simples",
+    steps: [
+      {
+        title: "Accédez à votre boîte email",
+        description: "Connectez-vous à votre compte email principal"
+      },
+      {
+        title: "Créez une règle de transfert",
+        description: "Dans les paramètres, configurez le transfert automatique des emails de commande",
+        highlight: "e0mhvbrtqwlcy3kk7q49p4gces25cy14@hook.eu1.make.com"
+      },
+      {
+        title: "C'est tout !",
+        description: "Vos commandes seront automatiquement importées dans votre tableau de bord"
+      }
+    ]
+  },
+  {
+    title: "Plateformes compatibles",
+    icon: Package,
+    description: "Nous supportons les principales plateformes e-commerce",
+    platforms: [
+      { 
+        name: "Etsy", 
+        email: "transaction@etsy.com",
+        color: "bg-orange-100 text-orange-800 border-orange-200"
+      },
+      { 
+        name: "Shopify", 
+        email: "orders@shopify.com",
+        color: "bg-green-100 text-green-800 border-green-200"
+      },
+      { 
+        name: "WooCommerce", 
+        email: "orders@*.myshopify.com",
+        color: "bg-purple-100 text-purple-800 border-purple-200"
+      }
+    ]
+  },
+  {
+    title: "Traitement intelligent",
+    icon: Truck,
+    description: "Traitement automatisé de vos commandes",
+    features: [
+      {
+        title: "Import en temps réel",
+        description: "Les commandes sont importées dès réception de l'email"
+      },
+      {
+        title: "Mise à jour automatique",
+        description: "Le statut des commandes est mis à jour automatiquement"
+      },
+      {
+        title: "Notifications",
+        description: "Recevez une notification pour chaque nouvelle commande"
+      }
+    ]
+  }
+];
+
 export default function Orders() {
   const { user } = useStore();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+  const [showSetupInstructions, setShowSetupInstructions] = useState(true);
+  const [isSetupCompleted, setIsSetupCompleted] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+
+    // Get initial setup status from Firestore
+    const fetchSetupStatus = async () => {
+      try {
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        if (userDoc.exists()) {
+          const userData = userDoc.data() as UserProfile;
+          setIsSetupCompleted(!!userData.orderSetupCompleted);
+          setShowSetupInstructions(!userData.orderSetupCompleted);
+        }
+      } catch (error) {
+        console.error('Error fetching setup status:', error);
+      }
+    };
+
+    fetchSetupStatus();
+  }, [user]);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -78,6 +165,25 @@ export default function Orders() {
     fetchOrders();
   }, [user]);
 
+  const handleSetupComplete = async () => {
+    if (!user) return;
+
+    try {
+      // Update Firestore
+      const userRef = doc(db, 'users', user.uid);
+      await updateDoc(userRef, {
+        orderSetupCompleted: true
+      });
+
+      setIsSetupCompleted(true);
+      setShowSetupInstructions(false);
+      toast.success('Configuration terminée !');
+    } catch (error) {
+      console.error('Error updating setup status:', error);
+      toast.error('Erreur lors de la sauvegarde du statut');
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
@@ -91,6 +197,148 @@ export default function Orders() {
 
   return (
     <div className="space-y-8">
+      {/* Setup Instructions */}
+      <div className={clsx(
+        "bg-gradient-to-br from-white to-indigo-50/20 rounded-xl shadow-sm overflow-hidden border border-indigo-100",
+        "transition-all duration-300 ease-in-out",
+        showSetupInstructions ? "opacity-100" : "opacity-0 h-0"
+      )}>
+        <div className="p-6 border-b border-indigo-100">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl">
+                <Mail className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">
+                  Import automatique des commandes
+                </h2>
+                <p className="text-gray-600 mt-1">
+                  Configurez une fois, importez automatiquement toutes vos commandes
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              {!isSetupCompleted && (
+                <button
+                  onClick={handleSetupComplete}
+                  className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                >
+                  <Check className="h-5 w-5 mr-2" />
+                  C'est fait !
+                </button>
+              )}
+              <button
+                onClick={() => setShowSetupInstructions(false)}
+                className="p-2 text-gray-400 hover:text-gray-500 hover:bg-white/50 rounded-lg transition-all"
+              >
+                <ChevronUp className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-8">
+          <div className="grid md:grid-cols-3 gap-8">
+            {SETUP_STEPS.map((section, index) => {
+              const Icon = section.icon;
+              return (
+                <div 
+                  key={index} 
+                  className="relative bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+                >
+                  <div className="absolute -top-4 left-6">
+                    <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg shadow-sm">
+                      <Icon className="h-5 w-5 text-white" />
+                    </div>
+                  </div>
+                  
+                  <div className="mt-4">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                      {section.title}
+                    </h3>
+                    <p className="text-sm text-gray-600 mb-4">
+                      {section.description}
+                    </p>
+                    
+                    {'steps' in section && (
+                      <div className="space-y-4">
+                        {section.steps.map((step, stepIndex) => (
+                          <div key={stepIndex} className="flex items-start gap-3">
+                            <div className="flex-shrink-0 w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm font-medium">
+                              {stepIndex + 1}
+                            </div>
+                            <div>
+                              <div className="font-medium text-gray-900">{step.title}</div>
+                              <p className="text-sm text-gray-600 mt-0.5">{step.description}</p>
+                              {step.highlight && (
+                                <div className="mt-2 p-2 bg-indigo-50 border border-indigo-100 rounded-lg">
+                                  <code className="text-sm text-indigo-600 font-mono break-all">
+                                    {step.highlight}
+                                  </code>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {'platforms' in section && (
+                      <div className="space-y-3">
+                        {section.platforms.map((platform, platformIndex) => (
+                          <div 
+                            key={platformIndex} 
+                            className={clsx(
+                              "p-3 rounded-lg border",
+                              platform.color
+                            )}
+                          >
+                            <div className="font-medium mb-1">{platform.name}</div>
+                            <div className="text-sm opacity-80 font-mono">
+                              {platform.email}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {'features' in section && (
+                      <div className="space-y-4">
+                        {section.features.map((feature, featureIndex) => (
+                          <div key={featureIndex} className="flex items-start gap-3">
+                            <div className="w-1.5 h-1.5 rounded-full bg-indigo-600 mt-2" />
+                            <div>
+                              <div className="font-medium text-gray-900">
+                                {feature.title}
+                              </div>
+                              <p className="text-sm text-gray-600 mt-0.5">
+                                {feature.description}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Show expand button when instructions are hidden */}
+      {!showSetupInstructions && (
+        <button
+          onClick={() => setShowSetupInstructions(true)}
+          className="flex items-center gap-2 px-4 py-2 text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors"
+        >
+          <ChevronDown className="h-5 w-5" />
+          Afficher les instructions d'import
+        </button>
+      )}
+
       {/* Order Stats */}
       <OrderStats orders={orders} />
 

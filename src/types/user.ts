@@ -4,7 +4,7 @@ export interface UserSubscription {
   plan: UserPlan;
   startDate: string;
   endDate?: string;
-  credits?: number;
+  credits: number;
   active: boolean;
   stripeCustomerId?: string;
   stripeSubscriptionId?: string;
@@ -14,6 +14,15 @@ export interface PlatformAccount {
   id: string;
   platform: string;
   name: string;
+}
+
+export interface PlanConfig {
+  id: string;
+  name: UserPlan;
+  price: number;
+  credits: number;
+  description: string;
+  features: string[];
 }
 
 interface PinterestAuth {
@@ -29,4 +38,5 @@ export interface UserProfile {
   platformAccounts?: PlatformAccount[];
   logoUrl?: string;
   pinterestAuth?: PinterestAuth;
+  orderSetupCompleted?: boolean; // Added this field
 }
