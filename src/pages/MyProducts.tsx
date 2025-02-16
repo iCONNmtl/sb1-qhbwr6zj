@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { collection, query, where, getDocs, doc, deleteDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useStore } from '../store/useStore';
-import { Package, Edit, Trash2, Plus, Loader2 } from 'lucide-react';
+import { Package, Edit, Trash2, Plus, Loader2, X, Info } from 'lucide-react';
 import ImageLoader from '../components/ImageLoader';
 import toast from 'react-hot-toast';
 import clsx from 'clsx';
@@ -28,11 +28,84 @@ const PRODUCT_TYPES = {
   'poster-frame': 'Poster Encadré'
 } as const;
 
+// Mapping des tailles avec leurs dimensions en cm
+const SIZE_DIMENSIONS: Record<string, string> = {
+  '8x10': '20x25cm',
+  '8x12': '21x29,7cm',
+  '12x18': '30x45cm',
+  '24x36': '60x90cm',
+  '11x14': '27x35cm',
+  '11x17': '28x43cm',
+  '18x24': '45x60cm',
+  'A4': '21x29,7cm',
+  '5x7': '13x18cm',
+  '20x28': '50x70cm',
+  '28x40': '70x100cm'
+};
+
+interface SizeDetailsPopupProps {
+  variants: Product['variants'];
+  onClose: () => void;
+}
+
+function SizeDetailsPopup({ variants, onClose }: SizeDetailsPopupProps) {
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-xl shadow-lg w-full max-w-lg">
+        <div className="flex items-center justify-between p-4 border-b border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-900">
+            Détails des tailles
+          </h3>
+          <button
+            onClick={onClose}
+            className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        
+        <div className="p-4">
+          <div className="grid grid-cols-4 gap-4 text-sm font-medium text-gray-500 mb-2">
+            <div>Taille</div>
+            <div>SKU</div>
+            <div className="text-right">Prix d'achat</div>
+            <div className="text-right">Prix de vente</div>
+          </div>
+          
+          <div className="space-y-4">
+            {variants.map((variant) => (
+              <div key={variant.sku} className="py-4 border-b border-gray-100 last:border-0">
+                <div className="grid grid-cols-4 gap-4 text-sm">
+                  <div>
+                    <div className="font-medium text-gray-900">{variant.sizeId}</div>
+                    <div className="text-gray-500 text-xs mt-0.5">
+                      {SIZE_DIMENSIONS[variant.sizeId]}
+                    </div>
+                  </div>
+                  <div className="font-mono text-gray-600">{variant.sku}</div>
+                  <div className="text-right font-medium text-gray-900">{variant.cost}€</div>
+                  <div className="text-right">
+                    <span className="font-medium text-gray-900">{variant.suggestedPrice}€</span>
+                    <span className="ml-1 text-green-600">
+                      (+{variant.suggestedPrice - variant.cost}€)
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function MyProducts() {
   const { user } = useStore();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -183,33 +256,35 @@ export default function MyProducts() {
 
               {/* Content */}
               <div className="p-4">
-                <div className="mb-4">
-                  <div className="font-medium text-gray-900">
-                    {PRODUCT_TYPES[product.type]}
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    Créé le {new Date(product.createdAt).toLocaleDateString()}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  {product.variants.map((variant) => (
-                    <div
-                      key={variant.sku}
-                      className="flex items-center justify-between text-sm"
-                    >
-                      <span className="text-gray-600">{variant.sizeId}</span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-gray-500">{variant.cost}€</span>
-                        <span className="text-green-600">+{variant.suggestedPrice - variant.cost}€</span>
-                      </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="font-medium text-gray-900">
+                      {PRODUCT_TYPES[product.type]}
                     </div>
-                  ))}
+                    <div className="text-sm text-gray-500">
+                      {product.variants.length} taille{product.variants.length > 1 ? 's' : ''} • Créé le {new Date(product.createdAt).toLocaleDateString()}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setSelectedProduct(product)}
+                    className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition"
+                    title="Voir les détails"
+                  >
+                    <Info className="h-5 w-5" />
+                  </button>
                 </div>
               </div>
             </div>
           ))}
         </div>
+      )}
+
+      {/* Size Details Popup */}
+      {selectedProduct && (
+        <SizeDetailsPopup
+          variants={selectedProduct.variants}
+          onClose={() => setSelectedProduct(null)}
+        />
       )}
     </div>
   );

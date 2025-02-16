@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import Sidebar from './components/navigation/Sidebar';
 import PageContainer from './components/layout/PageContainer';
+import SupportButton from './components/support/SupportButton';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
@@ -11,10 +12,6 @@ import Dashboard from './pages/Dashboard';
 import MockupGenerator from './pages/MockupGenerator';
 import MockupLibrary from './pages/MockupLibrary';
 import CustomMockup from './pages/CustomMockup';
-import Product from './pages/Product';
-import Products from './pages/Products';
-import MyProducts from './pages/MyProducts';
-import ProductDetails from './pages/ProductDetails';
 import AdminDashboard from './pages/AdminDashboard';
 import Settings from './pages/Settings';
 import Pricing from './pages/Pricing';
@@ -25,6 +22,12 @@ import TermsOfService from './pages/legal/TermsOfService';
 import TermsOfSale from './pages/legal/TermsOfSale';
 import PrivacyPolicy from './pages/legal/PrivacyPolicy';
 import ScheduledPosts from './pages/ScheduledPosts';
+import Products from './pages/Products';
+import Product from './pages/Product';
+import ProductDetails from './pages/ProductDetails';
+import ProductEdit from './pages/ProductEdit';
+import MyProducts from './pages/MyProducts';
+import Orders from './pages/Orders';
 import AuthGuard from './components/AuthGuard';
 import AdminGuard from './components/AdminGuard';
 import { useStore } from './store/useStore';
@@ -33,7 +36,7 @@ import { useAuthState } from './hooks/useAuthState';
 export default function App() {
   useAuthState();
   const { user } = useStore();
-
+  
   return (
     <BrowserRouter>
       <div className="min-h-screen flex">
@@ -52,6 +55,8 @@ export default function App() {
             <Route path="/legal/cgu" element={<TermsOfService />} />
             <Route path="/legal/cgv" element={<TermsOfSale />} />
             <Route path="/legal/confidentialite" element={<PrivacyPolicy />} />
+            
+            {/* Protected Routes */}
             <Route path="/generator" element={
               <AuthGuard>
                 <MockupGenerator />
@@ -60,26 +65,6 @@ export default function App() {
             <Route path="/custom-mockup" element={
               <AuthGuard>
                 <CustomMockup />
-              </AuthGuard>
-            } />
-            <Route path="/product" element={
-              <AuthGuard>
-                <Product />
-              </AuthGuard>
-            } />
-            <Route path="/products" element={
-              <AuthGuard>
-                <Products />
-              </AuthGuard>
-            } />
-            <Route path="/products/:id" element={
-              <AuthGuard>
-                <ProductDetails />
-              </AuthGuard>
-            } />
-            <Route path="/my-products" element={
-              <AuthGuard>
-                <MyProducts />
               </AuthGuard>
             } />
             <Route path="/dashboard" element={
@@ -97,6 +82,32 @@ export default function App() {
                 <Settings />
               </AuthGuard>
             } />
+            
+            {/* Product Routes */}
+            <Route path="/products" element={<Products />} />
+            <Route path="/products/:id" element={<ProductDetails />} />
+            <Route path="/product" element={
+              <AuthGuard>
+                <Product />
+              </AuthGuard>
+            } />
+            <Route path="/my-products" element={
+              <AuthGuard>
+                <MyProducts />
+              </AuthGuard>
+            } />
+            <Route path="/product/edit/:id" element={
+              <AuthGuard>
+                <ProductEdit />
+              </AuthGuard>
+            } />
+            <Route path="/orders" element={
+              <AuthGuard>
+                <Orders />
+              </AuthGuard>
+            } />
+            
+            {/* Admin Routes */}
             <Route path="/admin" element={
               <AuthGuard>
                 <AdminGuard>
@@ -106,6 +117,7 @@ export default function App() {
             } />
           </Routes>
         </PageContainer>
+        {user && <SupportButton />}
         <Toaster position="bottom-right" />
       </div>
     </BrowserRouter>

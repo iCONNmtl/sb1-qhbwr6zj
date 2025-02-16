@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, Wand2, CreditCard, Settings, Calendar, Package, ShoppingBag } from 'lucide-react';
+import { LayoutDashboard, Wand2, CreditCard, Settings, Calendar, Package, ShoppingBag, FileText } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import SidebarLink from './SidebarLink';
 import clsx from 'clsx';
@@ -58,6 +58,11 @@ export default function SidebarNav({ isCollapsed }: SidebarNavProps) {
           to: '/my-products',
           icon: ShoppingBag,
           label: 'Mes produits'
+        },
+        {
+          to: '/orders',
+          icon: FileText,
+          label: 'Commandes'
         }
       ]
     },

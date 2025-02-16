@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { User, CreditCard, Image } from 'lucide-react';
+import { User, CreditCard, Image, Package } from 'lucide-react';
 import Logo from '../common/Logo';
 
 export default function PublicHeader() {
@@ -17,6 +17,14 @@ export default function PublicHeader() {
             >
               <Image className="h-5 w-5 mr-2" />
               <span>Librairie</span>
+            </Link>
+            
+            <Link
+              to="/products"
+              className="flex items-center text-gray-600 hover:text-indigo-600 transition-colors"
+            >
+              <Package className="h-5 w-5 mr-2" />
+              <span>Catalogue</span>
             </Link>
             
             <Link

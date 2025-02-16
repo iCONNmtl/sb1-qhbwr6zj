@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useStore } from '../store/useStore';
-import { collection, addDoc } from 'firebase/firestore';
+import { useParams, useNavigate } from 'react-router-dom';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { nanoid } from 'nanoid';
-import { Printer, Save, Loader2, Info, Leaf, Sparkles, Droplets, Scale, Frame } from 'lucide-react';
+import { Save, Loader2, Package, Info } from 'lucide-react';
 import DesignSelector from '../components/DesignSelector';
 import DesignEditor from '../components/product/DesignEditor';
 import toast from 'react-hot-toast';
@@ -19,11 +17,6 @@ interface Size {
   };
   cost: number;
   suggestedPrice: number;
-}
-
-interface Variant {
-  size: Size;
-  selected: boolean;
 }
 
 const SIZES: Size[] = [
@@ -140,148 +133,118 @@ const SIZES: Size[] = [
 ];
 
 const PRODUCT_TYPES = {
-  'poster-mat': {
-    name: 'Poster Mat Premium',
-    description: 'Impression mate professionnelle sur papier 250g/m²',
-    icon: Droplets,
-    features: [
-      {
-        icon: Sparkles,
-        title: 'Finition mate',
-        description: 'Surface mate anti-reflets pour un rendu artistique'
-      },
-      {
-        icon: Scale,
-        title: '250 g/m²',
-        description: 'Grammage professionnel pour une qualité optimale'
-      },
-      {
-        icon: Droplets,
-        title: 'Texture fine',
-        description: 'Surface légèrement texturée pour un rendu premium'
-      },
-      {
-        icon: Leaf,
-        title: 'Certifié FSC',
-        description: 'Papier issu de forêts gérées durablement'
-      }
-    ]
-  },
-  'poster-glossy': {
-    name: 'Poster Brillant Premium',
-    description: 'Impression brillante éclatante sur papier photo 250g/m²',
-    icon: Sparkles,
-    features: [
-      {
-        icon: Sparkles,
-        title: 'Finition brillante',
-        description: 'Surface ultra-brillante pour des couleurs éclatantes'
-      },
-      {
-        icon: Scale,
-        title: '250 g/m²',
-        description: 'Grammage professionnel pour une qualité optimale'
-      },
-      {
-        icon: Droplets,
-        title: 'Séchage instantané',
-        description: 'Encre qui sèche instantanément, sans bavures'
-      },
-      {
-        icon: Leaf,
-        title: 'Certifié FSC',
-        description: 'Papier issu de forêts gérées durablement'
-      }
-    ]
-  },
-  'poster-frame': {
-    name: 'Poster Encadré',
-    description: 'Vos posters encadrés avec élégance dans des cadres en aluminium',
-    icon: Frame,
-    features: [
-      {
-        icon: Frame,
-        title: 'Cadre aluminium',
-        description: 'Cadre premium en aluminium brossé'
-      },
-      {
-        icon: Sparkles,
-        title: 'Verre anti-reflets',
-        description: 'Protection optimale contre les reflets'
-      },
-      {
-        icon: Scale,
-        title: 'Montage pro',
-        description: 'Montage professionnel inclus'
-      },
-      {
-        icon: Leaf,
-        title: 'Protection UV',
-        description: 'Protection contre les rayons UV'
-      }
-    ]
-  }
+  'poster-mat': 'Poster Mat Premium',
+  'poster-glossy': 'Poster Brillant Premium',
+  'poster-frame': 'Poster Encadré'
 } as const;
 
-type ProductType = keyof typeof PRODUCT_TYPES;
+interface Product {
+  id: string;
+  type: keyof typeof PRODUCT_TYPES;
+  designUrl: string;
+  variants: {
+    sizeId: string;
+    cost: number;
+    suggestedPrice: number;
+    sku: string;
+    adjustments?: {
+      scale: number;
+      position: { x: number; y: number };
+      rotation: number;
+    };
+  }[];
+  createdAt: string;
+}
 
-export default function Product() {
-  const [searchParams] = useSearchParams();
-  const productType = searchParams.get('type') as ProductType || 'poster-mat';
-  const product = PRODUCT_TYPES[productType];
-
-  const { user } = useStore();
+export default function ProductEdit() {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [product, setProduct] = useState<Product | null>(null);
   const [designUrl, setDesignUrl] = useState<string>();
-  const [selectedVariants, setSelectedVariants] = useState<Variant[]>(
-    SIZES.map(size => ({ size, selected: false }))
-  );
+  const [selectedVariants, setSelectedVariants] = useState<{
+    size: Size;
+    selected: boolean;
+  }[]>([]);
   const [designAdjustments, setDesignAdjustments] = useState<Record<string, any>>({});
 
-  const handleCreateProduct = async () => {
-    if (!user || !designUrl) {
-      toast.error('Veuillez sélectionner un design');
-      return;
-    }
+  useEffect(() => {
+    const fetchProduct = async () => {
+      if (!id) return;
 
-    const selectedSizes = selectedVariants.filter(v => v.selected);
-    if (selectedSizes.length === 0) {
-      toast.error('Veuillez sélectionner au moins une taille');
-      return;
-    }
+      try {
+        const productDoc = await getDoc(doc(db, 'products', id));
+        if (!productDoc.exists()) {
+          toast.error('Produit non trouvé');
+          navigate('/my-products');
+          return;
+        }
 
-    setLoading(true);
+        const productData = productDoc.data() as Product;
+        setProduct(productData);
+        setDesignUrl(productData.designUrl);
+
+        // Initialize variants
+        setSelectedVariants(
+          SIZES.map(size => ({
+            size,
+            selected: productData.variants.some(v => v.sizeId === size.id)
+          }))
+        );
+
+        // Initialize adjustments
+        const adjustments: Record<string, any> = {};
+        productData.variants.forEach(variant => {
+          if (variant.adjustments) {
+            adjustments[variant.sizeId] = variant.adjustments;
+          }
+        });
+        setDesignAdjustments(adjustments);
+      } catch (error) {
+        console.error('Error fetching product:', error);
+        toast.error('Erreur lors du chargement du produit');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, [id, navigate]);
+
+  const handleSave = async () => {
+    if (!product || !id) return;
+
+    setSaving(true);
     try {
-      const productId = nanoid();
-      const productRef = collection(db, 'products');
-      
-      await addDoc(productRef, {
-        id: productId,
-        userId: user.uid,
-        type: productType,
-        designUrl,
+      const selectedSizes = selectedVariants.filter(v => v.selected);
+      if (selectedSizes.length === 0) {
+        throw new Error('Veuillez sélectionner au moins une taille');
+      }
+
+      const productRef = doc(db, 'products', id);
+      await updateDoc(productRef, {
+        designUrl: designUrl || product.designUrl,
         variants: selectedSizes.map(variant => ({
           sizeId: variant.size.id,
           cost: variant.size.cost,
           suggestedPrice: variant.size.suggestedPrice,
-          sku: `${productId}-${variant.size.id}`,
+          sku: `${product.id}-${variant.size.id}`,
           adjustments: designAdjustments[variant.size.id] || {
             scale: 1,
             position: { x: 0, y: 0 },
             rotation: 0
           }
-        })),
-        createdAt: new Date().toISOString()
+        }))
       });
 
-      toast.success('Produit créé avec succès');
-      navigate('/products');
-    } catch (error) {
-      console.error('Error creating product:', error);
-      toast.error('Erreur lors de la création du produit');
+      toast.success('Produit mis à jour avec succès');
+      navigate('/my-products');
+    } catch (error: any) {
+      console.error('Error updating product:', error);
+      toast.error(error.message || 'Erreur lors de la mise à jour du produit');
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
@@ -291,72 +254,57 @@ export default function Product() {
     ));
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-indigo-600 mx-auto" />
+          <p className="mt-4 text-gray-500">Chargement du produit...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="text-center">
+          <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <p className="text-gray-600">Produit non trouvé</p>
+        </div>
+      </div>
+    );
+  }
+
   const selectedSizes = selectedVariants
     .filter(v => v.selected)
     .map(v => v.size);
 
-  const Icon = product.icon;
-
   return (
     <div className="max-w-7xl mx-auto space-y-8">
-      <div className="bg-white rounded-xl shadow-sm p-8">
-        <div className="flex items-center gap-4 mb-8">
-          <div className="p-3 bg-indigo-100 rounded-xl">
-            <Icon className="h-6 w-6 text-indigo-600" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">
-              {product.name}
-            </h1>
-            <p className="text-gray-600">
-              {product.description}
-            </p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-4 gap-6">
-          {product.features.map((feature, index) => {
-            const FeatureIcon = feature.icon;
-            return (
-              <div key={index} className="bg-gray-50 rounded-xl p-4">
-                <div className="p-2 bg-white w-fit rounded-lg mb-3">
-                  <FeatureIcon className="h-5 w-5 text-indigo-600" />
-                </div>
-                <div className="font-medium text-gray-900 mb-1">
-                  {feature.title}
-                </div>
-                <div className="text-sm text-gray-600">
-                  {feature.description}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <h2 className="text-xl font-semibold text-gray-900">
-            Configuration du produit
-          </h2>
-          <div className="px-3 py-1 bg-indigo-100 text-indigo-700 text-sm font-medium rounded-full">
-            {selectedVariants.filter(v => v.selected).length} taille{selectedVariants.filter(v => v.selected).length > 1 ? 's' : ''} sélectionnée{selectedVariants.filter(v => v.selected).length > 1 ? 's' : ''}
-          </div>
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Modifier le produit
+          </h1>
+          <p className="text-gray-600 mt-1">
+            {PRODUCT_TYPES[product.type]}
+          </p>
         </div>
         <button
-          onClick={handleCreateProduct}
-          disabled={loading || !designUrl || !selectedVariants.some(v => v.selected)}
+          onClick={handleSave}
+          disabled={saving || !selectedVariants.some(v => v.selected)}
           className="flex items-center px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition disabled:opacity-50"
         >
-          {loading ? (
+          {saving ? (
             <>
               <Loader2 className="h-5 w-5 animate-spin mr-2" />
-              Création...
+              Enregistrement...
             </>
           ) : (
             <>
               <Save className="h-5 w-5 mr-2" />
-              Créer le produit
+              Enregistrer
             </>
           )}
         </button>
@@ -365,8 +313,9 @@ export default function Product() {
       <div className="grid grid-cols-2 gap-8">
         <div className="space-y-6">
           <DesignSelector 
-            userId={user?.uid || ''}
+            userId={product.id}
             onSelect={setDesignUrl}
+            selectedUrl={designUrl}
           />
 
           {designUrl && selectedSizes.length > 0 && (
@@ -378,6 +327,7 @@ export default function Product() {
                 designUrl={designUrl}
                 selectedSizes={selectedSizes}
                 onSave={setDesignAdjustments}
+                initialAdjustments={designAdjustments}
               />
             </div>
           )}
@@ -418,7 +368,7 @@ export default function Product() {
                           <Info className="h-4 w-4 text-gray-400 group-hover:text-indigo-600" />
                           <div className="absolute right-0 bottom-full mb-2 w-64 p-3 bg-gray-900 text-white text-sm rounded-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
                             <div className="font-medium mb-2">Détails du prix</div>
-                            <div className="space-y-1 text-sm">
+                            <div className="space-y-1">
                               <div className="flex justify-between">
                                 <span>Prix de vente suggéré:</span>
                                 <span className="font-medium">{variant.size.suggestedPrice}€</span>

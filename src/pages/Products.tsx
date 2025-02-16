@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Package, Sparkles, Droplets, Frame } from 'lucide-react';
+import { Package, Sparkles, Droplets, Frame, Star, Globe2, Printer, Truck, Shield } from 'lucide-react';
+import RatingStars from '../components/common/RatingStars';
 import clsx from 'clsx';
 
 const PRODUCTS = [
@@ -17,7 +18,9 @@ const PRODUCTS = [
       'Certifié FSC'
     ],
     image: 'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?auto=format&fit=crop&q=80&w=2574',
-    startingPrice: 15
+    startingPrice: 15,
+    rating: 4.8,
+    reviewCount: 127
   },
   {
     id: 'poster-glossy',
@@ -32,7 +35,9 @@ const PRODUCTS = [
       'Certifié FSC'
     ],
     image: 'https://images.unsplash.com/photo-1581430872221-d1cfed785922?auto=format&fit=crop&q=80&w=2670',
-    startingPrice: 18
+    startingPrice: 18,
+    rating: 4.9,
+    reviewCount: 243
   },
   {
     id: 'poster-frame',
@@ -47,7 +52,27 @@ const PRODUCTS = [
       'Protection UV'
     ],
     image: 'https://images.unsplash.com/photo-1582053433976-25c00369fc93?auto=format&fit=crop&q=80&w=2512',
-    startingPrice: 35
+    startingPrice: 35,
+    rating: 4.7,
+    reviewCount: 89
+  }
+];
+
+const PRINTER_NETWORK = [
+  {
+    region: 'Europe',
+    locations: ['Paris', 'Berlin', 'Milan', 'Amsterdam'],
+    deliveryTime: '2-3 jours'
+  },
+  {
+    region: 'Amérique du Nord',
+    locations: ['New York', 'Los Angeles', 'Toronto', 'Chicago'],
+    deliveryTime: '3-5 jours'
+  },
+  {
+    region: 'Asie-Pacifique',
+    locations: ['Tokyo', 'Sydney', 'Singapour', 'Séoul'],
+    deliveryTime: '4-6 jours'
   }
 ];
 
@@ -62,6 +87,54 @@ export default function Products() {
         <p className="text-xl text-gray-600 max-w-3xl mx-auto">
           Des impressions de qualité professionnelle pour mettre en valeur vos créations. Choisissez parmi notre gamme de finitions et de formats.
         </p>
+      </div>
+
+      {/* Printer Network Info */}
+      <div className="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-2xl p-8 text-white">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold mb-4">
+            Un réseau d'imprimeurs d'excellence
+          </h2>
+          <p className="text-lg text-white/90 max-w-2xl mx-auto">
+            Nous collaborons avec les meilleurs imprimeurs à travers le monde pour garantir une qualité exceptionnelle et des délais de livraison optimaux.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-8">
+          {PRINTER_NETWORK.map((region) => (
+            <div key={region.region} className="bg-white/10 backdrop-blur-sm rounded-xl p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <Globe2 className="h-6 w-6 text-white" />
+                <h3 className="text-lg font-semibold">{region.region}</h3>
+              </div>
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center gap-2">
+                  <Printer className="h-4 w-4 text-white/70" />
+                  <span>{region.locations.join(', ')}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Truck className="h-4 w-4 text-white/70" />
+                  <span>Livraison en {region.deliveryTime}</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-8 grid md:grid-cols-3 gap-6 text-sm">
+          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center">
+            <div className="font-bold text-2xl mb-1">15+</div>
+            <div className="text-white/90">Centres d'impression</div>
+          </div>
+          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center">
+            <div className="font-bold text-2xl mb-1">24/7</div>
+            <div className="text-white/90">Production continue</div>
+          </div>
+          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center">
+            <div className="font-bold text-2xl mb-1">98%</div>
+            <div className="text-white/90">Satisfaction client</div>
+          </div>
+        </div>
       </div>
 
       {/* Products Grid */}
@@ -100,6 +173,13 @@ export default function Products() {
                   </div>
                 </div>
 
+                <div className="flex items-center gap-2 mb-4">
+                  <RatingStars rating={product.rating} showRating />
+                  <span className="text-sm text-gray-500">
+                    ({product.reviewCount} avis)
+                  </span>
+                </div>
+
                 <p className="text-gray-600 mb-6">
                   {product.description}
                 </p>
@@ -127,51 +207,63 @@ export default function Products() {
         })}
       </div>
 
-      {/* Features */}
-      <div className="bg-white rounded-2xl shadow-sm p-12 mt-16">
+      {/* Quality Commitment */}
+      <div className="bg-white rounded-2xl shadow-sm p-12">
         <div className="text-center mb-12">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            Une qualité d'impression exceptionnelle
+            Notre engagement qualité
           </h2>
           <p className="text-lg text-gray-600">
-            Nos produits sont imprimés avec les meilleures technologies pour un rendu professionnel
+            Un réseau international d'imprimeurs certifiés pour une qualité exceptionnelle
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-4 gap-8">
           <div className="text-center">
             <div className="w-16 h-16 bg-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Package className="h-8 w-8 text-indigo-600" />
+              <Printer className="h-8 w-8 text-indigo-600" />
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Emballage sécurisé
+              Imprimeurs certifiés
             </h3>
             <p className="text-gray-600">
-              Vos impressions sont soigneusement emballées dans des tubes rigides pour une protection optimale pendant le transport.
+              Nos partenaires sont rigoureusement sélectionnés selon des critères stricts de qualité.
             </p>
           </div>
 
           <div className="text-center">
             <div className="w-16 h-16 bg-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Sparkles className="h-8 w-8 text-indigo-600" />
+              <Globe2 className="h-8 w-8 text-indigo-600" />
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Qualité professionnelle
+              Réseau international
             </h3>
             <p className="text-gray-600">
-              Nos imprimantes professionnelles et nos papiers haut de gamme garantissent des impressions de qualité exceptionnelle.
+              Des centres d'impression dans le monde entier pour une livraison rapide et locale.
             </p>
           </div>
 
           <div className="text-center">
             <div className="w-16 h-16 bg-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Frame className="h-8 w-8 text-indigo-600" />
+              <Shield className="h-8 w-8 text-indigo-600" />
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Finitions premium
+              Qualité garantie
             </h3>
             <p className="text-gray-600">
-              Choisissez parmi nos différentes finitions pour sublimer vos créations et leur donner un aspect professionnel.
+              Chaque impression est vérifiée et validée selon nos standards de qualité.
+            </p>
+          </div>
+
+          <div className="text-center">
+            <div className="w-16 h-16 bg-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Truck className="h-8 w-8 text-indigo-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              Livraison optimisée
+            </h3>
+            <p className="text-gray-600">
+              Production au plus près du client pour des délais de livraison réduits.
             </p>
           </div>
         </div>
