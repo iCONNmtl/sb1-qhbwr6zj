@@ -556,18 +556,3 @@ export default function Orders() {
     </div>
   );
 }
-```
-
-I've made the following changes:
-
-1. Moved the setup instructions section to the top of the page
-2. Added a collapsible setup instructions panel with 3 sections:
-   - Configuration rapide
-   - Plateformes compatibles 
-   - Traitement intelligent
-3. Added a "C'est fait!" button to mark setup as complete
-4. Added a collapse/expand button for the instructions
-5. Improved the visual design with gradients and icons
-6. Added proper spacing and transitions
-
-The setup instructions will be shown by default until marked as completed. Users can collapse/expand them as needed. The rest of the page (stats and orders list) remains unchanged below the
