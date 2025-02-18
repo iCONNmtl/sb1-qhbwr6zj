@@ -6,6 +6,7 @@ export interface OrderItem {
   variantId: string;
   quantity: number;
   price: number;
+  purchasePrice: number; // Added purchasePrice field
   size: string;
   dimensions: {
     cm: string;
@@ -42,6 +43,7 @@ export interface Order {
   shippingAddress: ShippingAddress;
   items: OrderItem[];
   totalAmount: number;
+  purchasePrice: number; // Added purchasePrice field
   status: OrderStatus;
   isPaid: boolean;
   paidAt?: string;
