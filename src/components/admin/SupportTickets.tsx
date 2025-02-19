@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
-import { MessageCircle, Clock, CheckCircle, XCircle, Send, Loader2 } from 'lucide-react';
-import { doc, updateDoc } from 'firebase/firestore';
+import React from 'react';
+import { MessageCircle, Clock, CheckCircle, XCircle, Loader2, Trash2 } from 'lucide-react';
+import { doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
+import { usePagination } from '../../hooks/usePagination';
+import Pagination from '../Pagination';
 import toast from 'react-hot-toast';
 import clsx from 'clsx';
 
@@ -13,7 +15,6 @@ interface Ticket {
   message: string;
   status: 'open' | 'closed';
   createdAt: string;
-  response?: string;
 }
 
 interface SupportTicketsProps {
@@ -22,56 +23,50 @@ interface SupportTicketsProps {
 }
 
 export default function SupportTickets({ tickets, onRefresh }: SupportTicketsProps) {
-  const [respondingTo, setRespondingTo] = useState<string | null>(null);
-  const [response, setResponse] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [processingId, setProcessingId] = React.useState<string | null>(null);
+  const {
+    currentPage,
+    setCurrentPage,
+    pageSize,
+    setPageSize,
+    totalItems,
+    paginatedItems: paginatedTickets
+  } = usePagination(tickets);
 
-  const handleRespond = async (ticketId: string) => {
-    if (!response.trim()) {
-      toast.error('Veuillez entrer une réponse');
-      return;
-    }
-
-    setLoading(true);
+  const handleMarkAsResolved = async (ticketId: string) => {
+    setProcessingId(ticketId);
     try {
       const ticketRef = doc(db, 'tickets', ticketId);
       await updateDoc(ticketRef, {
         status: 'closed',
-        response,
-        updatedAt: new Date().toISOString()
+        resolvedAt: new Date().toISOString()
       });
 
-      toast.success('Réponse envoyée avec succès');
-      setRespondingTo(null);
-      setResponse('');
+      toast.success('Ticket marqué comme traité');
       await onRefresh();
     } catch (error) {
-      console.error('Error responding to ticket:', error);
-      toast.error('Erreur lors de l\'envoi de la réponse');
+      console.error('Error resolving ticket:', error);
+      toast.error('Erreur lors du traitement du ticket');
     } finally {
-      setLoading(false);
+      setProcessingId(null);
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'open':
-        return <Clock className="h-5 w-5 text-yellow-500" />;
-      case 'closed':
-        return <CheckCircle className="h-5 w-5 text-green-500" />;
-      default:
-        return <XCircle className="h-5 w-5 text-red-500" />;
-    }
-  };
+  const handleDelete = async (ticketId: string) => {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ce ticket ?')) return;
 
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'open':
-        return 'En attente';
-      case 'closed':
-        return 'Résolu';
-      default:
-        return 'Erreur';
+    setProcessingId(ticketId);
+    try {
+      const ticketRef = doc(db, 'tickets', ticketId);
+      await deleteDoc(ticketRef);
+
+      toast.success('Ticket supprimé');
+      await onRefresh();
+    } catch (error) {
+      console.error('Error deleting ticket:', error);
+      toast.error('Erreur lors de la suppression du ticket');
+    } finally {
+      setProcessingId(null);
     }
   };
 
@@ -96,7 +91,7 @@ export default function SupportTickets({ tickets, onRefresh }: SupportTicketsPro
       </div>
 
       <div className="divide-y divide-gray-200">
-        {tickets.map((ticket) => (
+        {paginatedTickets.map((ticket) => (
           <div key={ticket.id} className="p-6">
             <div className="flex items-start justify-between">
               <div className="space-y-1">
@@ -110,7 +105,7 @@ export default function SupportTickets({ tickets, onRefresh }: SupportTicketsPro
                       ? 'bg-yellow-100 text-yellow-800'
                       : 'bg-green-100 text-green-800'
                   )}>
-                    {getStatusText(ticket.status)}
+                    {ticket.status === 'open' ? 'En attente' : 'Traité'}
                   </div>
                 </div>
                 <div className="text-sm text-gray-500">
@@ -130,13 +125,39 @@ export default function SupportTickets({ tickets, onRefresh }: SupportTicketsPro
               <div className="flex items-center gap-2">
                 {ticket.status === 'open' && (
                   <button
-                    onClick={() => setRespondingTo(ticket.id)}
-                    className="px-3 py-1 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+                    onClick={() => handleMarkAsResolved(ticket.id)}
+                    disabled={processingId === ticket.id}
+                    className={clsx(
+                      'flex items-center px-3 py-1 rounded-lg transition-colors',
+                      'bg-green-600 text-white hover:bg-green-700',
+                      'disabled:opacity-50 disabled:cursor-not-allowed'
+                    )}
                   >
-                    Répondre
+                    {processingId === ticket.id ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        Traitement...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        Marquer comme traité
+                      </>
+                    )}
                   </button>
                 )}
-                {getStatusIcon(ticket.status)}
+                <button
+                  onClick={() => handleDelete(ticket.id)}
+                  disabled={processingId === ticket.id}
+                  className={clsx(
+                    'p-2 rounded-lg transition-colors',
+                    'text-red-600 hover:bg-red-50',
+                    'disabled:opacity-50 disabled:cursor-not-allowed'
+                  )}
+                  title="Supprimer"
+                >
+                  <Trash2 className="h-5 w-5" />
+                </button>
               </div>
             </div>
 
@@ -145,64 +166,17 @@ export default function SupportTickets({ tickets, onRefresh }: SupportTicketsPro
                 {ticket.message}
               </p>
             </div>
-
-            {ticket.response && (
-              <div className="mt-4 ml-8">
-                <div className="p-4 bg-indigo-50 rounded-lg">
-                  <div className="text-sm font-medium text-indigo-900 mb-2">
-                    Réponse :
-                  </div>
-                  <p className="text-indigo-800 whitespace-pre-wrap">
-                    {ticket.response}
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {respondingTo === ticket.id && (
-              <div className="mt-4 ml-8">
-                <div className="p-4 bg-white border border-gray-200 rounded-lg">
-                  <textarea
-                    value={response}
-                    onChange={(e) => setResponse(e.target.value)}
-                    placeholder="Votre réponse..."
-                    rows={4}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 mb-4"
-                  />
-                  <div className="flex justify-end gap-3">
-                    <button
-                      onClick={() => {
-                        setRespondingTo(null);
-                        setResponse('');
-                      }}
-                      className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition"
-                    >
-                      Annuler
-                    </button>
-                    <button
-                      onClick={() => handleRespond(ticket.id)}
-                      disabled={loading}
-                      className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition disabled:opacity-50"
-                    >
-                      {loading ? (
-                        <>
-                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                          Envoi...
-                        </>
-                      ) : (
-                        <>
-                          <Send className="h-4 w-4 mr-2" />
-                          Envoyer
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         ))}
       </div>
+
+      <Pagination
+        currentPage={currentPage}
+        totalItems={totalItems}
+        pageSize={pageSize}
+        onPageChange={setCurrentPage}
+        onPageSizeChange={setPageSize}
+      />
     </div>
   );
 }

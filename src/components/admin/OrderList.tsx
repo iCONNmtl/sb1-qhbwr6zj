@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Package, Truck, Clock, CheckCircle, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
+import { usePagination } from '../../hooks/usePagination';
+import Pagination from '../Pagination';
 import toast from 'react-hot-toast';
 import clsx from 'clsx';
 import type { Order } from '../../types/order';
@@ -39,8 +41,16 @@ const NEXT_STATUS = {
 } as const;
 
 export default function OrderList({ orders, onRefresh }: OrderListProps) {
-  const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
-  const [processingOrder, setProcessingOrder] = useState<string | null>(null);
+  const [expandedOrder, setExpandedOrder] = React.useState<string | null>(null);
+  const [processingOrder, setProcessingOrder] = React.useState<string | null>(null);
+  const {
+    currentPage,
+    setCurrentPage,
+    pageSize,
+    setPageSize,
+    totalItems,
+    paginatedItems: paginatedOrders
+  } = usePagination(orders);
 
   const handleUpdateStatus = async (orderId: string, currentStatus: Order['status']) => {
     if (!NEXT_STATUS[currentStatus]) return;
@@ -61,17 +71,6 @@ export default function OrderList({ orders, onRefresh }: OrderListProps) {
     } finally {
       setProcessingOrder(null);
     }
-  };
-
-  // Helper function to format amount
-  const formatAmount = (amount: string | number): string => {
-    const numericAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
-    return numericAmount.toFixed(2);
-  };
-
-  // Helper function to format item price
-  const formatItemPrice = (price: string | number): number => {
-    return typeof price === 'string' ? parseFloat(price) : price;
   };
 
   return (
@@ -95,13 +94,12 @@ export default function OrderList({ orders, onRefresh }: OrderListProps) {
       </div>
 
       <div className="divide-y divide-gray-200">
-        {orders.map((order) => {
+        {paginatedOrders.map((order) => {
           const StatusIcon = STATUS_ICONS[order.status];
           const isExpanded = expandedOrder === order.firestoreId;
 
           return (
             <div key={order.firestoreId} className="group">
-              {/* Order Header */}
               <div 
                 className="p-6 hover:bg-gray-50 cursor-pointer transition-colors"
                 onClick={() => setExpandedOrder(isExpanded ? null : order.firestoreId)}
@@ -128,7 +126,7 @@ export default function OrderList({ orders, onRefresh }: OrderListProps) {
 
                     <div>
                       <div className="text-sm font-medium text-gray-900">
-                        {formatAmount(order.totalAmount)}€
+                        {order.totalAmount.toFixed(2)}€
                       </div>
                       <div className="text-sm text-gray-500">
                         {order.items.length} article{order.items.length > 1 ? 's' : ''}
@@ -186,50 +184,46 @@ export default function OrderList({ orders, onRefresh }: OrderListProps) {
                 </div>
               </div>
 
-              {/* Order Details */}
               {isExpanded && (
                 <div className="px-6 pb-6 space-y-6">
                   {/* Items */}
                   <div className="bg-gray-50 rounded-lg p-4">
                     <h4 className="font-medium text-gray-900 mb-4">Articles</h4>
                     <div className="grid gap-4">
-                      {order.items.map((item, index) => {
-                        const itemPrice = formatItemPrice(item.price);
-                        return (
-                          <div 
-                            key={index}
-                            className="bg-white rounded-lg p-4 border border-gray-200"
-                          >
-                            <div className="flex items-start justify-between">
-                              <div className="space-y-1">
-                                <div className="flex items-center gap-2">
-                                  <span className="px-2 py-1 bg-indigo-100 text-indigo-700 text-sm font-medium rounded-md">
-                                    {item.size}
+                      {order.items.map((item, index) => (
+                        <div 
+                          key={index}
+                          className="bg-white rounded-lg p-4 border border-gray-200"
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2">
+                                <span className="px-2 py-1 bg-indigo-100 text-indigo-700 text-sm font-medium rounded-md">
+                                  {item.size}
+                                </span>
+                                {item.dimensions && (
+                                  <span className="text-sm text-gray-500">
+                                    {item.dimensions.cm} • {item.dimensions.inches}
                                   </span>
-                                  {item.dimensions && (
-                                    <span className="text-sm text-gray-500">
-                                      {item.dimensions.cm} • {item.dimensions.inches}
-                                    </span>
-                                  )}
-                                </div>
-                                {item.sku && (
-                                  <div className="text-xs text-gray-500 font-mono">
-                                    SKU: {item.sku}
-                                  </div>
                                 )}
                               </div>
-                              <div className="text-right">
-                                <div className="text-lg font-medium text-gray-900">
-                                  {(itemPrice * item.quantity).toFixed(2)}€
+                              {item.sku && (
+                                <div className="text-xs text-gray-500 font-mono">
+                                  SKU: {item.sku}
                                 </div>
-                                <div className="text-sm text-gray-500">
-                                  {itemPrice.toFixed(2)}€ × {item.quantity}
-                                </div>
+                              )}
+                            </div>
+                            <div className="text-right">
+                              <div className="text-lg font-medium text-gray-900">
+                                {(item.price * item.quantity).toFixed(2)}€
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                {item.price.toFixed(2)}€ × {item.quantity}
                               </div>
                             </div>
                           </div>
-                        );
-                      })}
+                        </div>
+                      ))}
                     </div>
                   </div>
 
@@ -271,6 +265,14 @@ export default function OrderList({ orders, onRefresh }: OrderListProps) {
           );
         })}
       </div>
+
+      <Pagination
+        currentPage={currentPage}
+        totalItems={totalItems}
+        pageSize={pageSize}
+        onPageChange={setCurrentPage}
+        onPageSizeChange={setPageSize}
+      />
     </div>
   );
 }
