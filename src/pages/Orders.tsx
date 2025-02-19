@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, where, getDocs, getDoc, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useStore } from '../store/useStore';
-import { Package, Truck, Clock, CheckCircle, ChevronDown, ChevronUp, Loader2, Mail, ArrowRight, Check, Info } from 'lucide-react';
+import { Package, Truck, Clock, CheckCircle, ChevronDown, ChevronUp, Loader2, Mail, ArrowRight, Check, CreditCard } from 'lucide-react';
 import OrderStats from './OrderStats';
+import CreditPaymentDialog from '../components/orders/CreditPaymentDialog';
 import toast from 'react-hot-toast';
 import clsx from 'clsx';
 import type { Order } from '../types/order';
@@ -101,77 +102,72 @@ export default function Orders() {
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [showSetupInstructions, setShowSetupInstructions] = useState(true);
   const [isSetupCompleted, setIsSetupCompleted] = useState(false);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [paymentDialog, setPaymentDialog] = useState<{
+    orderId: string;
+    purchasePrice: number;
+  } | null>(null);
 
   useEffect(() => {
     if (!user) return;
 
-    // Get initial setup status from Firestore
-    const fetchSetupStatus = async () => {
-      try {
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
-        if (userDoc.exists()) {
-          const userData = userDoc.data() as UserProfile;
+    const unsubscribeUser = onSnapshot(
+      doc(db, 'users', user.uid),
+      (doc) => {
+        if (doc.exists()) {
+          const userData = doc.data() as UserProfile;
+          setUserProfile(userData);
           setIsSetupCompleted(!!userData.orderSetupCompleted);
           setShowSetupInstructions(!userData.orderSetupCompleted);
         }
-      } catch (error) {
-        console.error('Error fetching setup status:', error);
       }
-    };
+    );
 
-    fetchSetupStatus();
-  }, [user]);
+    const ordersQuery = query(
+      collection(db, 'orders'),
+      where('userId', '==', user.uid)
+    );
 
-  useEffect(() => {
-    const fetchOrders = async () => {
-      if (!user) {
-        setLoading(false);
-        return;
-      }
+    const unsubscribeOrders = onSnapshot(
+      ordersQuery,
+      (snapshot) => {
+        const ordersData = snapshot.docs.map(doc => ({
+          ...doc.data(),
+          firestoreId: doc.id,
+          totalAmount: Number(doc.data().totalAmount),
+          purchasePrice: Number(doc.data().purchasePrice || 0),
+          items: doc.data().items.map((item: any) => ({
+            ...item,
+            price: Number(item.price),
+            quantity: Number(item.quantity),
+            purchasePrice: Number(item.purchasePrice || 0)
+          }))
+        })) as Order[];
 
-      try {
-        const ordersRef = collection(db, 'orders');
-        const q = query(ordersRef, where('userId', '==', user.uid));
-        const snapshot = await getDocs(q);
-        
-        const ordersData = snapshot.docs.map(doc => {
-          const data = doc.data();
-          return {
-            ...data,
-            firestoreId: doc.id,
-            totalAmount: Number(data.totalAmount),
-            purchasePrice: Number(data.purchasePrice || 0),
-            items: data.items.map((item: any) => ({
-              ...item,
-              price: Number(item.price),
-              quantity: Number(item.quantity),
-              purchasePrice: Number(item.purchasePrice || 0)
-            }))
-          };
-        }) as Order[];
-
-        // Sort by creation date (newest first)
         ordersData.sort((a, b) => 
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
 
         setOrders(ordersData);
-      } catch (error) {
+        setLoading(false);
+      },
+      (error) => {
         console.error('Error fetching orders:', error);
         toast.error('Erreur lors du chargement des commandes');
-      } finally {
         setLoading(false);
       }
-    };
+    );
 
-    fetchOrders();
+    return () => {
+      unsubscribeUser();
+      unsubscribeOrders();
+    };
   }, [user]);
 
   const handleSetupComplete = async () => {
     if (!user) return;
 
     try {
-      // Update Firestore
       const userRef = doc(db, 'users', user.uid);
       await updateDoc(userRef, {
         orderSetupCompleted: true
@@ -184,6 +180,10 @@ export default function Orders() {
       console.error('Error updating setup status:', error);
       toast.error('Erreur lors de la sauvegarde du statut');
     }
+  };
+
+  const handlePaymentSuccess = (orderId: string) => {
+    setPaymentDialog(null);
   };
 
   if (loading) {
@@ -199,7 +199,6 @@ export default function Orders() {
 
   return (
     <div className="space-y-8">
-      {/* Setup Instructions */}
       <div className={clsx(
         "bg-gradient-to-br from-white to-indigo-50/20 rounded-xl shadow-sm overflow-hidden border border-indigo-100",
         "transition-all duration-300 ease-in-out",
@@ -330,7 +329,6 @@ export default function Orders() {
         </div>
       </div>
 
-      {/* Show expand button when instructions are hidden */}
       {!showSetupInstructions && (
         <button
           onClick={() => setShowSetupInstructions(true)}
@@ -341,10 +339,8 @@ export default function Orders() {
         </button>
       )}
 
-      {/* Order Stats */}
       <OrderStats orders={orders} />
 
-      {/* Order List */}
       {orders.length === 0 ? (
         <div className="bg-white rounded-xl shadow-sm p-12 text-center">
           <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -357,7 +353,7 @@ export default function Orders() {
         </div>
       ) : (
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-gray-200">
+          <div className="p-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-indigo-100 rounded-lg">
@@ -383,7 +379,6 @@ export default function Orders() {
 
               return (
                 <div key={order.firestoreId} className="group">
-                  {/* Order Header */}
                   <div 
                     className="p-6 hover:bg-gray-50 cursor-pointer transition-colors"
                     onClick={() => setExpandedOrder(isExpanded ? null : order.firestoreId)}
@@ -445,7 +440,22 @@ export default function Orders() {
                         </div>
                       </div>
 
-                      <div>
+                      <div className="flex items-center gap-4">
+                        {order.status === 'pending' && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setPaymentDialog({
+                                orderId: order.firestoreId,
+                                purchasePrice: order.purchasePrice
+                              });
+                            }}
+                            className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+                          >
+                            <CreditCard className="h-5 w-5 mr-2" />
+                            Payer la commande
+                          </button>
+                        )}
                         {isExpanded ? (
                           <ChevronUp className="h-5 w-5 text-gray-400" />
                         ) : (
@@ -455,10 +465,8 @@ export default function Orders() {
                     </div>
                   </div>
 
-                  {/* Order Details */}
                   {isExpanded && (
                     <div className="px-6 pb-6 space-y-6">
-                      {/* Items */}
                       <div className="bg-gray-50 rounded-lg p-4">
                         <h4 className="font-medium text-gray-900 mb-4">Articles</h4>
                         <div className="grid gap-4">
@@ -513,7 +521,6 @@ export default function Orders() {
                         </div>
                       </div>
 
-                      {/* Shipping Info */}
                       <div className="bg-gray-50 rounded-lg p-4">
                         <h4 className="font-medium text-gray-900 mb-4">Livraison</h4>
                         <div className="grid grid-cols-2 gap-4">
@@ -552,6 +559,17 @@ export default function Orders() {
             })}
           </div>
         </div>
+      )}
+
+      {paymentDialog && userProfile && (
+        <CreditPaymentDialog
+          orderId={paymentDialog.orderId}
+          userId={user!.uid}
+          purchasePrice={paymentDialog.purchasePrice}
+          availableCredits={userProfile.subscription.credits}
+          onClose={() => setPaymentDialog(null)}
+          onSuccess={() => handlePaymentSuccess(paymentDialog.orderId)}
+        />
       )}
     </div>
   );
