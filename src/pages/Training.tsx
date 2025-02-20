@@ -191,110 +191,6 @@ export default function Training() {
         </div>
       </div>
 
-      {/* Business Impact Section */}
-      <div className="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-2xl p-12 text-white">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4">
-            L'impact sur votre business
-          </h2>
-          <p className="text-xl text-white/90">
-            Des résultats concrets et mesurables pour votre activité
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-8">
-          {BUSINESS_IMPACT.map((impact, index) => {
-            const Icon = impact.icon;
-            return (
-              <div key={index} className="bg-white/10 backdrop-blur-sm rounded-xl p-6">
-                <div className="p-3 bg-white/20 rounded-xl w-fit mb-4">
-                  <Icon className="h-6 w-6 text-white" />
-                </div>
-                <h3 className="text-xl font-bold mb-2">
-                  {impact.title}
-                </h3>
-                <p className="text-white/80">
-                  {impact.description}
-                </p>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Complementary Features */}
-      <div>
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            La combinaison parfaite avec MockupPro
-          </h2>
-          <p className="text-xl text-gray-600">
-            Nos formations sont conçues pour exploiter tout le potentiel de l'outil
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-8">
-          {COMPLEMENTARY_FEATURES.map((feature, index) => {
-            const Icon = feature.icon;
-            return (
-              <div key={index} className="bg-white rounded-xl p-8 shadow-sm hover:shadow-md transition-shadow">
-                <div className="p-3 bg-indigo-100 rounded-xl w-fit mb-4">
-                  <Icon className="h-6 w-6 text-indigo-600" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  {feature.title}
-                </h3>
-                <p className="text-gray-600">
-                  {feature.description}
-                </p>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Success Stories */}
-      <div className="bg-gray-50 rounded-2xl p-12">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            Ils ont transformé leur activité
-          </h2>
-          <p className="text-xl text-gray-600">
-            Des résultats concrets obtenus par nos étudiants
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-8">
-          {SUCCESS_STORIES.map((story, index) => (
-            <div key={index} className="bg-white rounded-xl p-6 shadow-sm">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center">
-                  <Users className="h-6 w-6 text-indigo-600" />
-                </div>
-                <div>
-                  <div className="font-medium text-gray-900">{story.name}</div>
-                  <div className="text-sm text-gray-500">{story.duration}</div>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="text-sm text-gray-500">Avant</div>
-                  <div className="text-lg font-medium text-gray-900">{story.before}</div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="text-sm text-gray-500">Après</div>
-                  <div className="text-lg font-medium text-green-600">{story.after}</div>
-                </div>
-                <div className="text-sm text-gray-500 text-center italic">
-                  "{story.quote}"
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
       {/* Training Categories */}
       <div>
         <h2 className="text-2xl font-bold text-gray-900 mb-8">
@@ -380,6 +276,68 @@ export default function Training() {
         </div>
       </div>
 
+      {/* Business Impact Section */}
+      <div className="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-2xl p-12 text-white">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold mb-4">
+            L'impact sur votre business
+          </h2>
+          <p className="text-xl text-white/90">
+            Des résultats concrets et mesurables pour votre activité
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-8">
+          {BUSINESS_IMPACT.map((impact, index) => {
+            const Icon = impact.icon;
+            return (
+              <div key={index} className="bg-white/10 backdrop-blur-sm rounded-xl p-6">
+                <div className="p-3 bg-white/20 rounded-xl w-fit mb-4">
+                  <Icon className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="text-xl font-bold mb-2">
+                  {impact.title}
+                </h3>
+                <p className="text-white/80">
+                  {impact.description}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Complementary Features */}
+      <div>
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            La combinaison parfaite avec MockupPro
+          </h2>
+          <p className="text-xl text-gray-600">
+            Nos formations sont conçues pour exploiter tout le potentiel de l'outil
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-8">
+          {COMPLEMENTARY_FEATURES.map((feature, index) => {
+            const Icon = feature.icon;
+            return (
+              <div key={index} className="bg-white rounded-xl p-8 shadow-sm hover:shadow-md transition-shadow">
+                <div className="p-3 bg-indigo-100 rounded-xl w-fit mb-4">
+                  <Icon className="h-6 w-6 text-indigo-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  {feature.title}
+                </h3>
+                <p className="text-gray-600">
+                  {feature.description}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
       {/* FAQ Section */}
       <div>
         <div className="text-center mb-12">
@@ -436,7 +394,7 @@ export default function Training() {
           Prêt à transformer votre business ?
         </h2>
         <p className="text-xl mb-8 text-white/90">
-          Rejoignez les milliers d'entrepreneurs qui réussissent grâce à MockupPro et nos formations
+          Rejoignez les milliers d'entrepreneurs qui réussissent grâce à Pixmock et nos formations
         </p>
         <Link
           to={user ? '/generator' : '/signup'}

@@ -89,54 +89,6 @@ export default function Products() {
         </p>
       </div>
 
-      {/* Printer Network Info */}
-      <div className="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-2xl p-8 text-white">
-        <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold mb-4">
-            Un réseau d'imprimeurs d'excellence
-          </h2>
-          <p className="text-lg text-white/90 max-w-2xl mx-auto">
-            Nous collaborons avec les meilleurs imprimeurs à travers le monde pour garantir une qualité exceptionnelle et des délais de livraison optimaux.
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-8">
-          {PRINTER_NETWORK.map((region) => (
-            <div key={region.region} className="bg-white/10 backdrop-blur-sm rounded-xl p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <Globe2 className="h-6 w-6 text-white" />
-                <h3 className="text-lg font-semibold">{region.region}</h3>
-              </div>
-              <div className="space-y-2 text-sm">
-                <div className="flex items-center gap-2">
-                  <Printer className="h-4 w-4 text-white/70" />
-                  <span>{region.locations.join(', ')}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Truck className="h-4 w-4 text-white/70" />
-                  <span>Livraison en {region.deliveryTime}</span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-8 grid md:grid-cols-3 gap-6 text-sm">
-          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center">
-            <div className="font-bold text-2xl mb-1">15+</div>
-            <div className="text-white/90">Centres d'impression</div>
-          </div>
-          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center">
-            <div className="font-bold text-2xl mb-1">24/7</div>
-            <div className="text-white/90">Production continue</div>
-          </div>
-          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center">
-            <div className="font-bold text-2xl mb-1">98%</div>
-            <div className="text-white/90">Satisfaction client</div>
-          </div>
-        </div>
-      </div>
-
       {/* Products Grid */}
       <div className="grid md:grid-cols-3 gap-8">
         {PRODUCTS.map((product) => {
@@ -205,6 +157,54 @@ export default function Products() {
             </Link>
           );
         })}
+      </div>
+
+      {/* Printer Network Info */}
+      <div className="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-2xl p-8 text-white">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold mb-4">
+            Un réseau d'imprimeurs d'excellence
+          </h2>
+          <p className="text-lg text-white/90 max-w-2xl mx-auto">
+            Nous collaborons avec les meilleurs imprimeurs à travers le monde pour garantir une qualité exceptionnelle et des délais de livraison optimaux.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-8">
+          {PRINTER_NETWORK.map((region) => (
+            <div key={region.region} className="bg-white/10 backdrop-blur-sm rounded-xl p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <Globe2 className="h-6 w-6 text-white" />
+                <h3 className="text-lg font-semibold">{region.region}</h3>
+              </div>
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center gap-2">
+                  <Printer className="h-4 w-4 text-white/70" />
+                  <span>{region.locations.join(', ')}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Truck className="h-4 w-4 text-white/70" />
+                  <span>Livraison en {region.deliveryTime}</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-8 grid md:grid-cols-3 gap-6 text-sm">
+          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center">
+            <div className="font-bold text-2xl mb-1">15+</div>
+            <div className="text-white/90">Centres d'impression</div>
+          </div>
+          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center">
+            <div className="font-bold text-2xl mb-1">24/7</div>
+            <div className="text-white/90">Production continue</div>
+          </div>
+          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center">
+            <div className="font-bold text-2xl mb-1">98%</div>
+            <div className="text-white/90">Satisfaction client</div>
+          </div>
+        </div>
       </div>
 
       {/* Quality Commitment */}
