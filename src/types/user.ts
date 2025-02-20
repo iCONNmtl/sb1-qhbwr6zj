@@ -38,5 +38,6 @@ export interface UserProfile {
   platformAccounts?: PlatformAccount[];
   logoUrl?: string;
   pinterestAuth?: PinterestAuth;
-  orderSetupCompleted?: boolean; // Added this field
+  orderSetupCompleted?: boolean;
+  purchasedTrainings?: string[]; // Added this field
 }

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Package, Truck, Clock, CheckCircle, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
@@ -41,8 +41,8 @@ const NEXT_STATUS = {
 } as const;
 
 export default function OrderList({ orders, onRefresh }: OrderListProps) {
-  const [expandedOrder, setExpandedOrder] = React.useState<string | null>(null);
-  const [processingOrder, setProcessingOrder] = React.useState<string | null>(null);
+  const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+  const [processingOrder, setProcessingOrder] = useState<string | null>(null);
   const {
     currentPage,
     setCurrentPage,
@@ -186,7 +186,6 @@ export default function OrderList({ orders, onRefresh }: OrderListProps) {
 
               {isExpanded && (
                 <div className="px-6 pb-6 space-y-6">
-                  {/* Items */}
                   <div className="bg-gray-50 rounded-lg p-4">
                     <h4 className="font-medium text-gray-900 mb-4">Articles</h4>
                     <div className="grid gap-4">
@@ -227,7 +226,6 @@ export default function OrderList({ orders, onRefresh }: OrderListProps) {
                     </div>
                   </div>
 
-                  {/* Shipping Info */}
                   <div className="bg-gray-50 rounded-lg p-4">
                     <h4 className="font-medium text-gray-900 mb-4">Livraison</h4>
                     <div className="grid grid-cols-2 gap-4">

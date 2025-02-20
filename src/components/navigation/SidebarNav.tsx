@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, Wand2, CreditCard, Settings, Calendar, Package, ShoppingBag, FileText } from 'lucide-react';
+import { LayoutDashboard, Wand2, CreditCard, Settings, Calendar, Package, ShoppingBag, FileText, Book } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import SidebarLink from './SidebarLink';
 import clsx from 'clsx';
@@ -30,19 +30,12 @@ export default function SidebarNav({ isCollapsed }: SidebarNavProps) {
         {
           to: '/generator',
           icon: Wand2,
-          label: 'Générateur',
-          primary: true
+          label: 'Mockups'
         },
         {
           to: '/dashboard',
           icon: LayoutDashboard,
-          label: 'Tableau de bord'
-        },
-        {
-          to: '/scheduled',
-          icon: Calendar,
-          label: 'Publications',
-          adminOnly: true
+          label: 'Mes visuels'
         }
       ]
     },
@@ -58,17 +51,27 @@ export default function SidebarNav({ isCollapsed }: SidebarNavProps) {
           to: '/my-products',
           icon: ShoppingBag,
           label: 'Mes produits'
-        },
+        }
+      ]
+    },
+    {
+      title: 'Formation',
+      items: [
         {
-          to: '/orders',
-          icon: FileText,
-          label: 'Commandes'
+          to: '/training',
+          icon: Book,
+          label: 'Formations'
         }
       ]
     },
     {
       title: 'Compte',
       items: [
+        {
+          to: '/orders',
+          icon: FileText,
+          label: 'Commandes'
+        },
         {
           to: '/pricing',
           icon: CreditCard,

@@ -28,6 +28,8 @@ import ProductDetails from './pages/ProductDetails';
 import ProductEdit from './pages/ProductEdit';
 import MyProducts from './pages/MyProducts';
 import Orders from './pages/Orders';
+import Training from './pages/Training';
+import TrainingDetails from './pages/TrainingDetails';
 import AuthGuard from './components/AuthGuard';
 import AdminGuard from './components/AdminGuard';
 import { useStore } from './store/useStore';
@@ -55,6 +57,10 @@ export default function App() {
             <Route path="/legal/cgu" element={<TermsOfService />} />
             <Route path="/legal/cgv" element={<TermsOfSale />} />
             <Route path="/legal/confidentialite" element={<PrivacyPolicy />} />
+            
+            {/* Training Routes */}
+            <Route path="/training" element={<Training />} />
+            <Route path="/training/:id" element={<TrainingDetails />} />
             
             {/* Protected Routes */}
             <Route path="/generator" element={
