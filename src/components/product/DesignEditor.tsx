@@ -29,20 +29,40 @@ interface Adjustment {
   rotation: number;
 }
 
-// Dimensions de base pour la prévisualisation
 const BASE_PREVIEW_SIZE = 800;
-
-// Ajustement par défaut
 const DEFAULT_ADJUSTMENT: Adjustment = {
   scale: 1,
   position: { x: 0, y: 0 },
   rotation: 0
 };
 
-// Constantes pour le zoom
 const MIN_SCALE = 0.1;
 const MAX_SCALE = 3;
-const SCALE_STEP = 0.01; // Changé de 0.1 à 0.01 pour plus de précision
+const SCALE_STEP = 0.01;
+
+const SIZE_RATIOS: Record<string, number> = {
+  '8x10': 8/10,
+  '8x12': 8/12,
+  '12x18': 12/18,
+  '24x36': 24/36,
+  '11x14': 11/14,
+  '11x17': 11/17,
+  '18x24': 18/24,
+  'A4': 210/297,
+  '5x7': 5/7,
+  '20x28': 20/28,
+  '28x40': 28/40
+};
+
+const SIMILAR_SIZES = {
+  '8x12': ['12x18', '24x36'],
+  '12x18': ['8x12', '24x36'],
+  '24x36': ['8x12', '12x18'],
+  'A4': ['5x7', '20x28', '28x40'],
+  '5x7': ['A4', '20x28', '28x40'],
+  '20x28': ['A4', '5x7', '28x40'],
+  '28x40': ['A4', '5x7', '20x28']
+};
 
 export default function DesignEditor({
   designUrl,
@@ -62,42 +82,52 @@ export default function DesignEditor({
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [initialPosition, setInitialPosition] = useState({ x: 0, y: 0 });
   const [zoomInput, setZoomInput] = useState('100');
+  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
 
   const containerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const adjustmentsRef = useRef(adjustments);
 
-  // Mettre à jour la ref quand les ajustements changent
   useEffect(() => {
     adjustmentsRef.current = adjustments;
   }, [adjustments]);
 
-  // Calculer les dimensions de prévisualisation (mémorisé)
   const getPreviewDimensions = useCallback((size: Size) => {
-    const [width, height] = size.dimensions.inches.split('x').map(Number);
-    const aspectRatio = width / height;
+    const ratio = SIZE_RATIOS[size.id];
+    if (!ratio) return { width: BASE_PREVIEW_SIZE, height: BASE_PREVIEW_SIZE };
 
-    return {
-      width: aspectRatio >= 1 ? BASE_PREVIEW_SIZE : BASE_PREVIEW_SIZE * aspectRatio,
-      height: aspectRatio >= 1 ? BASE_PREVIEW_SIZE / aspectRatio : BASE_PREVIEW_SIZE
-    };
+    const maxWidth = Math.min(BASE_PREVIEW_SIZE, window.innerWidth * 0.4);
+    const baseSize = maxWidth;
+
+    if (ratio >= 1) {
+      return {
+        width: baseSize,
+        height: Math.round(baseSize / ratio)
+      };
+    } else {
+      return {
+        width: Math.round(baseSize * ratio),
+        height: baseSize
+      };
+    }
   }, []);
 
-  // Ajuster automatiquement le design (mémorisé)
+  useEffect(() => {
+    const dimensions = getPreviewDimensions(currentSize);
+    setContainerSize(dimensions);
+  }, [currentSize, getPreviewDimensions]);
+
   const autoFitDesign = useCallback(() => {
     if (!imageSize.width || !imageSize.height) return;
 
     const previewDimensions = getPreviewDimensions(currentSize);
-    
     const imageRatio = imageSize.width / imageSize.height;
-    const targetRatio = previewDimensions.width / previewDimensions.height;
+    const containerRatio = previewDimensions.width / previewDimensions.height;
     
     let scale;
-    if (imageRatio > targetRatio) {
-      // Ajusté pour remplir exactement la largeur
+    if (imageRatio > containerRatio) {
       scale = previewDimensions.width / imageSize.width;
     } else {
-      // Ajusté pour remplir exactement la hauteur
       scale = previewDimensions.height / imageSize.height;
     }
     
@@ -107,32 +137,16 @@ export default function DesignEditor({
     const x = (previewDimensions.width - scaledWidth) / 2;
     const y = (previewDimensions.height - scaledHeight) / 2;
 
-    setAdjustments(prev => ({
-      ...prev,
-      [currentSize.id]: {
-        scale,
-        position: { x, y },
-        rotation: 0
-      }
-    }));
+    const newAdjustment = {
+      scale,
+      position: { x, y },
+      rotation: 0
+    };
 
+    handleAdjustmentChange(newAdjustment);
     setZoomInput(Math.round(scale * 100).toString());
   }, [imageSize, currentSize, getPreviewDimensions]);
 
-  // Mettre à jour les ajustements quand les tailles changent
-  useEffect(() => {
-    setAdjustments(prev => {
-      const newAdjustments = { ...prev };
-      selectedSizes.forEach(size => {
-        if (!newAdjustments[size.id]) {
-          newAdjustments[size.id] = { ...DEFAULT_ADJUSTMENT };
-        }
-      });
-      return newAdjustments;
-    });
-  }, [selectedSizes]);
-
-  // Charger les dimensions de l'image
   useEffect(() => {
     const img = new Image();
     img.onload = () => {
@@ -141,7 +155,14 @@ export default function DesignEditor({
     img.src = designUrl;
   }, [designUrl]);
 
-  // Sauvegarder les ajustements (avec debounce)
+  useEffect(() => {
+    if (imageSize.width && imageSize.height) {
+      if (!adjustments[currentSize.id]?.scale) {
+        autoFitDesign();
+      }
+    }
+  }, [imageSize, currentSize.id, autoFitDesign, adjustments]);
+
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       onSave(adjustmentsRef.current);
@@ -149,12 +170,28 @@ export default function DesignEditor({
     return () => clearTimeout(timeoutId);
   }, [adjustments, onSave]);
 
-  // Appliquer l'ajustement automatique initial
-  useEffect(() => {
-    if (imageSize.width && imageSize.height && !adjustments[currentSize.id]?.scale) {
-      autoFitDesign();
+  const handleAdjustmentChange = (adjustment: Adjustment) => {
+    const updatedAdjustments = { ...adjustments };
+    
+    const sizeGroup = Object.entries(SIMILAR_SIZES).find(([key, sizes]) => 
+      key === currentSize.id || sizes.includes(currentSize.id)
+    );
+
+    if (sizeGroup) {
+      const groupSizes = [sizeGroup[0], ...sizeGroup[1]];
+      
+      groupSizes.forEach(sizeId => {
+        if (selectedSizes.some(size => size.id === sizeId)) {
+          updatedAdjustments[sizeId] = { ...adjustment };
+        }
+      });
+    } else {
+      updatedAdjustments[currentSize.id] = adjustment;
     }
-  }, [imageSize, currentSize.id, autoFitDesign, adjustments]);
+
+    setAdjustments(updatedAdjustments);
+    onSave(updatedAdjustments);
+  };
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!containerRef.current) return;
@@ -171,16 +208,15 @@ export default function DesignEditor({
     const deltaX = e.clientX - dragStart.x;
     const deltaY = e.clientY - dragStart.y;
 
-    setAdjustments(prev => ({
-      ...prev,
-      [currentSize.id]: {
-        ...prev[currentSize.id],
-        position: {
-          x: initialPosition.x + deltaX,
-          y: initialPosition.y + deltaY
-        }
-      }
-    }));
+    const newPosition = {
+      x: initialPosition.x + deltaX,
+      y: initialPosition.y + deltaY
+    };
+
+    handleAdjustmentChange({
+      ...adjustments[currentSize.id],
+      position: newPosition
+    });
   };
 
   const handleMouseUp = () => {
@@ -188,44 +224,36 @@ export default function DesignEditor({
   };
 
   const handleRotate = () => {
-    setAdjustments(prev => ({
-      ...prev,
-      [currentSize.id]: {
-        ...prev[currentSize.id],
-        rotation: (prev[currentSize.id].rotation + 90) % 360
-      }
-    }));
+    const newRotation = (adjustments[currentSize.id].rotation + 90) % 360;
+    handleAdjustmentChange({
+      ...adjustments[currentSize.id],
+      rotation: newRotation
+    });
   };
 
   const handleZoom = (delta: number) => {
-    setAdjustments(prev => {
-      const currentAdjustment = prev[currentSize.id];
-      const newScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, currentAdjustment.scale + delta));
-      
-      // Ajuster la position pour zoomer depuis le centre
-      const previewDimensions = getPreviewDimensions(currentSize);
-      const oldWidth = imageSize.width * currentAdjustment.scale;
-      const oldHeight = imageSize.height * currentAdjustment.scale;
-      const newWidth = imageSize.width * newScale;
-      const newHeight = imageSize.height * newScale;
-      
-      const centerX = currentAdjustment.position.x + oldWidth / 2;
-      const centerY = currentAdjustment.position.y + oldHeight / 2;
+    const currentAdjustment = adjustments[currentSize.id];
+    const newScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, currentAdjustment.scale + delta));
 
-      setZoomInput(Math.round(newScale * 100).toString());
-      
-      return {
-        ...prev,
-        [currentSize.id]: {
-          ...currentAdjustment,
-          scale: newScale,
-          position: {
-            x: centerX - newWidth / 2,
-            y: centerY - newHeight / 2
-          }
-        }
-      };
+    const previewDimensions = getPreviewDimensions(currentSize);
+    const oldWidth = imageSize.width * currentAdjustment.scale;
+    const oldHeight = imageSize.height * currentAdjustment.scale;
+    const newWidth = imageSize.width * newScale;
+    const newHeight = imageSize.height * newScale;
+
+    const centerX = currentAdjustment.position.x + oldWidth / 2;
+    const centerY = currentAdjustment.position.y + oldHeight / 2;
+
+    handleAdjustmentChange({
+      ...currentAdjustment,
+      scale: newScale,
+      position: {
+        x: centerX - newWidth / 2,
+        y: centerY - newHeight / 2
+      }
     });
+
+    setZoomInput(Math.round(newScale * 100).toString());
   };
 
   const handleZoomInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -234,29 +262,7 @@ export default function DesignEditor({
 
     if (value) {
       const newScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, parseInt(value) / 100));
-      const currentAdjustment = adjustments[currentSize.id];
-      
-      // Ajuster la position pour zoomer depuis le centre
-      const previewDimensions = getPreviewDimensions(currentSize);
-      const oldWidth = imageSize.width * currentAdjustment.scale;
-      const oldHeight = imageSize.height * currentAdjustment.scale;
-      const newWidth = imageSize.width * newScale;
-      const newHeight = imageSize.height * newScale;
-      
-      const centerX = currentAdjustment.position.x + oldWidth / 2;
-      const centerY = currentAdjustment.position.y + oldHeight / 2;
-      
-      setAdjustments(prev => ({
-        ...prev,
-        [currentSize.id]: {
-          ...currentAdjustment,
-          scale: newScale,
-          position: {
-            x: centerX - newWidth / 2,
-            y: centerY - newHeight / 2
-          }
-        }
-      }));
+      handleZoom(newScale - adjustments[currentSize.id].scale);
     }
   };
 
@@ -265,7 +271,6 @@ export default function DesignEditor({
 
   return (
     <div className="space-y-6">
-      {/* Sélecteur de taille */}
       {selectedSizes.length > 1 && (
         <div className="flex gap-2 overflow-x-auto pb-2">
           {selectedSizes.map((size) => (
@@ -285,19 +290,17 @@ export default function DesignEditor({
         </div>
       )}
 
-      {/* Zone de prévisualisation */}
       <div 
         ref={containerRef}
-        className="relative bg-gray-100 rounded-lg overflow-hidden"
+        className="relative bg-gray-100 rounded-lg overflow-hidden mx-auto"
         style={{
-          width: previewDimensions.width,
-          height: previewDimensions.height
+          width: containerSize.width,
+          height: containerSize.height
         }}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
       >
-        {/* Design */}
         <div
           className="absolute cursor-move"
           style={{
@@ -316,16 +319,13 @@ export default function DesignEditor({
           />
         </div>
 
-        {/* Zone de point-tillés (par dessus le design) */}
         <div className="absolute inset-0 border-4 border-dashed border-indigo-500/50 pointer-events-none z-10" />
 
-        {/* Indicateur de déplacement */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
           <Move className="h-8 w-8 text-indigo-500/50" />
         </div>
       </div>
 
-      {/* Contrôles */}
       <div className="flex gap-4">
         <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-lg p-2">
           <button

@@ -311,7 +311,7 @@ export default function Training() {
       <div>
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            La combinaison parfaite avec MockupPro
+            La combinaison parfaite avec Pixmock
           </h2>
           <p className="text-xl text-gray-600">
             Nos formations sont conçues pour exploiter tout le potentiel de l'outil
