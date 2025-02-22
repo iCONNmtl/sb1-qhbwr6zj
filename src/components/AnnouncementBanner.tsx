@@ -13,7 +13,7 @@ export default function AnnouncementBanner({ onClose }: AnnouncementBannerProps)
   return (
     <div 
       className={clsx(
-        "bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white relative",
+        "bg-gradient-to-r from-purple-600 to-indigo-600 text-white relative",
         "transition-all duration-300",
         isSidebarCollapsed ? 'ml-16' : 'ml-64'
       )}

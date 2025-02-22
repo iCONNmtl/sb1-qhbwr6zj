@@ -40,7 +40,7 @@ export default function SidebarLink({
         <div className="ml-3 flex items-center">
           <span>{label}</span>
           {notificationCount !== undefined && notificationCount > 0 && (
-            <div className="ml-2 bg-red-500 text-white text-xs font-medium rounded-full min-w-[20px] h-5 px-1.5 flex items-center justify-center">
+            <div className="ml-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs font-medium rounded-full min-w-[20px] h-5 px-1.5 flex items-center justify-center">
               {notificationCount}
             </div>
           )}

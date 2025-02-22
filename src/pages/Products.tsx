@@ -160,7 +160,7 @@ export default function Products() {
       </div>
 
       {/* Printer Network Info */}
-      <div className="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-2xl p-8 text-white">
+      <div className="bg-gradient-to-r from-purple-600 to-indigo-600 to-pink-500 rounded-2xl p-8 text-white">
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold mb-4">
             Un réseau d'imprimeurs d'excellence
