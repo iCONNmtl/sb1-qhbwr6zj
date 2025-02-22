@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { collection, query, where, getDocs, doc, deleteDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useStore } from '../store/useStore';
-import { Package, Edit, Trash2, Plus, Loader2 } from 'lucide-react';
+import { Package, Edit, Trash2, Plus, Loader2, ChevronDown, ChevronUp, DollarSign, Eye } from 'lucide-react';
 import ImageLoader from '../components/ImageLoader';
 import toast from 'react-hot-toast';
 import clsx from 'clsx';
@@ -17,6 +17,14 @@ interface Product {
   designUrl: string;
   variants: {
     sizeId: string;
+    price: number;
+    cost: number;
+    sku: string;
+    designUrl: string;
+    dimensions: {
+      cm: string;
+      inches: string;
+    };
   }[];
   createdAt: string;
 }
@@ -32,6 +40,7 @@ export default function MyProducts() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [expandedProduct, setExpandedProduct] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -132,7 +141,7 @@ export default function MyProducts() {
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
           <div className="divide-y divide-gray-200">
             {products.map((product) => (
-              <div key={product.firestoreId} className="p-4 hover:bg-gray-50 transition-colors">
+              <div key={product.firestoreId} className="p-6">
                 <div className="flex items-center gap-4">
                   {/* Thumbnail */}
                   <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
@@ -156,6 +165,17 @@ export default function MyProducts() {
 
                   {/* Actions */}
                   <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setExpandedProduct(expandedProduct === product.firestoreId ? null : product.firestoreId)}
+                      className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition"
+                      title="Voir les détails"
+                    >
+                      {expandedProduct === product.firestoreId ? (
+                        <ChevronUp className="h-5 w-5" />
+                      ) : (
+                        <ChevronDown className="h-5 w-5" />
+                      )}
+                    </button>
                     <Link
                       to={`/product/edit/${product.firestoreId}`}
                       className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition"
@@ -180,6 +200,71 @@ export default function MyProducts() {
                     </button>
                   </div>
                 </div>
+
+                {/* Variants Details */}
+                {expandedProduct === product.firestoreId && (
+                  <div className="mt-6 border-t border-gray-100 pt-6">
+                    <div className="space-y-4">
+                      {product.variants.map((variant) => (
+                        <div key={variant.sizeId} className="bg-gray-50 rounded-lg p-4">
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            {/* Size Info */}
+                            <div>
+                              <div className="text-sm font-medium text-gray-900">
+                                {variant.dimensions.inches}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                {variant.dimensions.cm}
+                              </div>
+                            </div>
+
+                            {/* Price Info */}
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <DollarSign className="h-4 w-4 text-gray-400" />
+                                <div className="text-sm font-medium text-gray-900">
+                                  Prix de vente: {variant.price}€
+                                </div>
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                Prix d'achat: {variant.cost}€
+                              </div>
+                              <div className="text-sm font-medium text-green-600">
+                                Bénéfice: {(variant.price - variant.cost).toFixed(2)}€
+                              </div>
+                            </div>
+
+                            {/* SKU */}
+                            <div>
+                              <div className="text-sm font-medium text-gray-900">
+                                SKU
+                              </div>
+                              <div className="text-sm font-mono text-gray-500">
+                                {variant.sku}
+                              </div>
+                            </div>
+
+                            {/* Design Link */}
+                            <div>
+                              <div className="text-sm font-medium text-gray-900 mb-2">
+                                Design
+                              </div>
+                              <a
+                                href={variant.designUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-colors"
+                              >
+                                <Eye className="h-4 w-4 mr-2" />
+                                Voir le design
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>

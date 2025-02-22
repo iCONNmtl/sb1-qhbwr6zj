@@ -1,26 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
-import { doc, onSnapshot } from 'firebase/firestore';
+import { doc, onSnapshot, collection, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { Link } from 'react-router-dom';
-import { Plus, Shuffle, Image as ImageIcon, Instagram, BookmarkIcon, Eye, Download, Share2, Calendar, Loader2 } from 'lucide-react';
+import { Image as ImageIcon, Instagram, BookmarkIcon, Eye, Download, Share2, Calendar, Loader2, Package, DollarSign } from 'lucide-react';
 import { useGenerations } from '../hooks/useGenerations';
 import { downloadImage } from '../utils/download';
 import toast from 'react-hot-toast';
 import clsx from 'clsx';
 
 // Components
-import MockupGrid from '../components/mockup/MockupGrid';
-import MockupPagination from '../components/mockup/MockupPagination';
 import MockupPreviewModal from '../components/mockup/MockupPreviewModal';
-import GenerationProgress from '../components/generation/GenerationProgress';
-import GenerationFooter from '../components/mockup/GenerationFooter';
 import SchedulePostDialog from '../components/scheduling/SchedulePostDialog';
-
-// Types
 import type { UserProfile, PlatformAccount } from '../types/user';
 
-const ITEMS_PER_PAGE = 20; // Nombre d'éléments par page
+interface Product {
+  id: string;
+  type: string;
+  designUrl: string;
+  variants: {
+    sizeId: string;
+    price: number;
+    cost: number;
+    sku: string;
+    dimensions: {
+      cm: string;
+      inches: string;
+    };
+  }[];
+  createdAt: string;
+}
 
 export default function Dashboard() {
   const { user } = useStore();
@@ -33,8 +42,9 @@ export default function Dashboard() {
   const [selectedMockups, setSelectedMockups] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'instagram' | 'pinterest'>('all');
   const [showScheduleDialog, setShowScheduleDialog] = useState(false);
-  const [randomCount, setRandomCount] = useState<number>(1);
   const [currentPage, setCurrentPage] = useState(1);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
   const { generations, loading } = useGenerations();
 
   const isAdmin = user?.uid === 'Juvh6BgsXhYsi3loKegWfzRIphG2';
@@ -55,15 +65,11 @@ export default function Dashboard() {
   );
 
   // Pagination
+  const ITEMS_PER_PAGE = 20;
   const totalPages = Math.ceil(filteredMockups.length / ITEMS_PER_PAGE);
   const indexOfLastMockup = currentPage * ITEMS_PER_PAGE;
   const indexOfFirstMockup = indexOfLastMockup - ITEMS_PER_PAGE;
   const currentMockups = filteredMockups.slice(indexOfFirstMockup, indexOfLastMockup);
-
-  // Reset to page 1 when category changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [selectedCategory]);
 
   useEffect(() => {
     if (!user) return;
@@ -83,6 +89,22 @@ export default function Dashboard() {
       }
     );
 
+    // Fetch products
+    const fetchProducts = async () => {
+      try {
+        const productsRef = collection(db, 'products');
+        const snapshot = await getDocs(productsRef);
+        const productsData = snapshot.docs.map(doc => ({
+          ...doc.data(),
+          id: doc.id
+        })) as Product[];
+        setProducts(productsData);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      }
+    };
+
+    fetchProducts();
     return () => unsubscribe();
   }, [user]);
 
@@ -172,6 +194,9 @@ export default function Dashboard() {
         };
       }));
 
+      // Get selected product data if any
+      const productData = selectedProduct ? products.find(p => p.id === selectedProduct) : null;
+
       const response = await fetch('https://hook.eu1.make.com/1brcdh36omu22jrtb06fwrpkb39nkw9b', {
         method: 'POST',
         headers: {
@@ -180,7 +205,8 @@ export default function Dashboard() {
         body: JSON.stringify({
           mockups: selectedMockupData,
           platforms: platformsData,
-          userId: user?.uid
+          userId: user?.uid,
+          product: productData
         })
       });
 
@@ -192,6 +218,7 @@ export default function Dashboard() {
       setSelectedMockups([]);
       setSelectedPlatformAccounts([]);
       setPlatformData({});
+      setSelectedProduct(null);
     } catch (error) {
       console.error('Error publishing mockups:', error);
       toast.error('Erreur lors de la publication');
@@ -202,37 +229,14 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8">
+      {/* Mockup Selection */}
       <div className="bg-white rounded-xl shadow-sm p-6">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold text-gray-900">
-            Vos générations
+            1. Sélectionnez vos mockups
           </h2>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <input
-                type="number"
-                min="1"
-                max={filteredMockups.length}
-                value={randomCount}
-                onChange={(e) => setRandomCount(Math.min(Math.max(1, parseInt(e.target.value) || 1), filteredMockups.length))}
-                className="w-16 px-2 py-1 border border-gray-300 rounded-lg text-center"
-              />
-              <button
-                onClick={() => {
-                  const shuffled = [...filteredMockups]
-                    .sort(() => Math.random() - 0.5)
-                    .slice(0, randomCount);
-                  setSelectedMockups(shuffled.map(m => m.id));
-                }}
-                className="flex items-center px-3 py-1 bg-indigo-100 text-indigo-600 rounded-lg hover:bg-indigo-200 transition-colors"
-              >
-                <Shuffle className="h-4 w-4 mr-1" />
-                Random
-              </button>
-            </div>
-            <div className="text-sm text-gray-600">
-              {allMockups.length} mockup{allMockups.length > 1 ? 's' : ''} généré{allMockups.length > 1 ? 's' : ''}
-            </div>
+          <div className="text-sm text-gray-600">
+            {allMockups.length} mockup{allMockups.length > 1 ? 's' : ''} généré{allMockups.length > 1 ? 's' : ''}
           </div>
         </div>
 
@@ -364,12 +368,79 @@ export default function Dashboard() {
         )}
       </div>
 
+      {/* Product Selection */}
+      {selectedMockups.length > 0 && (
+        <div className="bg-white rounded-xl shadow-sm p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold text-gray-900">
+              2. Sélectionnez un produit (optionnel)
+            </h2>
+          </div>
+
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {products.map((product) => {
+              const totalVariants = product.variants.length;
+              const averagePrice = product.variants.reduce((sum, v) => sum + v.price, 0) / totalVariants;
+              const averageCost = product.variants.reduce((sum, v) => sum + v.cost, 0) / totalVariants;
+              const averageProfit = averagePrice - averageCost;
+
+              return (
+                <button
+                  key={product.id}
+                  onClick={() => setSelectedProduct(selectedProduct === product.id ? null : product.id)}
+                  className={clsx(
+                    'group relative rounded-xl overflow-hidden transition-all duration-200',
+                    selectedProduct === product.id
+                      ? 'ring-2 ring-indigo-600 scale-95'
+                      : 'hover:scale-105'
+                  )}
+                >
+                  {/* Image */}
+                  <div className="aspect-square bg-gray-100 relative">
+                    <img
+                      src={product.designUrl}
+                      alt={product.type}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0" />
+                  </div>
+
+                  {/* Content */}
+                  <div className="absolute bottom-0 left-0 right-0 p-4 text-left">
+                    <h3 className="text-lg font-medium text-white mb-1">
+                      {product.type}
+                    </h3>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-white/90">
+                        {totalVariants} taille{totalVariants > 1 ? 's' : ''}
+                      </span>
+                      <span className="flex items-center text-green-400">
+                        <DollarSign className="h-4 w-4 mr-1" />
+                        +{averageProfit.toFixed(2)}€
+                      </span>
+                    </div>
+                  </div>
+
+                  {selectedProduct === product.id && (
+                    <div className="absolute inset-0 bg-indigo-600/20 backdrop-blur-sm" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Platform Selection */}
       {isAdmin && selectedMockups.length > 0 && (
         <div className="bg-white rounded-xl shadow-sm p-6 space-y-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold text-gray-900">
+              3. Sélectionnez les plateformes
+            </h2>
+          </div>
+
           <div className="space-y-4">
-            <h3 className="font-medium text-gray-900">
-              Publier sur
-            </h3>
             <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
               {userProfile?.platformAccounts?.map(account => (
                 <button
@@ -386,7 +457,7 @@ export default function Dashboard() {
                     {React.createElement(
                       account.platform === 'instagram' ? Instagram :
                       account.platform === 'pinterest' ? BookmarkIcon :
-                      Plus,
+                      Package,
                       { className: "h-5 w-5 text-gray-500" }
                     )}
                     <div className="text-left">
@@ -442,37 +513,32 @@ export default function Dashboard() {
             )}
           </div>
 
-          <div className="flex items-center justify-between pt-6 border-t border-gray-200">
-            <div className="text-sm text-gray-600">
-              {selectedMockups.length} mockup{selectedMockups.length > 1 ? 's' : ''} sélectionné{selectedMockups.length > 1 ? 's' : ''}
-            </div>
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => setShowScheduleDialog(true)}
-                disabled={selectedPlatformAccounts.length === 0 || selectedMockups.length === 0}
-                className="flex items-center px-6 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Calendar className="h-5 w-5 mr-2" />
-                Programmer
-              </button>
-              <button
-                onClick={handlePublish}
-                disabled={selectedPlatformAccounts.length === 0 || selectedMockups.length === 0 || isPublishing}
-                className="flex items-center px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isPublishing ? (
-                  <>
-                    <Loader2 className="h-5 w-5 animate-spin mr-2" />
-                    Publication...
-                  </>
-                ) : (
-                  <>
-                    <Share2 className="h-5 w-5 mr-2" />
-                    Publier
-                  </>
-                )}
-              </button>
-            </div>
+          <div className="flex items-center justify-end gap-4 pt-6 border-t border-gray-200">
+            <button
+              onClick={() => setShowScheduleDialog(true)}
+              disabled={selectedPlatformAccounts.length === 0}
+              className="flex items-center px-6 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Calendar className="h-5 w-5 mr-2" />
+              Programmer
+            </button>
+            <button
+              onClick={handlePublish}
+              disabled={selectedPlatformAccounts.length === 0 || isPublishing}
+              className="flex items-center px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isPublishing ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                  Publication...
+                </>
+              ) : (
+                <>
+                  <Share2 className="h-5 w-5 mr-2" />
+                  Publier
+                </>
+              )}
+            </button>
           </div>
         </div>
       )}
@@ -494,13 +560,15 @@ export default function Dashboard() {
           }
           platforms={selectedPlatformAccounts.map(accountId => ({
             platform: userProfile?.platformAccounts?.find(a => a.id === accountId)?.platform,
-            ...platformData[accountId]
+            ...platformData[accountId],
+            product: selectedProduct ? products.find(p => p.id === selectedProduct) : undefined
           }))}
           onClose={() => {
             setShowScheduleDialog(false);
             setSelectedMockups([]);
             setSelectedPlatformAccounts([]);
             setPlatformData({});
+            setSelectedProduct(null);
           }}
         />
       )}

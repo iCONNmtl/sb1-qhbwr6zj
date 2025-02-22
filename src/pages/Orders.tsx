@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { collection, query, where, getDocs, doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useStore } from '../store/useStore';
-import { Package, Truck, Clock, CheckCircle, ChevronDown, ChevronUp, Loader2, Mail, ArrowRight, Check, CreditCard, BarChart2, FileText } from 'lucide-react';
+import { Package, Truck, Clock, CheckCircle, ChevronDown, ChevronUp, Loader2, Mail, ArrowRight, Check, CreditCard, BarChart2, FileText, Eye } from 'lucide-react';
 import OrderStats from './OrderStats';
 import CreditPaymentDialog from '../components/orders/CreditPaymentDialog';
 import toast from 'react-hot-toast';
@@ -94,9 +94,32 @@ export default function Orders() {
     orderId: string;
     purchasePrice: number;
   } | null>(null);
+  const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+  const [designUrls, setDesignUrls] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (!user) return;
+
+    const fetchProducts = async () => {
+      try {
+        const productsRef = collection(db, 'products');
+        const productsSnap = await getDocs(productsRef);
+        const designUrlMap: Record<string, string> = {};
+        
+        productsSnap.docs.forEach(doc => {
+          const product = doc.data();
+          product.variants.forEach((variant: any) => {
+            if (variant.sku && variant.designUrl) {
+              designUrlMap[variant.sku] = variant.designUrl;
+            }
+          });
+        });
+
+        setDesignUrls(designUrlMap);
+      } catch (error) {
+        console.error('Error fetching product design URLs:', error);
+      }
+    };
 
     const unsubscribeUser = onSnapshot(
       doc(db, 'users', user.uid),
@@ -145,6 +168,8 @@ export default function Orders() {
       }
     );
 
+    fetchProducts();
+
     return () => {
       unsubscribeUser();
       unsubscribeOrders();
@@ -186,7 +211,6 @@ export default function Orders() {
 
   return (
     <div className="space-y-8">
-      {/* Tabs */}
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
         <div className="border-b border-gray-200">
           <div className="flex">
@@ -332,95 +356,169 @@ export default function Orders() {
                   </p>
                 </div>
               ) : (
-                <div className="divide-y divide-gray-200">
-                  {orders.map((order) => {
-                    const StatusIcon = order.status === 'pending' ? Clock :
-                                     order.status === 'paid' ? CheckCircle :
-                                     order.status === 'shipped' ? Truck : Package;
-                    const isExpanded = false;
-                    const profit = order.totalAmount - order.purchasePrice;
+                <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+                  <div className="divide-y divide-gray-200">
+                    {orders.map((order) => {
+                      const StatusIcon = order.status === 'pending' ? Clock :
+                                       order.status === 'paid' ? CheckCircle :
+                                       order.status === 'shipped' ? Truck : Package;
+                      const profit = order.totalAmount - order.purchasePrice;
 
-                    return (
-                      <div key={order.firestoreId} className="py-6">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-6">
-                            <div>
-                              <div className="text-sm font-medium text-gray-900">
-                                {order.orderId}
-                              </div>
-                              <div className="text-sm text-gray-500">
-                                {order.platform}
-                              </div>
-                            </div>
-
-                            <div>
-                              <div className="text-sm font-medium text-gray-900">
-                                {order.customerName}
-                              </div>
-                              <div className="text-sm text-gray-500">
-                                {order.customerEmail}
-                              </div>
-                            </div>
-
-                            <div>
-                              <div className="flex items-center gap-4">
+                      return (
+                        <div key={order.firestoreId} className="p-6">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-6">
+                              <div>
                                 <div className="text-sm font-medium text-gray-900">
-                                  {order.totalAmount.toFixed(2)}€
+                                  {order.orderId}
                                 </div>
                                 <div className="text-sm text-gray-500">
-                                  ({order.purchasePrice.toFixed(2)}€)
-                                </div>
-                                <div className={clsx(
-                                  "text-sm font-medium",
-                                  profit >= 0 ? "text-green-600" : "text-red-600"
-                                )}>
-                                  {profit >= 0 ? "+" : ""}{profit.toFixed(2)}€
+                                  {order.platform}
                                 </div>
                               </div>
-                              <div className="text-sm text-gray-500">
-                                {order.items.length} article{order.items.length > 1 ? 's' : ''}
+
+                              <div>
+                                <div className="text-sm font-medium text-gray-900">
+                                  {order.customerName}
+                                </div>
+                                <div className="text-sm text-gray-500">
+                                  {order.customerEmail}
+                                </div>
+                              </div>
+
+                              <div>
+                                <div className="flex items-center gap-4">
+                                  <div className="text-sm font-medium text-gray-900">
+                                    {order.totalAmount.toFixed(2)}€
+                                  </div>
+                                  <div className="text-sm text-gray-500">
+                                    ({order.purchasePrice.toFixed(2)}€)
+                                  </div>
+                                  <div className={clsx(
+                                    "text-sm font-medium",
+                                    profit >= 0 ? "text-green-600" : "text-red-600"
+                                  )}>
+                                    {profit >= 0 ? "+" : ""}{profit.toFixed(2)}€
+                                  </div>
+                                </div>
+                                <div className="text-sm text-gray-500">
+                                  {order.items.length} article{order.items.length > 1 ? 's' : ''}
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-2">
+                                <StatusIcon className={clsx(
+                                  'h-4 w-4',
+                                  order.status === 'pending' ? 'text-yellow-500' :
+                                  order.status === 'paid' ? 'text-green-500' :
+                                  order.status === 'shipped' ? 'text-blue-500' :
+                                  'text-gray-500'
+                                )} />
+                                <span className={clsx(
+                                  'px-2 py-1 text-xs font-medium rounded-full',
+                                  order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                  order.status === 'paid' ? 'bg-green-100 text-green-800' :
+                                  order.status === 'shipped' ? 'bg-blue-100 text-blue-800' :
+                                  'bg-gray-100 text-gray-800'
+                                )}>
+                                  {order.status === 'pending' ? 'En attente' :
+                                   order.status === 'paid' ? 'Payée' :
+                                   order.status === 'shipped' ? 'Expédiée' :
+                                   'Livrée'}
+                                </span>
                               </div>
                             </div>
 
-                            <div className="flex items-center gap-2">
-                              <StatusIcon className={clsx(
-                                'h-4 w-4',
-                                order.status === 'pending' ? 'text-yellow-500' :
-                                order.status === 'paid' ? 'text-green-500' :
-                                order.status === 'shipped' ? 'text-blue-500' :
-                                'text-gray-500'
-                              )} />
-                              <span className={clsx(
-                                'px-2 py-1 text-xs font-medium rounded-full',
-                                order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                                order.status === 'paid' ? 'bg-green-100 text-green-800' :
-                                order.status === 'shipped' ? 'bg-blue-100 text-blue-800' :
-                                'bg-gray-100 text-gray-800'
-                              )}>
-                                {order.status === 'pending' ? 'En attente' :
-                                 order.status === 'paid' ? 'Payée' :
-                                 order.status === 'shipped' ? 'Expédiée' :
-                                 'Livrée'}
-                              </span>
+                            <div className="flex items-center gap-4">
+                              {order.status === 'pending' && (
+                                <button
+                                  onClick={() => setPaymentDialog({
+                                    orderId: order.firestoreId,
+                                    purchasePrice: order.purchasePrice
+                                  })}
+                                  className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+                                >
+                                  <CreditCard className="h-5 w-5 mr-2" />
+                                  Payer la commande
+                                </button>
+                              )}
+                              <button
+                                onClick={() => setExpandedOrder(expandedOrder === order.firestoreId ? null : order.firestoreId)}
+                                className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition"
+                              >
+                                {expandedOrder === order.firestoreId ? (
+                                  <ChevronUp className="h-5 w-5" />
+                                ) : (
+                                  <ChevronDown className="h-5 w-5" />
+                                )}
+                              </button>
                             </div>
                           </div>
 
-                          {order.status === 'pending' && (
-                            <button
-                              onClick={() => setPaymentDialog({
-                                orderId: order.firestoreId,
-                                purchasePrice: order.purchasePrice
-                              })}
-                              className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
-                            >
-                              <CreditCard className="h-5 w-5 mr-2" />
-                              Payer la commande
-                            </button>
+                          {expandedOrder === order.firestoreId && (
+                            <div className="mt-6 border-t border-gray-100 pt-6">
+                              <div className="space-y-4">
+                                {order.items.map((item, index) => (
+                                  <div key={index} className="bg-gray-50 rounded-lg p-4">
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                      <div>
+                                        <div className="text-sm font-medium text-gray-900">
+                                          {item.size}
+                                        </div>
+                                        <div className="text-sm text-gray-500">
+                                          {item.dimensions.cm}
+                                        </div>
+                                      </div>
+
+                                      <div>
+                                        <div className="text-sm font-medium text-gray-900">
+                                          Prix unitaire: {item.price}€
+                                        </div>
+                                        <div className="text-sm text-gray-500">
+                                          Quantité: {item.quantity}
+                                        </div>
+                                        <div className="text-sm font-medium text-green-600">
+                                          Total: {(item.price * item.quantity).toFixed(2)}€
+                                        </div>
+                                      </div>
+
+                                      <div>
+                                        <div className="text-sm font-medium text-gray-900">
+                                          SKU
+                                        </div>
+                                        <div className="text-sm font-mono text-gray-500">
+                                          {item.sku}
+                                        </div>
+                                      </div>
+
+                                      <div>
+                                        {designUrls[item.sku] && (
+                                          <div>
+                                            <div className="text-sm font-medium text-gray-900 mb-2">
+                                              Design
+                                            </div>
+                                            <a
+                                              href={designUrls[item.sku]}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="inline-flex items-center px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-colors"
+                                            >
+                                              <Eye className="h-4 w-4 mr-2" />
+                                              Voir le design
+                                            </a>
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
                           )}
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </div>
@@ -428,7 +526,6 @@ export default function Orders() {
         </div>
       </div>
 
-      {/* Payment Dialog */}
       {paymentDialog && userProfile && (
         <CreditPaymentDialog
           orderId={paymentDialog.orderId}
