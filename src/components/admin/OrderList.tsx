@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Package, Truck, Clock, CheckCircle, ChevronDown, ChevronUp, Loader2, Eye } from 'lucide-react';
+import { Package, Truck, Clock, CheckCircle, ChevronDown, ChevronUp, Loader2, Eye, DollarSign } from 'lucide-react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import toast from 'react-hot-toast';
@@ -72,16 +72,35 @@ export default function OrderList({ orders, onRefresh }: OrderListProps) {
           return (
             <div key={order.firestoreId} className="p-6">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-6">
-                  <div>
-                    <div className="text-sm font-medium text-gray-900">
-                      {order.orderId}
+                <div className="flex items-center gap-8">
+                  {/* Order Info */}
+                  <div className="flex items-center gap-3">
+                    <div className={clsx(
+                      'p-2 rounded-lg',
+                      order.status === 'pending' ? 'bg-yellow-100' :
+                      order.status === 'paid' ? 'bg-green-100' :
+                      order.status === 'shipped' ? 'bg-blue-100' :
+                      'bg-gray-100'
+                    )}>
+                      <StatusIcon className={clsx(
+                        'h-5 w-5',
+                        order.status === 'pending' ? 'text-yellow-600' :
+                        order.status === 'paid' ? 'text-green-600' :
+                        order.status === 'shipped' ? 'text-blue-600' :
+                        'text-gray-600'
+                      )} />
                     </div>
-                    <div className="text-sm text-gray-500">
-                      {order.platform}
+                    <div>
+                      <div className="text-sm font-medium text-gray-900">
+                        {order.orderId}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {order.platform}
+                      </div>
                     </div>
                   </div>
 
+                  {/* Customer Info */}
                   <div>
                     <div className="text-sm font-medium text-gray-900">
                       {order.customerName}
@@ -91,13 +110,23 @@ export default function OrderList({ orders, onRefresh }: OrderListProps) {
                     </div>
                   </div>
 
-                  <div>
-                    <div className="flex items-center gap-4">
-                      <div className="text-sm font-medium text-gray-900">
-                        {totalAmount.toFixed(2)}€
+                  {/* Financial Info */}
+                  <div className="flex items-center gap-6">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <DollarSign className="h-4 w-4 text-gray-400" />
+                        <div className="text-sm font-medium text-gray-900">
+                          {totalAmount.toFixed(2)}€
+                        </div>
                       </div>
                       <div className="text-sm text-gray-500">
-                        ({purchasePrice.toFixed(2)}€)
+                        {order.items.length} article{order.items.length > 1 ? 's' : ''}
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="text-sm text-gray-500">
+                        Coût: {purchasePrice.toFixed(2)}€
                       </div>
                       <div className={clsx(
                         "text-sm font-medium",
@@ -106,21 +135,12 @@ export default function OrderList({ orders, onRefresh }: OrderListProps) {
                         {profit >= 0 ? "+" : ""}{profit.toFixed(2)}€
                       </div>
                     </div>
-                    <div className="text-sm text-gray-500">
-                      {order.items.length} article{order.items.length > 1 ? 's' : ''}
-                    </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <StatusIcon className={clsx(
-                      'h-4 w-4',
-                      order.status === 'pending' ? 'text-yellow-500' :
-                      order.status === 'paid' ? 'text-green-500' :
-                      order.status === 'shipped' ? 'text-blue-500' :
-                      'text-gray-500'
-                    )} />
+                  {/* Status */}
+                  <div>
                     <span className={clsx(
-                      'px-2 py-1 text-xs font-medium rounded-full',
+                      'px-3 py-1 text-sm font-medium rounded-full',
                       order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
                       order.status === 'paid' ? 'bg-green-100 text-green-800' :
                       order.status === 'shipped' ? 'bg-blue-100 text-blue-800' :

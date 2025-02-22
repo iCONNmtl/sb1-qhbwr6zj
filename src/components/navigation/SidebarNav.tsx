@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { LayoutDashboard, Wand2, CreditCard, Settings, Calendar, Package, ShoppingBag, FileText, Book } from 'lucide-react';
 import { useStore } from '../../store/useStore';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { db } from '../../lib/firebase';
 import SidebarLink from './SidebarLink';
 import clsx from 'clsx';
 
@@ -12,6 +14,7 @@ interface NavSection {
     label: string;
     primary?: boolean;
     adminOnly?: boolean;
+    showNotification?: boolean;
   }[];
 }
 
@@ -21,7 +24,25 @@ interface SidebarNavProps {
 
 export default function SidebarNav({ isCollapsed }: SidebarNavProps) {
   const { user } = useStore();
+  const [pendingOrders, setPendingOrders] = useState(0);
   const isAdmin = user?.uid === 'Juvh6BgsXhYsi3loKegWfzRIphG2';
+
+  useEffect(() => {
+    if (!user) return;
+
+    // Subscribe to pending orders count
+    const ordersQuery = query(
+      collection(db, 'orders'),
+      where('userId', '==', user.uid),
+      where('status', '==', 'pending')
+    );
+
+    const unsubscribe = onSnapshot(ordersQuery, (snapshot) => {
+      setPendingOrders(snapshot.size);
+    });
+
+    return () => unsubscribe();
+  }, [user]);
 
   const navSections: NavSection[] = [
     {
@@ -70,7 +91,8 @@ export default function SidebarNav({ isCollapsed }: SidebarNavProps) {
         {
           to: '/orders',
           icon: FileText,
-          label: 'Commandes'
+          label: 'Commandes',
+          showNotification: true
         },
         {
           to: '/pricing',

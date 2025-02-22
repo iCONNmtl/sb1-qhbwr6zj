@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, where, getDocs, doc, onSnapshot, updateDoc } from 'firebase/firestore';
-import { db } from '../lib/firebase';
 import { useStore } from '../store/useStore';
-import { Package, Truck, Clock, CheckCircle, ChevronDown, ChevronUp, Loader2, Mail, ArrowRight, Check, CreditCard, BarChart2, FileText, Eye } from 'lucide-react';
-import OrderStats from './OrderStats';
+import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc, getDocs } from 'firebase/firestore';
+import { db } from '../lib/firebase';
+import { Calendar, Clock, CheckCircle, XCircle, AlertTriangle, Trash2, Edit, Package, Truck, Eye, CreditCard, BarChart2, FileText, ChevronDown, ChevronUp, Loader2, DollarSign } from 'lucide-react';
+import DateTimePicker from '../components/scheduling/DateTimePicker';
 import CreditPaymentDialog from '../components/orders/CreditPaymentDialog';
+import OrderStats from './OrderStats';
 import toast from 'react-hot-toast';
 import clsx from 'clsx';
 import type { Order } from '../types/order';
@@ -21,7 +22,7 @@ type Tab = typeof TABS[number]['id'];
 const SETUP_STEPS = [
   {
     title: "Configuration rapide",
-    icon: Mail,
+    icon: FileText,
     description: "Importez automatiquement vos commandes en 3 étapes simples",
     steps: [
       {
@@ -84,7 +85,7 @@ const SETUP_STEPS = [
 
 export default function Orders() {
   const { user } = useStore();
-  const [activeTab, setActiveTab] = useState<Tab>('instructions');
+  const [activeTab, setActiveTab] = useState<Tab>('orders');
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [showSetupInstructions, setShowSetupInstructions] = useState(true);
@@ -331,7 +332,7 @@ export default function Orders() {
                     onClick={handleSetupComplete}
                     className="flex items-center px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition"
                   >
-                    <Check className="h-5 w-5 mr-2" />
+                    <CheckCircle className="h-5 w-5 mr-2" />
                     J'ai terminé la configuration
                   </button>
                 </div>
@@ -367,16 +368,35 @@ export default function Orders() {
                       return (
                         <div key={order.firestoreId} className="p-6">
                           <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-6">
-                              <div>
-                                <div className="text-sm font-medium text-gray-900">
-                                  {order.orderId}
+                            <div className="flex items-center gap-8">
+                              {/* Order Info */}
+                              <div className="flex items-center gap-3">
+                                <div className={clsx(
+                                  'p-2 rounded-lg',
+                                  order.status === 'pending' ? 'bg-yellow-100' :
+                                  order.status === 'paid' ? 'bg-green-100' :
+                                  order.status === 'shipped' ? 'bg-blue-100' :
+                                  'bg-gray-100'
+                                )}>
+                                  <StatusIcon className={clsx(
+                                    'h-5 w-5',
+                                    order.status === 'pending' ? 'text-yellow-600' :
+                                    order.status === 'paid' ? 'text-green-600' :
+                                    order.status === 'shipped' ? 'text-blue-600' :
+                                    'text-gray-600'
+                                  )} />
                                 </div>
-                                <div className="text-sm text-gray-500">
-                                  {order.platform}
+                                <div>
+                                  <div className="text-sm font-medium text-gray-900">
+                                    {order.orderId}
+                                  </div>
+                                  <div className="text-sm text-gray-500">
+                                    {order.platform}
+                                  </div>
                                 </div>
                               </div>
 
+                              {/* Customer Info */}
                               <div>
                                 <div className="text-sm font-medium text-gray-900">
                                   {order.customerName}
@@ -386,13 +406,23 @@ export default function Orders() {
                                 </div>
                               </div>
 
-                              <div>
-                                <div className="flex items-center gap-4">
-                                  <div className="text-sm font-medium text-gray-900">
-                                    {order.totalAmount.toFixed(2)}€
+                              {/* Financial Info */}
+                              <div className="flex items-center gap-6">
+                                <div>
+                                  <div className="flex items-center gap-2">
+                                    <DollarSign className="h-4 w-4 text-gray-400" />
+                                    <div className="text-sm font-medium text-gray-900">
+                                      {order.totalAmount.toFixed(2)}€
+                                    </div>
                                   </div>
                                   <div className="text-sm text-gray-500">
-                                    ({order.purchasePrice.toFixed(2)}€)
+                                    {order.items.length} article{order.items.length > 1 ? 's' : ''}
+                                  </div>
+                                </div>
+
+                                <div>
+                                  <div className="text-sm text-gray-500">
+                                    Coût: {order.purchasePrice.toFixed(2)}€
                                   </div>
                                   <div className={clsx(
                                     "text-sm font-medium",
@@ -401,21 +431,12 @@ export default function Orders() {
                                     {profit >= 0 ? "+" : ""}{profit.toFixed(2)}€
                                   </div>
                                 </div>
-                                <div className="text-sm text-gray-500">
-                                  {order.items.length} article{order.items.length > 1 ? 's' : ''}
-                                </div>
                               </div>
 
-                              <div className="flex items-center gap-2">
-                                <StatusIcon className={clsx(
-                                  'h-4 w-4',
-                                  order.status === 'pending' ? 'text-yellow-500' :
-                                  order.status === 'paid' ? 'text-green-500' :
-                                  order.status === 'shipped' ? 'text-blue-500' :
-                                  'text-gray-500'
-                                )} />
+                              {/* Status */}
+                              <div>
                                 <span className={clsx(
-                                  'px-2 py-1 text-xs font-medium rounded-full',
+                                  'px-3 py-1 text-sm font-medium rounded-full',
                                   order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
                                   order.status === 'paid' ? 'bg-green-100 text-green-800' :
                                   order.status === 'shipped' ? 'bg-blue-100 text-blue-800' :
@@ -439,7 +460,7 @@ export default function Orders() {
                                   className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
                                 >
                                   <CreditCard className="h-5 w-5 mr-2" />
-                                  Payer la commande
+                                  Payer
                                 </button>
                               )}
                               <button
@@ -455,12 +476,14 @@ export default function Orders() {
                             </div>
                           </div>
 
+                          {/* Order Details */}
                           {expandedOrder === order.firestoreId && (
                             <div className="mt-6 border-t border-gray-100 pt-6">
                               <div className="space-y-4">
                                 {order.items.map((item, index) => (
                                   <div key={index} className="bg-gray-50 rounded-lg p-4">
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                      {/* Size Info */}
                                       <div>
                                         <div className="text-sm font-medium text-gray-900">
                                           {item.size}
@@ -470,6 +493,7 @@ export default function Orders() {
                                         </div>
                                       </div>
 
+                                      {/* Price Info */}
                                       <div>
                                         <div className="text-sm font-medium text-gray-900">
                                           Prix unitaire: {item.price}€
@@ -482,6 +506,7 @@ export default function Orders() {
                                         </div>
                                       </div>
 
+                                      {/* SKU */}
                                       <div>
                                         <div className="text-sm font-medium text-gray-900">
                                           SKU
@@ -491,6 +516,7 @@ export default function Orders() {
                                         </div>
                                       </div>
 
+                                      {/* Design Link */}
                                       <div>
                                         {designUrls[item.sku] && (
                                           <div>

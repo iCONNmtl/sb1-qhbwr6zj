@@ -4,6 +4,7 @@ import { Toaster } from 'react-hot-toast';
 import Sidebar from './components/navigation/Sidebar';
 import PageContainer from './components/layout/PageContainer';
 import SupportButton from './components/support/SupportButton';
+import AnnouncementBanner from './components/AnnouncementBanner';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
@@ -38,93 +39,97 @@ import { useAuthState } from './hooks/useAuthState';
 export default function App() {
   useAuthState();
   const { user } = useStore();
+  const [showBanner, setShowBanner] = React.useState(true);
   
   return (
     <BrowserRouter>
-      <div className="min-h-screen flex">
-        {user && <Sidebar />}
-        <PageContainer>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route path="/mockups" element={<MockupLibrary />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/thank-you" element={<ThankYou />} />
-            <Route path="/legal/mentions-legales" element={<LegalNotice />} />
-            <Route path="/legal/cgu" element={<TermsOfService />} />
-            <Route path="/legal/cgv" element={<TermsOfSale />} />
-            <Route path="/legal/confidentialite" element={<PrivacyPolicy />} />
-            
-            {/* Training Routes */}
-            <Route path="/training" element={<Training />} />
-            <Route path="/training/:id" element={<TrainingDetails />} />
-            
-            {/* Protected Routes */}
-            <Route path="/generator" element={
-              <AuthGuard>
-                <MockupGenerator />
-              </AuthGuard>
-            } />
-            <Route path="/custom-mockup" element={
-              <AuthGuard>
-                <CustomMockup />
-              </AuthGuard>
-            } />
-            <Route path="/dashboard" element={
-              <AuthGuard>
-                <Dashboard />
-              </AuthGuard>
-            } />
-            <Route path="/scheduled" element={
-              <AuthGuard>
-                <ScheduledPosts />
-              </AuthGuard>
-            } />
-            <Route path="/settings" element={
-              <AuthGuard>
-                <Settings />
-              </AuthGuard>
-            } />
-            
-            {/* Product Routes */}
-            <Route path="/products" element={<Products />} />
-            <Route path="/products/:id" element={<ProductDetails />} />
-            <Route path="/product" element={
-              <AuthGuard>
-                <Product />
-              </AuthGuard>
-            } />
-            <Route path="/my-products" element={
-              <AuthGuard>
-                <MyProducts />
-              </AuthGuard>
-            } />
-            <Route path="/product/edit/:id" element={
-              <AuthGuard>
-                <ProductEdit />
-              </AuthGuard>
-            } />
-            <Route path="/orders" element={
-              <AuthGuard>
-                <Orders />
-              </AuthGuard>
-            } />
-            
-            {/* Admin Routes */}
-            <Route path="/admin" element={
-              <AuthGuard>
-                <AdminGuard>
-                  <AdminDashboard />
-                </AdminGuard>
-              </AuthGuard>
-            } />
-          </Routes>
-        </PageContainer>
-        {user && <SupportButton />}
-        <Toaster position="bottom-right" />
+      <div className="min-h-screen flex flex-col">
+        {showBanner && <AnnouncementBanner onClose={() => setShowBanner(false)} />}
+        <div className="flex flex-1">
+          {user && <Sidebar />}
+          <PageContainer>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/pricing" element={<Pricing />} />
+              <Route path="/mockups" element={<MockupLibrary />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/thank-you" element={<ThankYou />} />
+              <Route path="/legal/mentions-legales" element={<LegalNotice />} />
+              <Route path="/legal/cgu" element={<TermsOfService />} />
+              <Route path="/legal/cgv" element={<TermsOfSale />} />
+              <Route path="/legal/confidentialite" element={<PrivacyPolicy />} />
+              
+              {/* Training Routes */}
+              <Route path="/training" element={<Training />} />
+              <Route path="/training/:id" element={<TrainingDetails />} />
+              
+              {/* Protected Routes */}
+              <Route path="/generator" element={
+                <AuthGuard>
+                  <MockupGenerator />
+                </AuthGuard>
+              } />
+              <Route path="/custom-mockup" element={
+                <AuthGuard>
+                  <CustomMockup />
+                </AuthGuard>
+              } />
+              <Route path="/dashboard" element={
+                <AuthGuard>
+                  <Dashboard />
+                </AuthGuard>
+              } />
+              <Route path="/scheduled" element={
+                <AuthGuard>
+                  <ScheduledPosts />
+                </AuthGuard>
+              } />
+              <Route path="/settings" element={
+                <AuthGuard>
+                  <Settings />
+                </AuthGuard>
+              } />
+              
+              {/* Product Routes */}
+              <Route path="/products" element={<Products />} />
+              <Route path="/products/:id" element={<ProductDetails />} />
+              <Route path="/product" element={
+                <AuthGuard>
+                  <Product />
+                </AuthGuard>
+              } />
+              <Route path="/my-products" element={
+                <AuthGuard>
+                  <MyProducts />
+                </AuthGuard>
+              } />
+              <Route path="/product/edit/:id" element={
+                <AuthGuard>
+                  <ProductEdit />
+                </AuthGuard>
+              } />
+              <Route path="/orders" element={
+                <AuthGuard>
+                  <Orders />
+                </AuthGuard>
+              } />
+              
+              {/* Admin Routes */}
+              <Route path="/admin" element={
+                <AuthGuard>
+                  <AdminGuard>
+                    <AdminDashboard />
+                  </AdminGuard>
+                </AuthGuard>
+              } />
+            </Routes>
+          </PageContainer>
+          {user && <SupportButton />}
+          <Toaster position="bottom-right" />
+        </div>
       </div>
     </BrowserRouter>
   );

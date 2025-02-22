@@ -9,6 +9,7 @@ interface SidebarLinkProps {
   label: string;
   isCollapsed: boolean;
   className?: string;
+  notificationCount?: number;
 }
 
 export default function SidebarLink({ 
@@ -16,7 +17,8 @@ export default function SidebarLink({
   icon: Icon, 
   label, 
   isCollapsed,
-  className 
+  className,
+  notificationCount
 }: SidebarLinkProps) {
   const location = useLocation();
   const isActive = location.pathname === to;
@@ -25,7 +27,7 @@ export default function SidebarLink({
     <Link
       to={to}
       className={clsx(
-        'flex items-center px-3 py-2 rounded-lg transition-all duration-200',
+        'flex items-center px-3 py-2 rounded-lg transition-all duration-200 relative',
         isActive && !className?.includes('gradient-bg')
           ? 'bg-indigo-50 text-indigo-600'
           : 'text-gray-600 hover:bg-gray-100',
@@ -34,7 +36,22 @@ export default function SidebarLink({
       title={isCollapsed ? label : undefined}
     >
       <Icon className="h-5 w-5" />
-      {!isCollapsed && <span className="ml-3">{label}</span>}
+      {!isCollapsed && (
+        <div className="ml-3 flex items-center">
+          <span>{label}</span>
+          {notificationCount !== undefined && notificationCount > 0 && (
+            <div className="ml-2 bg-red-500 text-white text-xs font-medium rounded-full min-w-[20px] h-5 px-1.5 flex items-center justify-center">
+              {notificationCount}
+            </div>
+          )}
+        </div>
+      )}
+      
+      {isCollapsed && notificationCount !== undefined && notificationCount > 0 && (
+        <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-medium rounded-full w-5 h-5 flex items-center justify-center">
+          {notificationCount}
+        </div>
+      )}
     </Link>
   );
 }
