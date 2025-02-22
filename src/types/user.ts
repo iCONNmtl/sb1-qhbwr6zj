@@ -39,5 +39,6 @@ export interface UserProfile {
   logoUrl?: string;
   pinterestAuth?: PinterestAuth;
   orderSetupCompleted?: boolean;
-  purchasedTrainings?: string[]; // Added this field
+  purchasedTrainings?: string[];
+  autoPayOrders?: boolean; // Added this field
 }

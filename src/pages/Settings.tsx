@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { doc, updateDoc, onSnapshot } from 'firebase/firestore';
 import { auth, db } from '../lib/firebase';
 import { useStore } from '../store/useStore';
-import { ShoppingBag, Camera, BookmarkIcon, Save, Loader2, Plus, Trash2, Edit, Mail, Lock, User } from 'lucide-react';
+import { ShoppingBag, Camera, BookmarkIcon, Save, Loader2, Plus, Trash2, Edit, Mail, Lock, User, DollarSign } from 'lucide-react';
 import LogoUploader from '../components/settings/LogoUploader';
 import PinterestAuthButton from '../components/settings/PinterestAuthButton';
 import PinterestCallback from '../components/settings/PinterestCallback';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { updateEmail, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
 import toast from 'react-hot-toast';
+import clsx from 'clsx';
 import type { UserProfile, PlatformAccount } from '../types/user';
 
 const PLATFORMS = [
@@ -20,7 +21,8 @@ const PLATFORMS = [
 
 const TABS = [
   { id: 'account', label: 'Compte', icon: User },
-  { id: 'branding', label: 'Branding', icon: BookmarkIcon }
+  { id: 'branding', label: 'Branding', icon: BookmarkIcon },
+  { id: 'orders', label: 'Commandes', icon: ShoppingBag }
 ] as const;
 
 type Tab = typeof TABS[number]['id'];
@@ -44,6 +46,7 @@ export default function Settings() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isChangingEmail, setIsChangingEmail] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [autoPayOrders, setAutoPayOrders] = useState(false);
 
   const isAdmin = user?.uid === 'Juvh6BgsXhYsi3loKegWfzRIphG2';
 
@@ -61,6 +64,7 @@ export default function Settings() {
           setUserProfile(data);
           setPlatformAccounts(data.platformAccounts || []);
           setNewEmail(user.email || '');
+          setAutoPayOrders(data.autoPayOrders || false);
         }
       }
     );
@@ -139,6 +143,24 @@ export default function Settings() {
       } else {
         toast.error('Erreur lors de la mise à jour du mot de passe');
       }
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleToggleAutoPay = async () => {
+    if (!user) return;
+
+    setIsSaving(true);
+    try {
+      const userRef = doc(db, 'users', user.uid);
+      await updateDoc(userRef, {
+        autoPayOrders: !autoPayOrders
+      });
+      toast.success('Paramètre mis à jour avec succès');
+    } catch (error) {
+      console.error('Error updating auto-pay setting:', error);
+      toast.error('Erreur lors de la mise à jour du paramètre');
     } finally {
       setIsSaving(false);
     }
@@ -385,6 +407,47 @@ export default function Settings() {
             userId={user.uid}
             currentLogo={userProfile?.logoUrl}
           />
+        )}
+
+        {activeTab === 'orders' && user && (
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <DollarSign className="h-5 w-5 mr-2" />
+                Paiement automatique
+              </h3>
+              
+              <div className="bg-gray-50 rounded-xl p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-gray-900 mb-1">
+                      Payer automatiquement les commandes
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Les nouvelles commandes seront payées automatiquement si vous avez assez de crédits disponibles
+                    </p>
+                  </div>
+                  <div className="relative">
+                    <button
+                      onClick={handleToggleAutoPay}
+                      disabled={isSaving}
+                      className={clsx(
+                        'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none',
+                        autoPayOrders ? 'bg-indigo-600' : 'bg-gray-200'
+                      )}
+                    >
+                      <span
+                        className={clsx(
+                          'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
+                          autoPayOrders ? 'translate-x-5' : 'translate-x-0'
+                        )}
+                      />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
 
         {activeTab === 'platforms' && isAdmin && (

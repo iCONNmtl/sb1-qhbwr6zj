@@ -48,7 +48,7 @@ export default function SidebarLink({
       )}
       
       {isCollapsed && notificationCount !== undefined && notificationCount > 0 && (
-        <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-medium rounded-full w-5 h-5 flex items-center justify-center">
+        <div className="absolute -top-1 -right-1 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs font-medium rounded-full w-5 h-5 flex items-center justify-center">
           {notificationCount}
         </div>
       )}
