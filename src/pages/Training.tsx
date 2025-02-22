@@ -277,7 +277,7 @@ export default function Training() {
       </div>
 
       {/* Business Impact Section */}
-      <div className="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-2xl p-12 text-white">
+      <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl p-12 text-white">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold mb-4">
             L'impact sur votre business
@@ -389,7 +389,7 @@ export default function Training() {
       </div>
 
       {/* CTA Section */}
-      <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-2xl p-12 text-center text-white">
+      <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl p-12 text-center text-white">
         <h2 className="text-3xl font-bold mb-4">
           Prêt à transformer votre business ?
         </h2>
