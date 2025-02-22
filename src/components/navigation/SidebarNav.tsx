@@ -141,6 +141,7 @@ export default function SidebarNav({ isCollapsed }: SidebarNavProps) {
                   icon={item.icon}
                   label={item.label}
                   isCollapsed={isCollapsed}
+                  notificationCount={item.showNotification ? pendingOrders : undefined}
                   className={clsx(
                     item.primary && 'gradient-bg text-white hover:opacity-90',
                     isCollapsed && 'justify-center'
