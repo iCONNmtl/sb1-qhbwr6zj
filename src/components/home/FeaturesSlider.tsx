@@ -6,49 +6,49 @@ import { Wand2, Palette, Layout, ShoppingBag } from 'lucide-react';
 const FEATURES = [
   {
     title: "Créez vos affiches à partir de votre design",
-    description: "Transformez instantanément vos designs en mockups professionnels. Notre technologie avancée s'occupe de tout : positionnement intelligent, ajustement des perspectives et rendu photoréaliste. Importez simplement votre design et laissez la magie opérer.",
+    description: "Transformez vos créations en affiches imprimables en quelques clics. Choisissez votre papier, importez votre design, ajustez les dimensions et obtenez instantanément des produits prêts à être vendus.",
     icon: Wand2,
     image: "https://d2v7vpg8oce97p.cloudfront.net/Branding/A1.webp",
     highlights: [
       "Importation simple par glisser-déposer",
-      "Positionnement automatique intelligent",
-      "Rendu photoréaliste instantané",
-      "Plus de 100 mockups disponibles"
+      "Formats adaptés aux standards du marché",
+      "Optimisation pour une impression parfaite",
+      "Choix entre papier mat, glossy et art premium"
     ]
   },
   {
     title: "Créez des visuels professionnels et percutants",
-    description: "Donnez vie à vos designs avec notre collection exclusive de mockups haute qualité. Chaque template est soigneusement conçu pour mettre en valeur votre travail et impressionner vos clients avec des rendus dignes des plus grandes marques.",
+    description: "Générez automatiquement des visuels ultra-réalistes pour mettre en valeur vos affiches grâce à des mises en scène professionnelles. Ajoutez facilement du texte, des badges et votre logo pour personnaliser vos images et renforcer votre marque. Adaptez vos visuels aux formats Pinterest et Instagram pour maximiser votre visibilité sur les réseaux sociaux.",
     icon: Palette,
     image: "https://d2v7vpg8oce97p.cloudfront.net/Branding/A2.webp",
     highlights: [
-      "Mockups en haute résolution 4K",
-      "Effets de lumière et d'ombre réalistes",
-      "Perspectives et angles variés",
-      "Templates exclusifs premium"
+      "Mockups en haute résolution",
+      "Positionnement automatique intelligent",
+      "Personnalisation avec texte, badges et logo",
+      "Resize pour Pinterest et Instagram en un clic"
     ]
   },
   {
-    title: "Éditez et adaptez pour les réseaux sociaux",
-    description: "Un outil complet de personnalisation pour adapter vos mockups à chaque plateforme. Ajoutez du texte, votre logo, des images et optimisez automatiquement les formats pour Instagram, Pinterest et bien plus encore.",
+    title: "Publiez et générez des revenus sur vos boutiques",
+    description: "Mettez vos affiches en vente en un seul clic. Plus besoin de longues manipulations : Pixmock automatise l’export, la mise en ligne et la création des descriptions pour vous faire gagner du temps.",
     icon: Layout,
     image: "https://d2v7vpg8oce97p.cloudfront.net/Branding/A3.webp",
     highlights: [
-      "Formats optimisés pour chaque réseau",
-      "Éditeur de texte avancé",
-      "Gestion des calques intuitive",
-      "Export multi-formats en un clic"
+      "Export automatique vers Etsy, Shopify et Pinterest",
+      "Descriptions générées automatiquement et optimisées SEO",
+      "Gestion des variantes sélectionnées",
+      "Gestion simplifiée des stocks et mises à jour"
     ]
   },
   {
-    title: "Générez des revenus sur les marketplaces",
-    description: "Transformez vos designs en source de revenus passive. Publiez directement vos créations sur Etsy, Shopify et d'autres marketplaces populaires. Notre système automatisé gère tout le processus de publication et de mise en ligne.",
+    title: "Analysez vos statistiques de ventes",
+    description: "Gardez un œil sur vos performances et optimisez vos ventes grâce à un tableau de bord complet. Identifiez vos best-sellers, comprenez les tendances et adaptez votre stratégie en temps réel.",
     icon: ShoppingBag,
     image: "https://d2v7vpg8oce97p.cloudfront.net/Branding/A4.webp",
     highlights: [
-      "Publication automatisée sur Etsy",
-      "Intégration Shopify native",
-      "Gestion multi-boutiques centralisée",
+      "Tableau de bord détaillé en temps réel",
+      "Identification automatique des best-sellers",
+      "Analyse des comportements d’achat des clients",
       "Analytics et suivi des ventes"
     ]
   }

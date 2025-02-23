@@ -42,10 +42,10 @@ export default function ROISection() {
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      Augmentez vos revenus
+                    Un marché en pleine explosion
                     </h3>
                     <p className="text-gray-600">
-                      Des visuels professionnels augmentent votre taux de conversion et votre panier moyen.
+                    Les affiches sont l’un des produits les plus en vogue du moment. Pourquoi ne pas lancer les vôtres dès aujourd’hui ?
                     </p>
                   </div>
                 </div>
@@ -58,10 +58,10 @@ export default function ROISection() {
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      Réduisez vos dépenses
+                    Une solution tout-en-un et ultra abordable
                     </h3>
                     <p className="text-gray-600">
-                      L'outils tout en un, qui vous fait économiser plusieurs centaines de dollars chaque mois.
+                    Plus besoin de logiciels complexes et coûteux. Avec Pixmock, tout est réuni en un seul outil, au meilleur prix du marché.
                     </p>
                   </div>
                 </div>
@@ -74,10 +74,10 @@ export default function ROISection() {
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      Économisez votre temps
+                    Votre produit prêt en 1 minute
                     </h3>
                     <p className="text-gray-600">
-                      Gagnez des heures chaques semaines, pour vous développer beaucoup plus rapidement.
+                    Transformez votre design en une affiche finalisée et directement disponible sur votre boutique en un temps record.
                     </p>
                   </div>
                 </div>
