@@ -20,14 +20,14 @@ export default function Home() {
         <div className="relative z-10 max-w-6xl mx-auto space-y-6 md:space-y-8 text-center px-4 md:px-8">
           <div className="space-y-4">
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-gray-900 leading-tight">
-            Créez des{' '}
+            Créez et vendez{' '}
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600">
-              visuels ultra-réalistes
+              vos affiches personnalisés
               </span>{' '}
-              en quelques secondes !
+              en quelques clics !
             </h1>
             <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto">
-              L'outil indispensable pour augmenter la valeur de vos affiches et faire exploser vos ventes.
+              L'outil indispensable tout en un pour créer votre business d'affiches et enchaîner les ventes.
             </p>
           </div>
 
