@@ -218,7 +218,7 @@ export default function Settings() {
   };
 
   return (
-    <div className="max-w-4xl space-y-8">
+    <div className="max-w-7xl mx-auto space-y-8">
       {/* Callback Pinterest */}
       {searchParams.has('code') && user && (
         <PinterestCallback 
