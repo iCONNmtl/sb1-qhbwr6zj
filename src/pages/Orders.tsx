@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { Calendar, Clock, CheckCircle, XCircle, AlertTriangle, Trash2, Edit, Package, Truck, Eye, CreditCard, BarChart2, FileText, ChevronDown, ChevronUp, Loader2, DollarSign } from 'lucide-react';
+import { Calendar, Clock, CheckCircle, XCircle, AlertTriangle, Truck, Package, Eye, CreditCard, BarChart2, FileText, ChevronDown, ChevronUp, Loader2, DollarSign, MapPin, Box } from 'lucide-react';
 import DateTimePicker from '../components/scheduling/DateTimePicker';
 import CreditPaymentDialog from '../components/orders/CreditPaymentDialog';
 import OrderStats from './OrderStats';
@@ -145,12 +145,12 @@ export default function Orders() {
         const ordersData = snapshot.docs.map(doc => ({
           ...doc.data(),
           firestoreId: doc.id,
-          totalAmount: Number(doc.data().totalAmount),
+          totalAmount: Number(doc.data().totalAmount || 0),
           purchasePrice: Number(doc.data().purchasePrice || 0),
           items: doc.data().items.map((item: any) => ({
             ...item,
-            price: Number(item.price),
-            quantity: Number(item.quantity),
+            price: Number(item.price || 0),
+            quantity: Number(item.quantity || 0),
             purchasePrice: Number(item.purchasePrice || 0)
           }))
         })) as Order[];
@@ -479,65 +479,184 @@ export default function Orders() {
                           {/* Order Details */}
                           {expandedOrder === order.firestoreId && (
                             <div className="mt-6 border-t border-gray-100 pt-6">
-                              <div className="space-y-4">
-                                {order.items.map((item, index) => (
-                                  <div key={index} className="bg-gray-50 rounded-lg p-4">
-                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                      {/* Size Info */}
-                                      <div>
-                                        <div className="text-sm font-medium text-gray-900">
-                                          {item.size}
-                                        </div>
-                                        <div className="text-sm text-gray-500">
-                                          {item.dimensions.cm}
-                                        </div>
+                              <div className="grid grid-cols-2 gap-6">
+                                {/* Shipping Information */}
+                                <div className="space-y-4">
+                                  <h4 className="font-medium text-gray-900 flex items-center gap-2">
+                                    <MapPin className="h-4 w-4 text-gray-500" />
+                                    Informations de livraison
+                                  </h4>
+                                  <div className="bg-gray-50 rounded-lg p-4">
+                                    <div className="space-y-2">
+                                      <p className="text-sm text-gray-600">
+                                        {order.shippingAddress.street}
+                                      </p>
+                                      <p className="text-sm text-gray-600">
+                                        {order.shippingAddress.postalCode} {order.shippingAddress.city}
+                                      </p>
+                                      <p className="text-sm text-gray-600">
+                                        {order.shippingAddress.country}
+                                      </p>
+                                      {order.shippingAddress.phone && (
+                                        <p className="text-sm text-gray-600">
+                                          Tél: {order.shippingAddress.phone}
+                                        </p>
+                                      )}
+                                    </div>
+                                    <div className="mt-4 pt-4 border-t border-gray-200">
+                                      <div className="flex items-center justify-between text-sm">
+                                        <span className="text-gray-600">Méthode:</span>
+                                        <span className="font-medium text-gray-900">
+                                          {order.shippingMethod.carrier} - {order.shippingMethod.method}
+                                        </span>
                                       </div>
-
-                                      {/* Price Info */}
-                                      <div>
-                                        <div className="text-sm font-medium text-gray-900">
-                                          Prix unitaire: {item.price}€
-                                        </div>
-                                        <div className="text-sm text-gray-500">
-                                          Quantité: {item.quantity}
-                                        </div>
-                                        <div className="text-sm font-medium text-green-600">
-                                          Total: {(item.price * item.quantity).toFixed(2)}€
-                                        </div>
+                                      <div className="flex items-center justify-between text-sm mt-1">
+                                        <span className="text-gray-600">Délai estimé:</span>
+                                        <span className="font-medium text-gray-900">
+                                          {order.shippingMethod.estimatedDays} jours
+                                        </span>
                                       </div>
-
-                                      {/* SKU */}
-                                      <div>
-                                        <div className="text-sm font-medium text-gray-900">
-                                          SKU
+                                      {order.shippingMethod.trackingNumber && (
+                                        <div className="flex items-center justify-between text-sm mt-1">
+                                          <span className="text-gray-600">Numéro de suivi:</span>
+                                          <span className="font-medium text-gray-900">
+                                            {order.shippingMethod.trackingNumber}
+                                          </span>
                                         </div>
-                                        <div className="text-sm font-mono text-gray-500">
-                                          {item.sku}
-                                        </div>
-                                      </div>
-
-                                      {/* Design Link */}
-                                      <div>
-                                        {designUrls[item.sku] && (
-                                          <div>
-                                            <div className="text-sm font-medium text-gray-900 mb-2">
-                                              Design
-                                            </div>
-                                            <a
-                                              href={designUrls[item.sku]}
-                                              target="_blank"
-                                              rel="noopener noreferrer"
-                                              className="inline-flex items-center px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-colors"
-                                            >
-                                              <Eye className="h-4 w-4 mr-2" />
-                                              Voir le design
-                                            </a>
-                                          </div>
-                                        )}
-                                      </div>
+                                      )}
                                     </div>
                                   </div>
-                                ))}
+                                </div>
+
+                                {/* Order Timeline */}
+                                <div className="space-y-4">
+                                  <h4 className="font-medium text-gray-900 flex items-center gap-2">
+                                    <Clock className="h-4 w-4 text-gray-500" />
+                                    Historique de la commande
+                                  </h4>
+                                  <div className="bg-gray-50 rounded-lg p-4">
+                                    <div className="space-y-4">
+                                      <div className="flex items-start gap-3">
+                                        <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                          <CheckCircle className="h-4 w-4 text-green-600" />
+                                        </div>
+                                        <div>
+                                          <p className="text-sm font-medium text-gray-900">Commande créée</p>
+                                          <p className="text-xs text-gray-500">
+                                            {new Date(order.createdAt).toLocaleString()}
+                                          </p>
+                                        </div>
+                                      </div>
+                                      {order.paidAt && (
+                                        <div className="flex items-start gap-3">
+                                          <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                            <DollarSign className="h-4 w-4 text-green-600" />
+                                          </div>
+                                          <div>
+                                            <p className="text-sm font-medium text-gray-900">Paiement reçu</p>
+                                            <p className="text-xs text-gray-500">
+                                              {new Date(order.paidAt).toLocaleString()}
+                                            </p>
+                                          </div>
+                                        </div>
+                                      )}
+                                      {order.shippedAt && (
+                                        <div className="flex items-start gap-3">
+                                          <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                            <Truck className="h-4 w-4 text-blue-600" />
+                                          </div>
+                                          <div>
+                                            <p className="text-sm font-medium text-gray-900">Commande expédiée</p>
+                                            <p className="text-xs text-gray-500">
+                                              {new Date(order.shippedAt).toLocaleString()}
+                                            </p>
+                                          </div>
+                                        </div>
+                                      )}
+                                      {order.deliveredAt && (
+                                        <div className="flex items-start gap-3">
+                                          <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                            <Package className="h-4 w-4 text-green-600" />
+                                          </div>
+                                          <div>
+                                            <p className="text-sm font-medium text-gray-900">Commande livrée</p>
+                                            <p className="text-xs text-gray-500">
+                                              {new Date(order.deliveredAt).toLocaleString()}
+                                            </p>
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Products */}
+                              <div className="mt-6">
+                                <h4 className="font-medium text-gray-900 flex items-center gap-2 mb-4">
+                                  <Box className="h-4 w-4 text-gray-500" />
+                                  Produits commandés
+                                </h4>
+                                <div className="space-y-4">
+                                  {order.items.map((item, index) => (
+                                    <div key={index} className="bg-gray-50 rounded-lg p-4">
+                                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                        {/* Size Info */}
+                                        <div>
+                                          <div className="text-sm font-medium text-gray-900">
+                                            {item.size}
+                                          </div>
+                                          <div className="text-sm text-gray-500">
+                                            {item.dimensions.cm}
+                                          </div>
+                                        </div>
+
+                                        {/* Price Info */}
+                                        <div>
+                                          <div className="text-sm font-medium text-gray-900">
+                                            Prix unitaire: {item.price}€
+                                          </div>
+                                          <div className="text-sm text-gray-500">
+                                            Quantité: {item.quantity}
+                                          </div>
+                                          <div className="text-sm font-medium text-green-600">
+                                            Total: {(item.price * item.quantity).toFixed(2)}€
+                                          </div>
+                                        </div>
+
+                                        {/* SKU */}
+                                        <div>
+                                          <div className="text-sm font-medium text-gray-900">
+                                            SKU
+                                          </div>
+                                          <div className="text-sm font-mono text-gray-500">
+                                            {item.sku}
+                                          </div>
+                                        </div>
+
+                                        {/* Design Link */}
+                                        <div>
+                                          {designUrls[item.sku] && (
+                                            <div>
+                                              <div className="text-sm font-medium text-gray-900 mb-2">
+                                                Design
+                                              </div>
+                                              <a
+                                                href={designUrls[item.sku]}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="inline-flex items-center px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-colors"
+                                              >
+                                                <Eye className="h-4 w-4 mr-2" />
+                                                Voir le design
+                                              </a>
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
                               </div>
                             </div>
                           )}
@@ -552,6 +671,7 @@ export default function Orders() {
         </div>
       </div>
 
+      {/* Purchase Dialog */}
       {paymentDialog && userProfile && (
         <CreditPaymentDialog
           orderId={paymentDialog.orderId}

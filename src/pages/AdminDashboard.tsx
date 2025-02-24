@@ -129,17 +129,35 @@ export default function AdminDashboard() {
 
   const fetchOrders = async () => {
     try {
+      // First fetch all products to get design URLs
+      const productsRef = collection(db, 'products');
+      const productsSnap = await getDocs(productsRef);
+      const designUrlMap: Record<string, string> = {};
+      
+      productsSnap.docs.forEach(doc => {
+        const product = doc.data();
+        product.variants.forEach((variant: any) => {
+          if (variant.sku && variant.designUrl) {
+            designUrlMap[variant.sku] = variant.designUrl;
+          }
+        });
+      });
+
+      // Then fetch and process orders
       const ordersSnap = await getDocs(collection(db, 'orders'));
       const ordersData = ordersSnap.docs.map(doc => {
         const data = doc.data();
         return {
           ...data,
           firestoreId: doc.id,
-          totalAmount: Number(data.totalAmount),
+          totalAmount: Number(data.totalAmount || 0),
+          purchasePrice: Number(data.purchasePrice || 0),
           items: data.items.map((item: any) => ({
             ...item,
-            price: Number(item.price),
-            quantity: Number(item.quantity)
+            price: Number(item.price || 0),
+            quantity: Number(item.quantity || 0),
+            purchasePrice: Number(item.purchasePrice || 0),
+            designUrl: designUrlMap[item.sku] // Add design URL to each item
           }))
         };
       }) as Order[];
