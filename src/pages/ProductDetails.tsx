@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Truck, Package, Shield, Clock, Info } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Truck, Package, Shield, Clock, Info, Globe2 } from 'lucide-react';
 import clsx from 'clsx';
 
 const SIZES = [
@@ -73,42 +73,68 @@ const SIZES = [
 ];
 
 const PRODUCT_IMAGES = {
-  'poster-mat': [
+  'art-poster': [
     'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?auto=format&fit=crop&q=80&w=2574',
     'https://images.unsplash.com/photo-1582053433976-25c00369fc93?auto=format&fit=crop&q=80&w=2512',
     'https://images.unsplash.com/photo-1581430872221-d1cfed785922?auto=format&fit=crop&q=80&w=2670'
   ],
-  'poster-glossy': [
+  'premium-mat': [
     'https://images.unsplash.com/photo-1581430872221-d1cfed785922?auto=format&fit=crop&q=80&w=2670',
     'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?auto=format&fit=crop&q=80&w=2574',
     'https://images.unsplash.com/photo-1582053433976-25c00369fc93?auto=format&fit=crop&q=80&w=2512'
   ],
-  'poster-frame': [
+  'premium-semigloss': [
     'https://images.unsplash.com/photo-1582053433976-25c00369fc93?auto=format&fit=crop&q=80&w=2512',
+    'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?auto=format&fit=crop&q=80&w=2574',
+    'https://images.unsplash.com/photo-1581430872221-d1cfed785922?auto=format&fit=crop&q=80&w=2670'
+  ],
+  'classic-mat': [
+    'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=2426',
+    'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?auto=format&fit=crop&q=80&w=2574',
+    'https://images.unsplash.com/photo-1581430872221-d1cfed785922?auto=format&fit=crop&q=80&w=2670'
+  ],
+  'classic-semigloss': [
+    'https://images.unsplash.com/photo-1472289065668-ce650ac443d2?auto=format&fit=crop&q=80&w=2000',
     'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?auto=format&fit=crop&q=80&w=2574',
     'https://images.unsplash.com/photo-1581430872221-d1cfed785922?auto=format&fit=crop&q=80&w=2670'
   ]
 };
 
 const PRODUCTS = {
-  'poster-mat': {
-    name: 'Poster Mat Premium',
-    description: 'Impression mate professionnelle sur papier 250g/m²',
+  'art-poster': {
+    name: 'Poster d\'Art',
+    description: 'Impression artistique sur papier texturé 200g/m²',
     features: [
-      'Papier premium 250g/m²',
-      'Finition mate anti-reflets',
-      'Rendu artistique',
-      'Idéal pour la décoration',
+      'Papier texturé 200g/m²',
+      'Rendu artistique unique',
+      'Idéal pour les œuvres d\'art',
+      'Finition mate élégante',
       'Certifié FSC'
     ],
     sizes: SIZES
   },
-  'poster-glossy': {
-    name: 'Poster Brillant Premium',
-    description: 'Impression brillante éclatante sur papier photo 250g/m²',
+  'premium-mat': {
+    name: 'Poster Premium Mat',
+    description: 'Impression mate professionnelle sur papier 250g/m²',
+    features: [
+      'Papier premium 250g/m²',
+      'Finition mate anti-reflets',
+      'Rendu professionnel',
+      'Idéal pour la décoration',
+      'Certifié FSC'
+    ],
+    sizes: SIZES.map(size => ({
+      ...size,
+      cost: Math.round(size.cost * 1.2),
+      price: Math.round(size.price * 1.2)
+    }))
+  },
+  'premium-semigloss': {
+    name: 'Poster Premium Semi-Brillant',
+    description: 'Impression semi-brillante sur papier photo 250g/m²',
     features: [
       'Papier photo 250g/m²',
-      'Finition ultra-brillante',
+      'Finition semi-brillante',
       'Couleurs éclatantes',
       'Idéal pour les photos',
       'Certifié FSC'
@@ -119,20 +145,36 @@ const PRODUCTS = {
       price: Math.round(size.price * 1.2)
     }))
   },
-  'poster-frame': {
-    name: 'Poster Encadré',
-    description: 'Vos posters encadrés avec élégance dans des cadres en aluminium',
+  'classic-mat': {
+    name: 'Poster Classique Mat',
+    description: 'Impression mate sur papier 180g/m²',
     features: [
-      'Cadre aluminium premium',
-      'Verre anti-reflets',
-      'Montage professionnel',
-      'Prêt à accrocher',
-      'Protection UV'
+      'Papier standard 180g/m²',
+      'Finition mate classique',
+      'Bon rapport qualité/prix',
+      'Usage quotidien',
+      'Certifié FSC'
     ],
     sizes: SIZES.map(size => ({
       ...size,
-      cost: Math.round(size.cost * 3),
-      price: Math.round(size.price * 2.5)
+      cost: Math.round(size.cost * 0.8),
+      price: Math.round(size.price * 0.8)
+    }))
+  },
+  'classic-semigloss': {
+    name: 'Poster Classique Semi-Brillant',
+    description: 'Impression semi-brillante sur papier photo 180g/m²',
+    features: [
+      'Papier photo 180g/m²',
+      'Finition semi-brillante',
+      'Bon rapport qualité/prix',
+      'Usage quotidien',
+      'Certifié FSC'
+    ],
+    sizes: SIZES.map(size => ({
+      ...size,
+      cost: Math.round(size.cost * 0.8),
+      price: Math.round(size.price * 0.8)
     }))
   }
 } as const;
@@ -292,6 +334,17 @@ export default function ProductDetails() {
             </ul>
           </div>
 
+          {/* Worldwide Shipping Badge */}
+          <div className="bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl p-4 text-white">
+            <div className="flex items-center gap-3">
+              <Globe2 className="h-6 w-6" />
+              <div>
+                <h3 className="font-medium">Expédition dans le monde entier</h3>
+                <p className="text-sm text-white/90">Livraison rapide et sécurisée</p>
+              </div>
+            </div>
+          </div>
+
           {/* Action Button */}
           <Link
             to={`/product?type=${id}`}
@@ -342,7 +395,7 @@ export default function ProductDetails() {
                     <span className="text-gray-500 ml-2">({size.dimensions.cm})</span>
                   </div>
                   <div className="text-indigo-600 font-medium">
-                    {size.cost}€
+                    {size.price}€
                   </div>
                 </div>
 
@@ -354,18 +407,18 @@ export default function ProductDetails() {
                   
                   {/* Tooltip */}
                   <div className="absolute bottom-full left-0 mb-2 w-64 p-3 bg-gray-900 text-white text-sm rounded-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                    <div className="font-medium mb-2">Détails du prix</div>
+                    <div className="font-medium mb-2">Détails du format</div>
                     <div className="space-y-1">
                       <div className="flex justify-between">
-                        <span>Prix de vente suggéré:</span>
-                        <span className="font-medium">{size.price}€</span>
+                        <span>Dimensions (cm):</span>
+                        <span className="font-medium">{size.dimensions.cm}</span>
                       </div>
-                      <div className="flex justify-between text-green-400">
-                        <span>Bénéfice potentiel:</span>
-                        <span className="font-medium">+{size.price - size.cost}€</span>
+                      <div className="flex justify-between">
+                        <span>Dimensions (pouces):</span>
+                        <span className="font-medium">{size.dimensions.inches}</span>
                       </div>
                       <div className="mt-2 pt-2 border-t border-white/20 text-xs text-white/70">
-                        Prix HT • TVA non incluse
+                        Prix TTC • Expédition non incluse
                       </div>
                     </div>
                   </div>

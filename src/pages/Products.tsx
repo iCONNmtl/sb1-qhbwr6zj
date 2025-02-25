@@ -6,55 +6,49 @@ import clsx from 'clsx';
 
 const PRODUCTS = [
   {
-    id: 'poster-mat',
-    name: 'Poster Mat Premium',
-    description: 'Impression mate professionnelle sur papier 250g/m²',
-    icon: Droplets,
-    features: [
-      'Papier premium 250g/m²',
-      'Finition mate anti-reflets',
-      'Rendu artistique',
-      'Idéal pour la décoration',
-      'Certifié FSC'
-    ],
+    id: 'art-poster',
+    name: 'Poster d\'Art',
+    description: 'Impression artistique sur papier texturé 200g/m²',
     image: 'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?auto=format&fit=crop&q=80&w=2574',
-    startingPrice: 15,
+    startingPrice: 12,
     rating: 4.8,
     reviewCount: 127
   },
   {
-    id: 'poster-glossy',
-    name: 'Poster Brillant Premium',
-    description: 'Impression brillante éclatante sur papier photo 250g/m²',
-    icon: Sparkles,
-    features: [
-      'Papier photo 250g/m²',
-      'Finition ultra-brillante',
-      'Couleurs éclatantes',
-      'Idéal pour les photos',
-      'Certifié FSC'
-    ],
+    id: 'premium-mat',
+    name: 'Poster Premium Mat',
+    description: 'Impression mate professionnelle sur papier 250g/m²',
     image: 'https://images.unsplash.com/photo-1581430872221-d1cfed785922?auto=format&fit=crop&q=80&w=2670',
-    startingPrice: 18,
+    startingPrice: 15,
     rating: 4.9,
     reviewCount: 243
   },
   {
-    id: 'poster-frame',
-    name: 'Poster Encadré',
-    description: 'Vos posters encadrés avec élégance dans des cadres en aluminium',
-    icon: Frame,
-    features: [
-      'Cadre aluminium premium',
-      'Verre anti-reflets',
-      'Montage professionnel',
-      'Prêt à accrocher',
-      'Protection UV'
-    ],
+    id: 'premium-semigloss',
+    name: 'Poster Premium Semi-Brillant',
+    description: 'Impression semi-brillante sur papier photo 250g/m²',
     image: 'https://images.unsplash.com/photo-1582053433976-25c00369fc93?auto=format&fit=crop&q=80&w=2512',
-    startingPrice: 35,
+    startingPrice: 15,
     rating: 4.7,
-    reviewCount: 89
+    reviewCount: 189
+  },
+  {
+    id: 'classic-mat',
+    name: 'Poster Classique Mat',
+    description: 'Impression mate sur papier 180g/m²',
+    image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=2426',
+    startingPrice: 10,
+    rating: 4.6,
+    reviewCount: 156
+  },
+  {
+    id: 'classic-semigloss',
+    name: 'Poster Classique Semi-Brillant',
+    description: 'Impression semi-brillante sur papier photo 180g/m²',
+    image: 'https://images.unsplash.com/photo-1472289065668-ce650ac443d2?auto=format&fit=crop&q=80&w=2000',
+    startingPrice: 10,
+    rating: 4.5,
+    reviewCount: 134
   }
 ];
 
@@ -90,73 +84,53 @@ export default function Products() {
       </div>
 
       {/* Products Grid */}
-      <div className="grid md:grid-cols-3 gap-8">
-        {PRODUCTS.map((product) => {
-          const Icon = product.icon;
-          return (
-            <Link
-              key={product.id}
-              to={`/products/${product.id}`}
-              className="group relative bg-white rounded-2xl shadow-sm overflow-hidden hover:shadow-lg transition-all duration-300"
-            >
-              {/* Image */}
-              <div className="aspect-[4/3] relative overflow-hidden">
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-300"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-              </div>
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {PRODUCTS.map((product) => (
+          <Link
+            key={product.id}
+            to={`/products/${product.id}`}
+            className="group relative bg-white rounded-2xl shadow-sm overflow-hidden hover:shadow-lg transition-all duration-300"
+          >
+            {/* Image */}
+            <div className="aspect-[4/3] relative overflow-hidden">
+              <img
+                src={product.image}
+                alt={product.name}
+                className="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-300"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+            </div>
 
-              {/* Content */}
-              <div className="p-8">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="p-3 bg-indigo-100 rounded-xl">
-                    <Icon className="h-6 w-6 text-indigo-600" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-semibold text-gray-900">
-                      {product.name}
-                    </h3>
-                    <p className="text-sm text-gray-500">
-                      À partir de {product.startingPrice}€
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 mb-4">
-                  <RatingStars rating={product.rating} showRating />
-                  <span className="text-sm text-gray-500">
-                    ({product.reviewCount} avis)
-                  </span>
-                </div>
-
-                <p className="text-gray-600 mb-6">
+            {/* Content */}
+            <div className="p-6">
+              <div className="mb-4">
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  {product.name}
+                </h3>
+                <p className="text-gray-600">
                   {product.description}
                 </p>
+              </div>
 
-                <ul className="space-y-3 mb-8">
-                  {product.features.map((feature, index) => (
-                    <li key={index} className="flex items-center text-sm text-gray-600">
-                      <div className="w-1.5 h-1.5 rounded-full bg-indigo-600 mr-2" />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-
-                <div
-                  className={clsx(
-                    'block w-full py-3 px-4 text-center rounded-xl transition-all duration-200',
-                    'bg-gradient-to-r from-purple-600 to-indigo-600 text-white group-hover:bg-indigo-700'
-                  )}
-                >
-                  Voir le produit
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-gray-500">
+                  À partir de {product.startingPrice}€
+                </div>
+                <div className="flex items-center text-sm text-gray-500">
+                  <Shield className="h-4 w-4 mr-1" />
+                  Qualité garantie
                 </div>
               </div>
-            </Link>
-          );
-        })}
+
+              <div className="mt-4 flex items-center text-indigo-600 group-hover:translate-x-2 transition-transform">
+                <span className="text-sm font-medium">Voir le produit</span>
+                <svg className="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                </svg>
+              </div>
+            </div>
+          </Link>
+        ))}
       </div>
 
       {/* Printer Network Info */}

@@ -3,7 +3,7 @@ import { useStore } from '../store/useStore';
 import { doc, onSnapshot, collection, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { Link } from 'react-router-dom';
-import { Image as ImageIcon, Instagram, BookmarkIcon, Eye, Download, Share2, Calendar, Loader2, Package, DollarSign } from 'lucide-react';
+import { Image as ImageIcon, Instagram, BookmarkIcon, Eye, Download, Share2, Loader2, Package, DollarSign } from 'lucide-react';
 import { useGenerations } from '../hooks/useGenerations';
 import { downloadImage } from '../utils/download';
 import toast from 'react-hot-toast';
@@ -11,7 +11,6 @@ import clsx from 'clsx';
 
 // Components
 import MockupPreviewModal from '../components/mockup/MockupPreviewModal';
-import SchedulePostDialog from '../components/scheduling/SchedulePostDialog';
 import type { UserProfile, PlatformAccount } from '../types/user';
 
 interface Product {
@@ -41,7 +40,6 @@ export default function Dashboard() {
   const [previewMockup, setPreviewMockup] = useState<{id: string; name: string; url: string} | null>(null);
   const [selectedMockups, setSelectedMockups] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'instagram' | 'pinterest'>('all');
-  const [showScheduleDialog, setShowScheduleDialog] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
@@ -515,14 +513,6 @@ export default function Dashboard() {
 
           <div className="flex items-center justify-end gap-4 pt-6 border-t border-gray-200">
             <button
-              onClick={() => setShowScheduleDialog(true)}
-              disabled={selectedPlatformAccounts.length === 0}
-              className="flex items-center px-6 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <Calendar className="h-5 w-5 mr-2" />
-              Programmer
-            </button>
-            <button
               onClick={handlePublish}
               disabled={selectedPlatformAccounts.length === 0 || isPublishing}
               className="flex items-center px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -548,28 +538,6 @@ export default function Dashboard() {
           mockup={previewMockup}
           onClose={() => setPreviewMockup(null)}
           onDownload={() => handleDownload(previewMockup)}
-        />
-      )}
-
-      {showScheduleDialog && user && (
-        <SchedulePostDialog
-          userId={user.uid}
-          mockups={generations
-            .flatMap(gen => gen.mockups)
-            .filter(mockup => selectedMockups.includes(mockup.id))
-          }
-          platforms={selectedPlatformAccounts.map(accountId => ({
-            platform: userProfile?.platformAccounts?.find(a => a.id === accountId)?.platform,
-            ...platformData[accountId],
-            product: selectedProduct ? products.find(p => p.id === selectedProduct) : undefined
-          }))}
-          onClose={() => {
-            setShowScheduleDialog(false);
-            setSelectedMockups([]);
-            setSelectedPlatformAccounts([]);
-            setPlatformData({});
-            setSelectedProduct(null);
-          }}
         />
       )}
     </div>

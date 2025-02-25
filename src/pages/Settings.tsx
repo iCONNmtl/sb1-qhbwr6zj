@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { doc, updateDoc, onSnapshot } from 'firebase/firestore';
+import { doc, updateDoc, onSnapshot, collection, query, where, getDocs } from 'firebase/firestore';
 import { auth, db } from '../lib/firebase';
 import { useStore } from '../store/useStore';
-import { ShoppingBag, Camera, BookmarkIcon, Save, Loader2, Plus, Trash2, Edit, Mail, Lock, User, DollarSign } from 'lucide-react';
+import { ShoppingBag, Camera, BookmarkIcon, Save, Loader2, Plus, Trash2, Edit, Mail, Lock, User, DollarSign, FileText } from 'lucide-react';
 import LogoUploader from '../components/settings/LogoUploader';
 import PinterestAuthButton from '../components/settings/PinterestAuthButton';
 import PinterestCallback from '../components/settings/PinterestCallback';
+import InvoiceList from '../components/settings/InvoiceList';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { updateEmail, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
 import toast from 'react-hot-toast';
 import clsx from 'clsx';
 import type { UserProfile, PlatformAccount } from '../types/user';
+import type { Invoice } from '../types/invoice';
 
 const PLATFORMS = [
   { id: 'etsy', label: 'Etsy', icon: ShoppingBag },
@@ -22,7 +24,8 @@ const PLATFORMS = [
 const TABS = [
   { id: 'account', label: 'Compte', icon: User },
   { id: 'branding', label: 'Branding', icon: BookmarkIcon },
-  { id: 'orders', label: 'Commandes', icon: ShoppingBag }
+  { id: 'orders', label: 'Commandes', icon: ShoppingBag },
+  { id: 'invoices', label: 'Factures', icon: FileText }
 ] as const;
 
 type Tab = typeof TABS[number]['id'];
@@ -38,6 +41,8 @@ export default function Settings() {
   const [editingAccount, setEditingAccount] = useState<PlatformAccount | null>(null);
   const [newAccount, setNewAccount] = useState<Partial<PlatformAccount>>({});
   const [showNewAccountForm, setShowNewAccountForm] = useState(false);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [loadingInvoices, setLoadingInvoices] = useState(true);
 
   // États pour la modification du compte
   const [newEmail, setNewEmail] = useState('');
@@ -56,7 +61,8 @@ export default function Settings() {
   useEffect(() => {
     if (!user) return;
 
-    const unsubscribe = onSnapshot(
+    // Subscribe to user profile updates
+    const unsubscribeUser = onSnapshot(
       doc(db, 'users', user.uid),
       (doc) => {
         if (doc.exists()) {
@@ -69,7 +75,34 @@ export default function Settings() {
       }
     );
 
-    return () => unsubscribe();
+    // Fetch invoices
+    const fetchInvoices = async () => {
+      try {
+        const invoicesRef = collection(db, 'invoices');
+        const q = query(invoicesRef, where('userId', '==', user.uid));
+        const snapshot = await getDocs(q);
+        
+        const invoicesData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })) as Invoice[];
+
+        // Sort by date descending
+        invoicesData.sort((a, b) => 
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+
+        setInvoices(invoicesData);
+      } catch (error) {
+        console.error('Error fetching invoices:', error);
+        toast.error('Erreur lors du chargement des factures');
+      } finally {
+        setLoadingInvoices(false);
+      }
+    };
+
+    fetchInvoices();
+    return () => unsubscribeUser();
   }, [user]);
 
   const handleUpdateEmail = async () => {
@@ -240,13 +273,12 @@ export default function Settings() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`
-                  flex items-center space-x-2 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
-                  ${activeTab === tab.id
+                className={clsx(
+                  'flex items-center space-x-2 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm',
+                  activeTab === tab.id
                     ? 'border-indigo-600 text-indigo-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }
-                `}
+                )}
               >
                 <Icon className="h-5 w-5" />
                 <span>{tab.label}</span>
@@ -448,6 +480,13 @@ export default function Settings() {
               </div>
             </div>
           </div>
+        )}
+
+        {activeTab === 'invoices' && user && (
+          <InvoiceList 
+            invoices={invoices}
+            loading={loadingInvoices}
+          />
         )}
 
         {activeTab === 'platforms' && isAdmin && (
