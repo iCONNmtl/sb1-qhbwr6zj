@@ -4,6 +4,7 @@ import Sidebar from './components/navigation/Sidebar';
 import PageContainer from './components/layout/PageContainer';
 import SupportButton from './components/support/SupportButton';
 import AnnouncementBanner from './components/AnnouncementBanner';
+import CookieConsent from './components/CookieConsent';
 import { useScrollToTop } from './hooks/useScrollToTop';
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -127,6 +128,7 @@ export default function AppContent() {
         </PageContainer>
         {user && <SupportButton />}
       </div>
+      <CookieConsent />
     </div>
   );
 }
