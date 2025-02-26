@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { collection, addDoc } from 'firebase/firestore';
@@ -6,11 +6,10 @@ import { db } from '../lib/firebase';
 import { nanoid } from 'nanoid';
 import { Save, Loader2, Leaf, Sparkles, Droplets, Frame, Link2, Image, ChevronRight, Eye, Plus, Check } from 'lucide-react';
 import DesignSelector from '../components/DesignSelector';
-import DesignEditor from '../components/product/DesignEditor';
 import toast from 'react-hot-toast';
 import clsx from 'clsx';
 
-type ProductType = 'poster-mat' | 'poster-glossy' | 'poster-frame';
+type ProductType = 'art-poster' | 'premium-mat' | 'premium-semigloss' | 'classic-mat' | 'classic-semigloss';
 
 interface Size {
   id: string;
@@ -21,18 +20,6 @@ interface Size {
   };
   cost: number;
   suggestedPrice: number;
-}
-
-interface Variant {
-  size: Size;
-  selected: boolean;
-  designUrl?: string;
-  customPrice?: number;
-  adjustments?: {
-    scale: number;
-    position: { x: number; y: number };
-    rotation: number;
-  };
 }
 
 const SIZES: Size[] = [
@@ -149,17 +136,25 @@ const SIZES: Size[] = [
 ];
 
 const PRODUCT_TYPES = {
-  'poster-mat': {
-    name: 'Poster Mat Premium',
+  'art-poster': {
+    name: 'Poster d\'Art',
+    description: 'Impression artistique sur papier texturé 200g/m²'
+  },
+  'premium-mat': {
+    name: 'Poster Premium Mat',
     description: 'Impression mate professionnelle sur papier 250g/m²'
   },
-  'poster-glossy': {
-    name: 'Poster Brillant Premium',
-    description: 'Impression brillante éclatante sur papier photo 250g/m²'
+  'premium-semigloss': {
+    name: 'Poster Premium Semi-Brillant',
+    description: 'Impression semi-brillante sur papier photo 250g/m²'
   },
-  'poster-frame': {
-    name: 'Poster Encadré',
-    description: 'Vos posters encadrés avec élégance dans des cadres en aluminium'
+  'classic-mat': {
+    name: 'Poster Classique Mat',
+    description: 'Impression mate sur papier 180g/m²'
+  },
+  'classic-semigloss': {
+    name: 'Poster Classique Semi-Brillant',
+    description: 'Impression semi-brillante sur papier photo 180g/m²'
   }
 } as const;
 
@@ -204,119 +199,80 @@ const SIZE_GROUPS = [
 
 export default function Product() {
   const [searchParams] = useSearchParams();
-  const productType = searchParams.get('type') as ProductType || 'poster-mat';
+  const productType = searchParams.get('type') as ProductType || 'art-poster';
   const product = PRODUCT_TYPES[productType];
   const { user } = useStore();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [selectedVariants, setSelectedVariants] = useState<Variant[]>(
+  const [selectedVariants, setSelectedVariants] = useState<{
+    size: Size;
+    selected: boolean;
+    customPrice?: number;
+  }[]>(
     SIZES.map(size => ({ size, selected: false }))
   );
-  const [configureVariantId, setConfigureVariantId] = useState<string | null>(null);
-  const [designAdjustments, setDesignAdjustments] = useState<Record<string, any>>({});
-  const [variantDesigns, setVariantDesigns] = useState<Record<string, string>>({});
-  const [configuredVariants, setConfiguredVariants] = useState<Set<string>>(new Set());
+  const [designUrl, setDesignUrl] = useState<string>();
 
-  const configuringVariant = selectedVariants.find(v => v.size.id === configureVariantId);
+  const handleCreateProduct = async () => {
+    if (!user) {
+      toast.error('Veuillez vous connecter');
+      return;
+    }
 
-  const getDefaultAdjustment = () => ({
-    scale: 1,
-    position: { x: 0, y: 0 },
-    rotation: 0
-  });
+    const selectedSizes = selectedVariants.filter(v => v.selected);
+    if (selectedSizes.length === 0) {
+      toast.error('Veuillez sélectionner au moins une taille');
+      return;
+    }
 
-  const updateVariantPrice = (index: number, price: number) => {
-    setSelectedVariants(prev => {
-      const newVariants = [...prev];
-      newVariants[index] = {
-        ...newVariants[index],
-        customPrice: price
-      };
-      return newVariants;
-    });
-  };
+    if (!designUrl) {
+      toast.error('Veuillez sélectionner un design');
+      return;
+    }
 
-  const updateVariantDesign = (url: string, sizeId: string) => {
-    // Update the design for the current size
-    setVariantDesigns(prev => ({
-      ...prev,
-      [sizeId]: url
-    }));
-
-    // Get the size group that contains this size
-    const sizeGroup = SIZE_GROUPS.find(group => group.sizes.includes(sizeId));
-    if (!sizeGroup) return;
-
-    // Get all selected variants from the same group
-    const selectedGroupVariants = selectedVariants.filter(v => 
-      v.selected && sizeGroup.sizes.includes(v.size.id)
-    );
-
-    // Update designs and adjustments for all selected variants in the group
-    if (selectedGroupVariants.length > 0) {
-      const newDesigns = { ...variantDesigns };
-      const newAdjustments = { ...designAdjustments };
-      const newConfigured = new Set(configuredVariants);
-
-      selectedGroupVariants.forEach(variant => {
-        newDesigns[variant.size.id] = url;
-        newAdjustments[variant.size.id] = getDefaultAdjustment();
-        newConfigured.add(variant.size.id);
+    setLoading(true);
+    try {
+      const productId = nanoid();
+      const productRef = collection(db, 'products');
+      
+      // Create product document with all variants
+      await addDoc(productRef, {
+        id: productId,
+        userId: user.uid,
+        type: productType,
+        name: product.name, // Add product name at root level
+        designUrl: designUrl,
+        variants: selectedSizes.map(variant => ({
+          sizeId: variant.size.id,
+          name: product.name, // Add product name to each variant
+          cost: variant.size.cost,
+          suggestedPrice: variant.size.suggestedPrice,
+          price: variant.customPrice || variant.size.suggestedPrice,
+          sku: `${user.uid}-${productId}-${variant.size.id}`,
+          designUrl: designUrl,
+          dimensions: variant.size.dimensions
+        })),
+        createdAt: new Date().toISOString(),
+        status: 'active'
       });
 
-      setVariantDesigns(newDesigns);
-      setDesignAdjustments(newAdjustments);
-      setConfiguredVariants(newConfigured);
-
-      // Set the first variant as the one being configured
-      if (!configureVariantId) {
-        setConfigureVariantId(selectedGroupVariants[0].size.id);
-      }
+      toast.success('Produit créé avec succès');
+      navigate('/my-products');
+    } catch (error) {
+      console.error('Error creating product:', error);
+      toast.error('Erreur lors de la création du produit');
+    } finally {
+      setLoading(false);
     }
   };
 
   const toggleVariant = (index: number) => {
     setSelectedVariants(prev => {
       const newVariants = [...prev];
-      const variant = newVariants[index];
-      
-      variant.selected = !variant.selected;
-
-      if (!variant.selected && configureVariantId === variant.size.id) {
-        const nextSelected = newVariants.find(v => v.selected && v.size.id !== variant.size.id);
-        setConfigureVariantId(nextSelected?.size.id || null);
-      }
-      else if (variant.selected && !configureVariantId) {
-        setConfigureVariantId(variant.size.id);
-      }
-
-      // If selecting and there's a similar size with a design already configured
-      if (variant.selected) {
-        const sizeGroup = SIZE_GROUPS.find(group => group.sizes.includes(variant.size.id));
-        if (sizeGroup) {
-          const configuredSimilarVariant = newVariants.find(v => 
-            v.selected && 
-            sizeGroup.sizes.includes(v.size.id) && 
-            variantDesigns[v.size.id]
-          );
-
-          if (configuredSimilarVariant) {
-            const designUrl = variantDesigns[configuredSimilarVariant.size.id];
-            const adjustment = designAdjustments[configuredSimilarVariant.size.id];
-
-            setVariantDesigns(prev => ({
-              ...prev,
-              [variant.size.id]: designUrl
-            }));
-            setDesignAdjustments(prev => ({
-              ...prev,
-              [variant.size.id]: { ...adjustment }
-            }));
-            setConfiguredVariants(prev => new Set([...prev, variant.size.id]));
-          }
-        }
-      }
-
+      newVariants[index] = {
+        ...newVariants[index],
+        selected: !newVariants[index].selected
+      };
       return newVariants;
     });
   };
@@ -338,13 +294,6 @@ export default function Product() {
         };
       });
 
-      if (!allSelected && !configureVariantId) {
-        const firstSelected = newVariants.find(v => v.selected);
-        if (firstSelected) {
-          setConfigureVariantId(firstSelected.size.id);
-        }
-      }
-
       return newVariants;
     });
   };
@@ -356,70 +305,17 @@ export default function Product() {
         selected: true
       }))
     );
-
-    if (!configureVariantId) {
-      setConfigureVariantId(selectedVariants[0].size.id);
-    }
   };
 
-  const handleCreateProduct = async () => {
-    if (!user) {
-      toast.error('Veuillez vous connecter');
-      return;
-    }
-
-    const selectedSizes = selectedVariants.filter(v => v.selected);
-    if (selectedSizes.length === 0) {
-      toast.error('Veuillez sélectionner au moins une taille');
-      return;
-    }
-
-    const missingDesigns = selectedSizes.filter(v => !variantDesigns[v.size.id]);
-    if (missingDesigns.length > 0) {
-      toast.error('Veuillez associer un design à toutes les tailles sélectionnées');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const productId = nanoid();
-      const productRef = collection(db, 'products');
-      
-      // Get the first variant's design URL to use as the main product design
-      const firstVariantDesignUrl = variantDesigns[selectedSizes[0].size.id];
-      
-      // Créer le document produit avec toutes les informations
-      await addDoc(productRef, {
-        id: productId,
-        userId: user.uid,
-        type: productType,
-        designUrl: firstVariantDesignUrl, // Add main design URL
-        variants: selectedSizes.map(variant => ({
-          sizeId: variant.size.id,
-          cost: variant.size.cost,
-          suggestedPrice: variant.size.suggestedPrice,
-          price: variant.customPrice || variant.size.suggestedPrice,
-          sku: `${user.uid}-${productId}-${variant.size.id}`, // SKU unique avec ID utilisateur
-          designUrl: variantDesigns[variant.size.id],
-          adjustments: designAdjustments[variant.size.id] || getDefaultAdjustment(),
-          dimensions: variant.size.dimensions
-        })),
-        createdAt: new Date().toISOString(),
-        status: 'active',
-        metadata: {
-          productName: PRODUCT_TYPES[productType].name,
-          productDescription: PRODUCT_TYPES[productType].description
-        }
-      });
-
-      toast.success('Produit créé avec succès');
-      navigate('/my-products');
-    } catch (error) {
-      console.error('Error creating product:', error);
-      toast.error('Erreur lors de la création du produit');
-    } finally {
-      setLoading(false);
-    }
+  const updateVariantPrice = (index: number, price: number) => {
+    setSelectedVariants(prev => {
+      const newVariants = [...prev];
+      newVariants[index] = {
+        ...newVariants[index],
+        customPrice: price
+      };
+      return newVariants;
+    });
   };
 
   const renderSizeGroup = (group: typeof SIZE_GROUPS[0]) => {
@@ -429,8 +325,6 @@ export default function Product() {
 
     const hasSelectedVariants = groupVariants.some(v => v.selected);
     const allVariantsSelected = groupVariants.every(v => v.selected);
-    const hasConfiguredVariants = groupVariants.some(v => variantDesigns[v.size.id]);
-    const allVariantsConfigured = groupVariants.every(v => !v.selected || variantDesigns[v.size.id]);
 
     return (
       <div 
@@ -461,23 +355,12 @@ export default function Product() {
                 <p className="text-sm text-gray-500">{group.description}</p>
               </div>
             </div>
-            {hasSelectedVariants && (
-              <div className={clsx(
-                'px-3 py-1 rounded-full text-sm font-medium',
-                allVariantsConfigured ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
-              )}>
-                {allVariantsConfigured ? 'Configuré' : 'À configurer'}
-              </div>
-            )}
           </div>
         </div>
 
         <div className="divide-y divide-gray-100">
-          {groupVariants.map((variant, index) => {
+          {groupVariants.map((variant) => {
             const variantIndex = selectedVariants.findIndex(v => v.size.id === variant.size.id);
-            const hasDesign = Boolean(variantDesigns[variant.size.id]);
-            const isConfiguring = configureVariantId === variant.size.id;
-            const isConfigured = configuredVariants.has(variant.size.id);
 
             return (
               <div
@@ -550,43 +433,6 @@ export default function Product() {
                       </div>
                     )}
                   </div>
-
-                  {variant.selected && (
-                    <div className="flex items-center gap-2">
-                      {hasDesign ? (
-                        <div className="flex items-center gap-2">
-                          <div className="w-10 h-10 rounded-lg bg-gray-100 relative overflow-hidden">
-                            <img 
-                              src={variantDesigns[variant.size.id]} 
-                              alt={`Design ${variant.size.name}`}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                          {!isConfigured && (
-                            <button
-                              onClick={() => setConfigureVariantId(variant.size.id)}
-                              className={clsx(
-                                'p-2 rounded-lg transition-colors',
-                                isConfiguring
-                                  ? 'bg-indigo-600 text-white'
-                                  : 'hover:bg-gray-100 text-gray-600'
-                              )}
-                            >
-                              <Eye className="h-5 w-5" />
-                            </button>
-                          )}
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => setConfigureVariantId(variant.size.id)}
-                          className="flex items-center px-3 py-1.5 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors"
-                        >
-                          <Plus className="h-4 w-4 mr-1" />
-                          Ajouter un design
-                        </button>
-                      )}
-                    </div>
-                  )}
                 </div>
               </div>
             );
@@ -647,53 +493,21 @@ export default function Product() {
         </div>
 
         <div>
-          {configureVariantId && configuringVariant ? (
-            <div className="bg-white rounded-xl shadow-sm p-6 sticky top-8">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h2 className="text-lg font-semibold text-gray-900">
-                    2. Configuration du design pour {configuringVariant.size.name}
-                  </h2>
-                  <p className="text-sm text-gray-500">
-                    {configuringVariant.size.dimensions.cm}
-                  </p>
-                </div>
+          <div className="bg-white rounded-xl shadow-sm p-6 sticky top-8">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  2. Sélectionnez votre design
+                </h2>
               </div>
+            </div>
 
-              <div className="space-y-8">
-                {variantDesigns[configureVariantId] ? (
-                  <DesignEditor
-                    designUrl={variantDesigns[configureVariantId]}
-                    selectedSizes={[configuringVariant.size]}
-                    onSave={(adjustments) => {
-                      setDesignAdjustments(prev => ({
-                        ...prev,
-                        [configuringVariant.size.id]: adjustments[configuringVariant.size.id]
-                      }));
-                    }}
-                    initialAdjustments={{
-                      [configuringVariant.size.id]: designAdjustments[configuringVariant.size.id] || getDefaultAdjustment()
-                    }}
-                  />
-                ) : (
-                  <DesignSelector
-                    userId={user?.uid || ''}
-                    onSelect={(url) => updateVariantDesign(url, configuringVariant.size.id)}
-                  />
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="bg-gray-50 rounded-xl p-8 text-center">
-              <Eye className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Sélectionnez une taille pour configurer son design
-              </h3>
-              <p className="text-gray-600">
-                Cliquez sur l'icône <Eye className="h-4 w-4 inline-block mx-1" /> pour commencer
-              </p>
-            </div>
-          )}
+            <DesignSelector
+              userId={user?.uid || ''}
+              onSelect={setDesignUrl}
+              selectedUrl={designUrl}
+            />
+          </div>
         </div>
       </div>
     </div>

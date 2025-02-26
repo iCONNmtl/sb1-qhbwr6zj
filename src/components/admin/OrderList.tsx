@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Package, Loader2, Clock, CheckCircle, XCircle, Truck, ChevronDown, ChevronUp, DollarSign, Eye, MapPin, Box, FileText, User, Mail, Download } from 'lucide-react';
+import { Package, Loader2, Clock, CheckCircle, XCircle, Truck, ChevronDown, ChevronUp, DollarSign, Eye, MapPin, Box, FileText, User, Mail } from 'lucide-react';
 import { doc, updateDoc, collection, query, where, getDocs, getDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import CreateInvoiceDialog from './CreateInvoiceDialog';
@@ -18,23 +18,33 @@ interface OrderWithInvoice extends Order {
   userEmail?: string;
 }
 
-const ORDER_STATUSES = [
-  { value: 'pending', label: 'En attente', color: 'yellow' },
-  { value: 'paid', label: 'Payée', color: 'green' },
-  { value: 'shipped', label: 'Expédiée', color: 'blue' },
-  { value: 'delivered', label: 'Livrée', color: 'gray' }
-] as const;
-
-export default function OrderList({ orders, onRefresh }: OrderListProps) {
+const OrderList = ({ orders, onRefresh }: OrderListProps) => {
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
   const [invoiceOrder, setInvoiceOrder] = useState<Order | null>(null);
   const [ordersWithInvoices, setOrdersWithInvoices] = useState<OrderWithInvoice[]>([]);
   const [loading, setLoading] = useState(true);
+  const [productNames, setProductNames] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const fetchInvoicesAndUserEmails = async () => {
       try {
+        // Fetch all products first to get names
+        const productsRef = collection(db, 'products');
+        const productsSnap = await getDocs(productsRef);
+        const nameMap: Record<string, string> = {};
+        
+        productsSnap.docs.forEach(doc => {
+          const product = doc.data();
+          product.variants.forEach((variant: any) => {
+            if (variant.sku && variant.name) {
+              nameMap[variant.sku] = variant.name;
+            }
+          });
+        });
+        
+        setProductNames(nameMap);
+
         const ordersWithData = await Promise.all(orders.map(async (order) => {
           // Fetch invoice for this order
           const invoicesRef = collection(db, 'invoices');
@@ -47,8 +57,15 @@ export default function OrderList({ orders, onRefresh }: OrderListProps) {
           const userSnap = await getDoc(userRef);
           const userEmail = userSnap.exists() ? userSnap.data().email : undefined;
 
+          // Add product names to items
+          const itemsWithNames = order.items.map(item => ({
+            ...item,
+            name: nameMap[item.sku] || 'Produit sans nom'
+          }));
+
           return {
             ...order,
+            items: itemsWithNames,
             invoice,
             userEmail
           };
@@ -57,7 +74,7 @@ export default function OrderList({ orders, onRefresh }: OrderListProps) {
         setOrdersWithInvoices(ordersWithData);
         setLoading(false);
       } catch (error) {
-        console.error('Error fetching invoices and user emails:', error);
+        console.error('Error fetching data:', error);
         toast.error('Erreur lors du chargement des données');
         setLoading(false);
       }
@@ -192,9 +209,8 @@ export default function OrderList({ orders, onRefresh }: OrderListProps) {
                       </div>
                     </div>
 
-                    {/* Actions */}
+                    {/* Status and Actions */}
                     <div className="flex items-center gap-4">
-                      {/* Status Selector */}
                       <select
                         value={order.status}
                         onChange={(e) => handleStatusChange(order.firestoreId, e.target.value)}
@@ -207,31 +223,20 @@ export default function OrderList({ orders, onRefresh }: OrderListProps) {
                           'bg-gray-100 border-gray-200 text-gray-800'
                         )}
                       >
-                        {ORDER_STATUSES.map(status => (
-                          <option key={status.value} value={status.value}>
-                            {status.label}
-                          </option>
-                        ))}
+                        <option value="pending">En attente</option>
+                        <option value="paid">Payée</option>
+                        <option value="shipped">Expédiée</option>
+                        <option value="delivered">Livrée</option>
                       </select>
 
                       {/* Invoice Button */}
-                      {order.invoice?.url ? (
-                        <a
-                          href={order.invoice.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center px-3 py-1.5 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors"
-                        >
-                          <Download className="h-4 w-4 mr-2" />
-                          Facture disponible
-                        </a>
-                      ) : (
+                      {!order.invoice && (
                         <button
                           onClick={() => setInvoiceOrder(order)}
                           className="flex items-center px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-colors"
                         >
                           <FileText className="h-4 w-4 mr-2" />
-                          Créer facture
+                          Créer la facture
                         </button>
                       )}
                     </div>
@@ -400,13 +405,13 @@ export default function OrderList({ orders, onRefresh }: OrderListProps) {
                         {order.items.map((item, index) => (
                           <div key={index} className="bg-gray-50 rounded-lg p-4">
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                              {/* Size Info */}
+                              {/* Product Info */}
                               <div>
                                 <div className="text-sm font-medium text-gray-900">
-                                  {item.size}
+                                  {productNames[item.sku] || 'Produit sans nom'}
                                 </div>
                                 <div className="text-sm text-gray-500">
-                                  {item.dimensions.cm}
+                                  {item.size} - {item.dimensions.cm}
                                 </div>
                               </div>
 
@@ -476,3 +481,5 @@ export default function OrderList({ orders, onRefresh }: OrderListProps) {
     </>
   );
 }
+
+export default OrderList;

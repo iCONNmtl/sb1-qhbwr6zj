@@ -3,20 +3,20 @@ import { Link } from 'react-router-dom';
 import { collection, query, where, getDocs, doc, deleteDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useStore } from '../store/useStore';
-import { Package, Edit, Trash2, Plus, Loader2, ChevronDown, ChevronUp, DollarSign, Eye } from 'lucide-react';
+import { Package, Edit, Trash2, Plus, Loader2, ChevronDown, ChevronUp, DollarSign, Eye, Globe2 } from 'lucide-react';
 import ImageLoader from '../components/ImageLoader';
 import toast from 'react-hot-toast';
 import clsx from 'clsx';
 
-type ProductType = 'poster-mat' | 'poster-glossy' | 'poster-frame';
-
 interface Product {
   id: string;
   firestoreId: string;
-  type: ProductType;
+  type: string;
+  name: string; // Added name field
   designUrl: string;
   variants: {
     sizeId: string;
+    name: string; // Added name field for variants
     price: number;
     cost: number;
     sku: string;
@@ -28,12 +28,6 @@ interface Product {
   }[];
   createdAt: string;
 }
-
-const PRODUCT_TYPES = {
-  'poster-mat': 'Poster Mat Premium',
-  'poster-glossy': 'Poster Brillant Premium',
-  'poster-frame': 'Poster Encadré'
-} as const;
 
 export default function MyProducts() {
   const { user } = useStore();
@@ -147,7 +141,7 @@ export default function MyProducts() {
                   <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
                     <ImageLoader
                       src={product.designUrl}
-                      alt={PRODUCT_TYPES[product.type]}
+                      alt={product.name}
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -155,7 +149,7 @@ export default function MyProducts() {
                   {/* Product Info */}
                   <div className="flex-1 min-w-0">
                     <h3 className="font-medium text-gray-900">
-                      {PRODUCT_TYPES[product.type]}
+                      {product.name}
                     </h3>
                     <div className="text-sm text-gray-500">
                       {product.variants.length} taille{product.variants.length > 1 ? 's' : ''} • 
