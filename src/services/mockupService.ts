@@ -19,14 +19,22 @@ interface GenerationResponse {
 }
 
 export async function generateMockups(
-  design: File,
+  design: File | null,
+  designUrl: string | undefined,
   uuidPairs: Array<{ mockupUuid: string; smartObjectUuid: string }>,
   generationId: string,
   exportFormat: ExportFormat,
   textCustomization: TextCustomization
 ): Promise<GenerationResponse> {
   const formData = new FormData();
-  formData.append('design', design);
+  
+  // Add either the file or URL
+  if (design) {
+    formData.append('design', design);
+  } else if (designUrl) {
+    formData.append('designUrl', designUrl);
+  }
+
   formData.append('generationId', generationId);
   formData.append('uuidPairs', JSON.stringify(uuidPairs));
   formData.append('mockupCount', uuidPairs.length.toString());
