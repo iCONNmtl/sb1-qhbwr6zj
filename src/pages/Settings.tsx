@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { doc, updateDoc, onSnapshot, collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, updateDoc, onSnapshot, query, collection, where } from 'firebase/firestore';
 import { auth, db } from '../lib/firebase';
 import { useStore } from '../store/useStore';
-import { ShoppingBag, Camera, BookmarkIcon, Save, Loader2, Plus, Trash2, Edit, Mail, Lock, User, DollarSign, FileText } from 'lucide-react';
+import { ShoppingBag, Camera, BookmarkIcon, Save, Loader2, Plus, Trash2, Edit, Mail, Lock, User, DollarSign } from 'lucide-react';
 import LogoUploader from '../components/settings/LogoUploader';
 import PinterestAuthButton from '../components/settings/PinterestAuthButton';
 import PinterestCallback from '../components/settings/PinterestCallback';
+import AccountDetails from '../components/settings/AccountDetails';
 import InvoiceList from '../components/settings/InvoiceList';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { updateEmail, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
@@ -25,7 +26,7 @@ const TABS = [
   { id: 'account', label: 'Compte', icon: User },
   { id: 'branding', label: 'Branding', icon: BookmarkIcon },
   { id: 'orders', label: 'Commandes', icon: ShoppingBag },
-  { id: 'invoices', label: 'Factures', icon: FileText }
+  { id: 'invoices', label: 'Factures', icon: DollarSign }
 ] as const;
 
 type Tab = typeof TABS[number]['id'];
@@ -36,13 +37,12 @@ export default function Settings() {
   const { user } = useStore();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [platformAccounts, setPlatformAccounts] = useState<PlatformAccount[]>([]);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>('account');
   const [editingAccount, setEditingAccount] = useState<PlatformAccount | null>(null);
   const [newAccount, setNewAccount] = useState<Partial<PlatformAccount>>({});
   const [showNewAccountForm, setShowNewAccountForm] = useState(false);
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [loadingInvoices, setLoadingInvoices] = useState(true);
 
   // États pour la modification du compte
   const [newEmail, setNewEmail] = useState('');
@@ -61,48 +61,41 @@ export default function Settings() {
   useEffect(() => {
     if (!user) return;
 
-    // Subscribe to user profile updates
     const unsubscribeUser = onSnapshot(
       doc(db, 'users', user.uid),
       (doc) => {
         if (doc.exists()) {
-          const data = doc.data() as UserProfile;
-          setUserProfile(data);
-          setPlatformAccounts(data.platformAccounts || []);
+          const userData = doc.data() as UserProfile;
+          setUserProfile(userData);
+          setPlatformAccounts(userData.platformAccounts || []);
           setNewEmail(user.email || '');
-          setAutoPayOrders(data.autoPayOrders || false);
+          setAutoPayOrders(userData.autoPayOrders || false);
         }
       }
     );
 
     // Fetch invoices
-    const fetchInvoices = async () => {
-      try {
-        const invoicesRef = collection(db, 'invoices');
-        const q = query(invoicesRef, where('userId', '==', user.uid));
-        const snapshot = await getDocs(q);
-        
+    const unsubscribeInvoices = onSnapshot(
+      query(collection(db, 'invoices'), where('userId', '==', user.uid)),
+      (snapshot) => {
         const invoicesData = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
         })) as Invoice[];
-
+        
         // Sort by date descending
         invoicesData.sort((a, b) => 
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
-
+        
         setInvoices(invoicesData);
-      } catch (error) {
-        console.error('Error fetching invoices:', error);
-        toast.error('Erreur lors du chargement des factures');
-      } finally {
-        setLoadingInvoices(false);
       }
-    };
+    );
 
-    fetchInvoices();
-    return () => unsubscribeUser();
+    return () => {
+      unsubscribeUser();
+      unsubscribeInvoices();
+    };
   }, [user]);
 
   const handleUpdateEmail = async () => {
@@ -250,16 +243,12 @@ export default function Settings() {
     window.location.reload();
   };
 
-  return (
-    <div className="max-w-7xl mx-auto space-y-8">
-      {/* Callback Pinterest */}
-      {searchParams.has('code') && user && (
-        <PinterestCallback 
-          userId={user.uid} 
-          onSuccess={handlePinterestSuccess}
-        />
-      )}
+  const onRefresh = () => {
+    window.location.reload();
+  };
 
+  return (
+    <div className="space-y-8">
       <h1 className="text-2xl font-bold text-gray-900">
         Paramètres
       </h1>
@@ -290,148 +279,12 @@ export default function Settings() {
 
       {/* Content */}
       <div className="bg-white rounded-xl shadow-sm p-6 space-y-6">
-        {activeTab === 'account' && user && (
-          <div className="space-y-8">
-            {/* Email Section */}
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <Mail className="h-5 w-5 mr-2" />
-                Email
-              </h3>
-              
-              {isChangingEmail ? (
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Nouvel email
-                    </label>
-                    <input
-                      type="email"
-                      value={newEmail}
-                      onChange={(e) => setNewEmail(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Mot de passe actuel
-                    </label>
-                    <input
-                      type="password"
-                      value={currentPassword}
-                      onChange={(e) => setCurrentPassword(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
-                    />
-                  </div>
-                  <div className="flex gap-3">
-                    <button
-                      onClick={handleUpdateEmail}
-                      disabled={isSaving}
-                      className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition disabled:opacity-50"
-                    >
-                      {isSaving ? 'Mise à jour...' : 'Mettre à jour'}
-                    </button>
-                    <button
-                      onClick={() => {
-                        setIsChangingEmail(false);
-                        setCurrentPassword('');
-                        setNewEmail(user.email || '');
-                      }}
-                      className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
-                    >
-                      Annuler
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex items-center justify-between">
-                  <p className="text-gray-600">{user.email}</p>
-                  <button
-                    onClick={() => setIsChangingEmail(true)}
-                    className="px-4 py-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition"
-                  >
-                    Modifier
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Password Section */}
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <Lock className="h-5 w-5 mr-2" />
-                Mot de passe
-              </h3>
-              
-              {isChangingPassword ? (
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Mot de passe actuel
-                    </label>
-                    <input
-                      type="password"
-                      value={currentPassword}
-                      onChange={(e) => setCurrentPassword(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Nouveau mot de passe
-                    </label>
-                    <input
-                      type="password"
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Confirmer le mot de passe
-                    </label>
-                    <input
-                      type="password"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
-                    />
-                  </div>
-                  <div className="flex gap-3">
-                    <button
-                      onClick={handleUpdatePassword}
-                      disabled={isSaving}
-                      className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition disabled:opacity-50"
-                    >
-                      {isSaving ? 'Mise à jour...' : 'Mettre à jour'}
-                    </button>
-                    <button
-                      onClick={() => {
-                        setIsChangingPassword(false);
-                        setCurrentPassword('');
-                        setNewPassword('');
-                        setConfirmPassword('');
-                      }}
-                      className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
-                    >
-                      Annuler
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex items-center justify-between">
-                  <p className="text-gray-600">••••••••</p>
-                  <button
-                    onClick={() => setIsChangingPassword(true)}
-                    className="px-4 py-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition"
-                  >
-                    Modifier
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
+        {activeTab === 'account' && user && userProfile && (
+          <AccountDetails
+            userId={user.uid}
+            userProfile={userProfile}
+            onUpdate={onRefresh}
+          />
         )}
 
         {activeTab === 'branding' && user && (
@@ -483,14 +336,11 @@ export default function Settings() {
         )}
 
         {activeTab === 'invoices' && user && (
-          <InvoiceList 
-            invoices={invoices}
-            loading={loadingInvoices}
-          />
+          <InvoiceList invoices={invoices} />
         )}
 
         {activeTab === 'platforms' && isAdmin && (
-          <>
+          <div className="space-y-6">
             <div>
               <h2 className="text-lg font-semibold text-gray-900 mb-4">
                 Comptes de publication
@@ -628,11 +478,11 @@ export default function Settings() {
                 )}
               </button>
             </div>
-          </>
+          </div>
         )}
       </div>
 
-      {/* Modal d'édition */}
+      {/* Modals */}
       {editingAccount && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl p-6 w-full max-w-md">
@@ -684,6 +534,14 @@ export default function Settings() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Pinterest Callback */}
+      {searchParams.has('code') && user && (
+        <PinterestCallback 
+          userId={user.uid} 
+          onSuccess={handlePinterestSuccess}
+        />
       )}
     </div>
   );

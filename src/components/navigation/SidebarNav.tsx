@@ -76,12 +76,12 @@ export default function SidebarNav({ isCollapsed }: SidebarNavProps) {
       ]
     },
     {
-      title: 'Formation',
+      title: 'Cours',
       items: [
         {
           to: '/training',
           icon: Book,
-          label: 'Formations'
+          label: 'Cours'
         }
       ]
     },
