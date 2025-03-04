@@ -11,7 +11,7 @@ export default function AnnouncementBanner({ onClose }: AnnouncementBannerProps)
   const { isSidebarCollapsed } = useStore();
 
   return (
-    <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white relative">
+    <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white relative">
       <div 
         className={clsx(
           "transition-all duration-300",

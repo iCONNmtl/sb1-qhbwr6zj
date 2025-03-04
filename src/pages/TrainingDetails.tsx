@@ -76,8 +76,8 @@ export default function TrainingDetails() {
       <div className="grid lg:grid-cols-3 gap-8">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-8">
-          {/* Video Section */}
-          {currentSection.videoUrl ? (
+          {/* Video Section - Only show if video URL exists */}
+          {currentSection.videoUrl && (
             <div className="aspect-video bg-gray-900 rounded-2xl overflow-hidden">
               {canAccess ? (
                 <iframe
@@ -116,8 +116,6 @@ export default function TrainingDetails() {
                 </div>
               )}
             </div>
-          ) : (
-            <div className="aspect-video bg-gray-100 rounded-2xl" />
           )}
 
           {/* Content */}
