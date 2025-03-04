@@ -8,12 +8,20 @@ import ImageLoader from './ImageLoader';
 interface DesignUploaderProps {
   onUpload: (file: File, imageUrl: string, dimensions: { width: number; height: number }) => void;
   multiple?: boolean;
+  allowedFormats?: string[];
+  selectedUrl?: string;
 }
 
 const MAKE_WEBHOOK_URL = 'https://hook.eu1.make.com/oizx9vh84aa43v76u289whf41oq1fijx';
 
-export default function DesignUploader({ onUpload, multiple = false }: DesignUploaderProps) {
+export default function DesignUploader({ 
+  onUpload, 
+  multiple = false,
+  allowedFormats = ['image/webp', 'image/jpeg', 'image/png'],
+  selectedUrl
+}: DesignUploaderProps) {
   const [uploading, setUploading] = useState(false);
+  const [designDimensions, setDesignDimensions] = useState<{ width: number; height: number } | null>(null);
 
   const handleUpload = async (file: File) => {
     setUploading(true);
@@ -48,6 +56,7 @@ export default function DesignUploader({ onUpload, multiple = false }: DesignUpl
         throw new Error('No image URL in response');
       }
 
+      setDesignDimensions(dimensions);
       onUpload(file, data.imageUrl, dimensions);
       toast.success('Design uploadé avec succès');
     } catch (error) {
@@ -61,7 +70,8 @@ export default function DesignUploader({ onUpload, multiple = false }: DesignUpl
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: {
       'image/webp': ['.webp'],
-      'image/jpeg': ['.jpg', '.jpeg']
+      'image/jpeg': ['.jpg', '.jpeg'],
+      'image/png': ['.png']
     },
     multiple,
     onDrop: (acceptedFiles) => {
@@ -70,7 +80,7 @@ export default function DesignUploader({ onUpload, multiple = false }: DesignUpl
     onDropRejected: (fileRejections) => {
       const error = fileRejections[0]?.errors[0];
       if (error?.code === 'file-invalid-type') {
-        toast.error('Format non supporté. Utilisez WebP, JPG ou JPEG');
+        toast.error('Format non supporté. Utilisez WebP, JPG, JPEG ou PNG');
       } else {
         toast.error('Erreur lors de l\'upload du fichier');
       }
@@ -105,11 +115,33 @@ export default function DesignUploader({ onUpload, multiple = false }: DesignUpl
               {multiple ? 'Glissez-déposez vos designs ou cliquez pour sélectionner' : 'Glissez-déposez votre design ou cliquez pour sélectionner'}
             </p>
             <p className="mt-2 text-sm text-gray-500">
-              WebP, JPG ou JPEG jusqu'à 10MB
+              WebP, JPG, JPEG ou PNG jusqu'à 10MB
             </p>
           </>
         )}
       </div>
+
+      {/* Preview */}
+      {selectedUrl && (
+        <div className="bg-white rounded-xl shadow-sm p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-medium text-gray-900">Design sélectionné</h3>
+            {designDimensions && (
+              <div className="text-sm text-gray-500">
+                {designDimensions.width}×{designDimensions.height}px
+              </div>
+            )}
+          </div>
+
+          <div className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden">
+            <ImageLoader
+              src={selectedUrl}
+              alt="Design"
+              className="absolute inset-0 w-full h-full object-contain"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

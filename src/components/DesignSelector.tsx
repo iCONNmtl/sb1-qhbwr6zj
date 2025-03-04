@@ -30,6 +30,7 @@ export default function DesignSelector({
   const [uploading, setUploading] = useState(false);
   const [designDimensions, setDesignDimensions] = useState<{ width: number; height: number } | null>(null);
 
+  // Initialiser la position au centre
   useEffect(() => {
     if (selectedUrl) {
       const img = new Image();
@@ -97,7 +98,8 @@ export default function DesignSelector({
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: {
       'image/webp': ['.webp'],
-      'image/jpeg': ['.jpg', '.jpeg']
+      'image/jpeg': ['.jpg', '.jpeg'],
+      'image/png': ['.png']
     },
     multiple: false,
     onDrop: (acceptedFiles) => {
@@ -108,7 +110,7 @@ export default function DesignSelector({
     onDropRejected: (fileRejections) => {
       const error = fileRejections[0]?.errors[0];
       if (error?.code === 'file-invalid-type') {
-        toast.error('Format non supporté. Utilisez WebP, JPG ou JPEG');
+        toast.error('Format non supporté. Utilisez WebP, JPG, JPEG ou PNG');
       } else {
         toast.error('Erreur lors de l\'upload du fichier');
       }
@@ -143,7 +145,7 @@ export default function DesignSelector({
               Glissez-déposez votre design ou cliquez pour sélectionner
             </p>
             <p className="mt-2 text-sm text-gray-500">
-              WebP, JPG ou JPEG jusqu'à 10MB
+              WebP, JPG, JPEG ou PNG jusqu'à 10MB
             </p>
           </>
         )}

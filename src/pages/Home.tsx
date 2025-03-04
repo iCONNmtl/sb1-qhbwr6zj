@@ -9,6 +9,7 @@ import ROISection from '../components/home/ROISection';
 import Testimonials from '../components/home/Testimonials';
 import FAQ from '../components/home/FAQ';
 import CTASection from '../components/home/CTASection';
+import BeforeAfterSection from '../components/home/BeforeAfterSection';
 import { AnimatedTooltip } from '../components/ui/animated-tooltip';
 
 const USERS = [
@@ -113,6 +114,9 @@ export default function Home() {
           </div>
         </div>
       </BackgroundBeamsWithCollision>
+
+      {/* Before/After Section */}
+      <BeforeAfterSection />
 
       {/* ROI Section */}
       <ROISection />

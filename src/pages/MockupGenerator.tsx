@@ -17,7 +17,6 @@ import GenerationProgress from '../components/generation/GenerationProgress';
 import ExportFormatSelector from '../components/mockup/ExportFormatSelector';
 import TextEditor from '../components/mockup/TextEditor';
 import TextCustomizationToggle from '../components/mockup/TextCustomizationToggle';
-import DesignSelector from '../components/DesignSelector';
 
 // Hooks
 import { useMockupGeneration } from '../hooks/useMockupGeneration';
@@ -256,12 +255,12 @@ export default function MockupGenerator() {
         <h2 className="text-xl font-semibold text-gray-900 mb-4">
           1. Choisissez votre design
         </h2>
-        <DesignSelector
-          userId={user?.uid || ''}
-          onSelect={(url) => {
+        <DesignUploader
+          onUpload={(file, url, dimensions) => {
+            setDesignFile(file);
             setDesignUrl(url);
-            setDesignFile(undefined);
           }}
+          selectedUrl={designUrl}
         />
       </section>
 
