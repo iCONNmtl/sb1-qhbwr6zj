@@ -6,19 +6,31 @@ import clsx from 'clsx';
 import ImageLoader from './ImageLoader';
 
 interface DesignUploaderProps {
-  onUpload: (file: File, imageUrl: string) => void;
-  uploadedFile?: File;
+  onUpload: (file: File, imageUrl: string, dimensions: { width: number; height: number }) => void;
+  multiple?: boolean;
 }
 
 const MAKE_WEBHOOK_URL = 'https://hook.eu1.make.com/oizx9vh84aa43v76u289whf41oq1fijx';
 
-export default function DesignUploader({ onUpload, uploadedFile }: DesignUploaderProps) {
+export default function DesignUploader({ onUpload, multiple = false }: DesignUploaderProps) {
   const [uploading, setUploading] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string>();
 
   const handleUpload = async (file: File) => {
     setUploading(true);
     try {
+      // Get image dimensions before upload
+      const dimensions = await new Promise<{ width: number; height: number }>((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          resolve({
+            width: img.width,
+            height: img.height
+          });
+        };
+        img.onerror = reject;
+        img.src = URL.createObjectURL(file);
+      });
+
       const formData = new FormData();
       formData.append('image', file);
 
@@ -36,8 +48,7 @@ export default function DesignUploader({ onUpload, uploadedFile }: DesignUploade
         throw new Error('No image URL in response');
       }
 
-      setPreviewUrl(data.imageUrl);
-      onUpload(file, data.imageUrl);
+      onUpload(file, data.imageUrl, dimensions);
       toast.success('Design uploadé avec succès');
     } catch (error) {
       console.error('Upload error:', error);
@@ -52,11 +63,9 @@ export default function DesignUploader({ onUpload, uploadedFile }: DesignUploade
       'image/webp': ['.webp'],
       'image/jpeg': ['.jpg', '.jpeg']
     },
-    maxFiles: 1,
+    multiple,
     onDrop: (acceptedFiles) => {
-      if (acceptedFiles.length > 0) {
-        handleUpload(acceptedFiles[0]);
-      }
+      acceptedFiles.forEach(handleUpload);
     },
     onDropRejected: (fileRejections) => {
       const error = fileRejections[0]?.errors[0];
@@ -68,74 +77,39 @@ export default function DesignUploader({ onUpload, uploadedFile }: DesignUploade
     }
   });
 
-  const { ref: dropzoneRef, ...rootProps } = getRootProps();
-
   return (
     <div className="space-y-4">
-      {uploadedFile && previewUrl ? (
-        <div className="space-y-4">
-          {/* File Info */}
-          <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
-            <FileImage className="h-8 w-8 text-indigo-600" />
-            <div className="flex-1">
-              <p className="font-medium text-gray-900">{uploadedFile.name}</p>
-              <p className="text-sm text-gray-500">
-                {(uploadedFile.size / 1024 / 1024).toFixed(2)} MB
-              </p>
+      <div
+        {...getRootProps()}
+        className={clsx(
+          'border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition',
+          isDragActive
+            ? 'border-indigo-600 bg-indigo-50'
+            : 'border-gray-300 hover:border-indigo-600'
+        )}
+      >
+        <input {...getInputProps()} />
+        {uploading ? (
+          <>
+            <Loader2 className="h-8 w-8 mx-auto mb-4 text-indigo-600 animate-spin" />
+            <p className="text-gray-600">Upload en cours...</p>
+          </>
+        ) : isDragActive ? (
+          <p className="text-gray-600">Déposez vos fichiers ici</p>
+        ) : (
+          <>
+            <div className="p-3 bg-indigo-100 rounded-xl w-fit mx-auto mb-4">
+              <Upload className="h-6 w-6 text-indigo-600" />
             </div>
-            <div {...getRootProps()}>
-              <input {...getInputProps()} />
-              <button
-                type="button"
-                className="px-3 py-1 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
-                disabled={uploading}
-              >
-                {uploading ? 'Upload...' : 'Changer'}
-              </button>
-            </div>
-          </div>
-
-          {/* Preview */}
-          <div className="relative aspect-square w-full max-w-sm mx-auto bg-gray-50 rounded-lg overflow-hidden">
-            <ImageLoader
-              src={previewUrl}
-              alt="Design preview"
-              className="w-full h-full object-contain"
-            />
-          </div>
-        </div>
-      ) : (
-        <div
-          {...rootProps}
-          ref={dropzoneRef}
-          className={clsx(
-            'border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition',
-            isDragActive
-              ? 'border-indigo-600 bg-indigo-50'
-              : 'border-gray-300 hover:border-indigo-600'
-          )}
-        >
-          <input {...getInputProps()} />
-          {uploading ? (
-            <>
-              <Loader2 className="h-8 w-8 mx-auto mb-4 text-indigo-600 animate-spin" />
-              <p className="text-gray-600">Upload en cours...</p>
-            </>
-          ) : isDragActive ? (
-            <p className="text-gray-600">Déposez votre fichier ici</p>
-          ) : (
-            <>
-              <Upload className="h-8 w-8 mx-auto mb-4 text-gray-400" />
-              <p className="text-gray-600">
-                Glissez-déposez votre design ou cliquez pour sélectionner
-              </p>
-              <p className="mt-2 text-sm text-gray-500">
-                WebP, JPG ou JPEG jusqu'à 10MB
-              </p>
-            </>
-          )}
-        </div>
-      )}
+            <p className="text-gray-600">
+              {multiple ? 'Glissez-déposez vos designs ou cliquez pour sélectionner' : 'Glissez-déposez votre design ou cliquez pour sélectionner'}
+            </p>
+            <p className="mt-2 text-sm text-gray-500">
+              WebP, JPG ou JPEG jusqu'à 10MB
+            </p>
+          </>
+        )}
+      </div>
     </div>
   );
 }

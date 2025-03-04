@@ -10,6 +10,8 @@ import toast from 'react-hot-toast';
 import clsx from 'clsx';
 import type { Order } from '../types/order';
 import type { UserProfile } from '../types/user';
+import { usePagination } from '../hooks/usePagination';
+import Pagination from '../components/Pagination';
 
 const TABS = [
   { id: 'instructions', label: 'Instructions', icon: FileText },
@@ -97,6 +99,15 @@ export default function Orders() {
   } | null>(null);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [designUrls, setDesignUrls] = useState<Record<string, string>>({});
+  
+  const {
+    currentPage,
+    setCurrentPage,
+    pageSize,
+    setPageSize,
+    totalItems,
+    paginatedItems: paginatedOrders
+  } = usePagination(orders);
 
   useEffect(() => {
     if (!user) return;
@@ -359,7 +370,7 @@ export default function Orders() {
               ) : (
                 <div className="bg-white rounded-xl shadow-sm overflow-hidden">
                   <div className="divide-y divide-gray-200">
-                    {orders.map((order) => {
+                    {paginatedOrders.map((order) => {
                       const StatusIcon = order.status === 'pending' ? Clock :
                                        order.status === 'paid' ? CheckCircle :
                                        order.status === 'shipped' ? Truck : Package;
@@ -664,6 +675,14 @@ export default function Orders() {
                       );
                     })}
                   </div>
+
+                  <Pagination
+                    currentPage={currentPage}
+                    totalItems={totalItems}
+                    pageSize={pageSize}
+                    onPageChange={setCurrentPage}
+                    onPageSizeChange={setPageSize}
+                  />
                 </div>
               )}
             </div>

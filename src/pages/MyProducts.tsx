@@ -5,6 +5,8 @@ import { db } from '../lib/firebase';
 import { useStore } from '../store/useStore';
 import { Package, Edit, Trash2, Plus, Loader2, ChevronDown, ChevronUp, DollarSign, Eye, Globe2 } from 'lucide-react';
 import ImageLoader from '../components/ImageLoader';
+import { usePagination } from '../hooks/usePagination';
+import Pagination from '../components/Pagination';
 import toast from 'react-hot-toast';
 import clsx from 'clsx';
 
@@ -12,11 +14,11 @@ interface Product {
   id: string;
   firestoreId: string;
   type: string;
-  name: string; // Added name field
+  name: string;
   designUrl: string;
   variants: {
     sizeId: string;
-    name: string; // Added name field for variants
+    name: string;
     price: number;
     cost: number;
     sku: string;
@@ -35,6 +37,15 @@ export default function MyProducts() {
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [expandedProduct, setExpandedProduct] = useState<string | null>(null);
+
+  const {
+    currentPage,
+    setCurrentPage,
+    pageSize,
+    setPageSize,
+    totalItems,
+    paginatedItems: paginatedProducts
+  } = usePagination(products);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -134,7 +145,7 @@ export default function MyProducts() {
       ) : (
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
           <div className="divide-y divide-gray-200">
-            {products.map((product) => (
+            {paginatedProducts.map((product) => (
               <div key={product.firestoreId} className="p-6">
                 <div className="flex items-center gap-4">
                   {/* Thumbnail */}
@@ -262,6 +273,14 @@ export default function MyProducts() {
               </div>
             ))}
           </div>
+
+          <Pagination
+            currentPage={currentPage}
+            totalItems={totalItems}
+            pageSize={pageSize}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={setPageSize}
+          />
         </div>
       )}
     </div>

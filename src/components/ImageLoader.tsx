@@ -18,14 +18,20 @@ export default function ImageLoader({ src, alt, className, platform }: ImageLoad
   useEffect(() => {
     // Function to convert Google Drive URL to direct image URL
     const getDirectUrl = (url: string) => {
+      if (!url) return '';
+      
+      // Handle Google Drive file URLs
       if (url.includes('drive.google.com/file/d/')) {
-        const fileId = url.match(/\/d\/([^/]+)/)?.[1];
+        const fileId = url.split('/file/d/')[1]?.split('/')[0];
         return fileId ? `https://lh3.googleusercontent.com/d/${fileId}` : url;
       }
+      
+      // Handle Google Drive uc URLs
       if (url.includes('drive.google.com/uc?')) {
         const fileId = url.match(/id=([^&]+)/)?.[1];
         return fileId ? `https://lh3.googleusercontent.com/d/${fileId}` : url;
       }
+      
       return url;
     };
 

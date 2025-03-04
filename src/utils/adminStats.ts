@@ -1,6 +1,7 @@
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import type { UserProfile } from '../types/user';
+import type { Order } from '../types/order';
 
 interface AdminStats {
   users: {
@@ -11,6 +12,15 @@ interface AdminStats {
     basicPercentage: number;
     proPercentage: number;
     expertPercentage: number;
+  };
+  orders: {
+    total: number;
+    pending: number;
+    paid: number;
+    shipped: number;
+    delivered: number;
+    totalRevenue: number;
+    averageOrderValue: number;
   };
   mockups: number;
   totalGenerations: number;
@@ -36,6 +46,45 @@ export async function fetchAdminStats(): Promise<AdminStats> {
     const proPercentage = Math.round((userStats.pro / userStats.total) * 100) || 0;
     const expertPercentage = Math.round((userStats.expert / userStats.total) * 100) || 0;
 
+    // Fetch orders
+    const ordersSnap = await getDocs(collection(db, 'orders'));
+    const orders = ordersSnap.docs.map(doc => doc.data() as Order);
+    
+    const orderStats = orders.reduce((acc, order) => {
+      acc.total++;
+      acc.totalRevenue += order.totalAmount;
+      
+      switch (order.status) {
+        case 'pending':
+          acc.pending++;
+          break;
+        case 'paid':
+          acc.paid++;
+          break;
+        case 'shipped':
+          acc.shipped++;
+          break;
+        case 'delivered':
+          acc.delivered++;
+          break;
+      }
+      
+      return acc;
+    }, {
+      total: 0,
+      pending: 0,
+      paid: 0,
+      shipped: 0,
+      delivered: 0,
+      totalRevenue: 0,
+      averageOrderValue: 0
+    });
+
+    // Calculate average order value
+    orderStats.averageOrderValue = orderStats.total > 0 
+      ? orderStats.totalRevenue / orderStats.total 
+      : 0;
+
     // Count mockups
     const mockupsSnap = await getDocs(collection(db, 'mockups'));
     const mockupsCount = mockupsSnap.size;
@@ -54,6 +103,7 @@ export async function fetchAdminStats(): Promise<AdminStats> {
         proPercentage,
         expertPercentage
       },
+      orders: orderStats,
       mockups: mockupsCount,
       totalGenerations
     };

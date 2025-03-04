@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Wand2, CreditCard, Settings, Calendar, Package, ShoppingBag, FileText, Book } from 'lucide-react';
+import { LayoutDashboard, Wand2, Calendar, Package, ShoppingBag, FileText, Book } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
@@ -25,7 +25,9 @@ interface SidebarNavProps {
 export default function SidebarNav({ isCollapsed }: SidebarNavProps) {
   const { user } = useStore();
   const [pendingOrders, setPendingOrders] = useState(0);
+  const [openTickets, setOpenTickets] = useState(0);
   const isAdmin = user?.uid === 'Juvh6BgsXhYsi3loKegWfzRIphG2';
+  const [visibleSections, setVisibleSections] = useState<string[]>([]);
 
   useEffect(() => {
     if (!user) return;
@@ -33,18 +35,51 @@ export default function SidebarNav({ isCollapsed }: SidebarNavProps) {
     // Subscribe to pending orders count
     const ordersQuery = query(
       collection(db, 'orders'),
-      where('userId', '==', user.uid),
       where('status', '==', 'pending')
     );
 
-    const unsubscribe = onSnapshot(ordersQuery, (snapshot) => {
+    const unsubscribeOrders = onSnapshot(ordersQuery, (snapshot) => {
       setPendingOrders(snapshot.size);
     });
 
-    return () => unsubscribe();
+    // Subscribe to open tickets count
+    const ticketsQuery = query(
+      collection(db, 'tickets'),
+      where('status', '==', 'open')
+    );
+
+    const unsubscribeTickets = onSnapshot(ticketsQuery, (snapshot) => {
+      setOpenTickets(snapshot.size);
+    });
+
+    return () => {
+      unsubscribeOrders();
+      unsubscribeTickets();
+    };
   }, [user]);
 
   const navSections: NavSection[] = [
+    {
+      title: 'Produits',
+      items: [
+        {
+          to: '/products',
+          icon: Package,
+          label: 'Catalogue'
+        },
+        {
+          to: '/my-products',
+          icon: ShoppingBag,
+          label: 'Mes produits'
+        },
+        {
+          to: '/orders',
+          icon: FileText,
+          label: 'Commandes',
+          showNotification: true
+        }
+      ]
+    },
     {
       title: 'Mockups',
       items: [
@@ -61,48 +96,12 @@ export default function SidebarNav({ isCollapsed }: SidebarNavProps) {
       ]
     },
     {
-      title: 'Produits',
-      items: [
-        {
-          to: '/products',
-          icon: Package,
-          label: 'Catalogue'
-        },
-        {
-          to: '/my-products',
-          icon: ShoppingBag,
-          label: 'Mes produits'
-        }
-      ]
-    },
-    {
       title: 'Cours',
       items: [
         {
           to: '/training',
           icon: Book,
           label: 'Cours'
-        }
-      ]
-    },
-    {
-      title: 'Compte',
-      items: [
-        {
-          to: '/orders',
-          icon: FileText,
-          label: 'Commandes',
-          showNotification: true
-        },
-        {
-          to: '/pricing',
-          icon: CreditCard,
-          label: 'Tarifs'
-        },
-        {
-          to: '/settings',
-          icon: Settings,
-          label: 'Paramètres'
         }
       ]
     }
@@ -115,17 +114,25 @@ export default function SidebarNav({ isCollapsed }: SidebarNavProps) {
       items: [
         {
           to: '/admin',
-          icon: Settings,
-          label: 'Admin'
+          icon: LayoutDashboard,
+          label: 'Admin',
+          showNotification: true
         }
       ]
     });
   }
 
   return (
-    <nav className="space-y-3">
+    <nav id="sidebar-nav" className="space-y-3 overflow-y-auto max-h-[calc(100vh-200px)]">
       {navSections.map((section, index) => (
-        <div key={section.title} className={index > 0 ? 'border-t border-gray-100 pt-3 mt-2' : ''}>
+        <div 
+          key={section.title} 
+          id={`section-${index}`}
+          className={clsx(
+            'nav-section',
+            index > 0 ? 'border-t border-gray-100 pt-3 mt-2' : ''
+          )}
+        >
           {!isCollapsed && (
             <h3 className="px-3 mb-1 text-xs font-medium text-gray-500 uppercase tracking-wider">
               {section.title}
@@ -141,7 +148,11 @@ export default function SidebarNav({ isCollapsed }: SidebarNavProps) {
                   icon={item.icon}
                   label={item.label}
                   isCollapsed={isCollapsed}
-                  notificationCount={item.showNotification ? pendingOrders : undefined}
+                  notificationCount={
+                    item.showNotification && item.to === '/admin' ? (pendingOrders + openTickets) :
+                    item.showNotification && item.to === '/orders' ? pendingOrders :
+                    undefined
+                  }
                   className={clsx(
                     item.primary && 'gradient-bg text-white hover:opacity-90',
                     isCollapsed && 'justify-center'

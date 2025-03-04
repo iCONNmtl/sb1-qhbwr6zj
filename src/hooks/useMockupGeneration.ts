@@ -11,19 +11,14 @@ import toast from 'react-hot-toast';
 import type { UserProfile } from '../types/user';
 import type { ExportFormat } from '../types/mockup';
 
-interface TextCustomization {
-  enabled: boolean;
-  appliedMockups: number[];
-  html: string;
-}
-
 export function useMockupGeneration() {
   const [isGenerating, setIsGenerating] = useState(false);
   const { user, addGeneration } = useStore();
   const navigate = useNavigate();
 
   const generate = async (
-    designFile: File,
+    designFile: File | null,
+    designUrl: string | undefined,
     selectedMockups: string[],
     selectedMockupData: any[],
     userProfile: UserProfile,
@@ -36,8 +31,8 @@ export function useMockupGeneration() {
       return;
     }
 
-    if (!designFile) {
-      toast.error('Veuillez uploader un design');
+    if (!designFile && !designUrl) {
+      toast.error('Veuillez sélectionner un design');
       return;
     }
 
@@ -46,9 +41,9 @@ export function useMockupGeneration() {
       return;
     }
 
-    // Calculer le coût total en crédits
-    const baseCredits = selectedMockups.length * 5; // 5 crédits par mockup
-    const customizationCredits = customizedMockups.length * 5; // 5 crédits supplémentaires par mockup personnalisé
+    // Calculate total credits needed
+    const baseCredits = selectedMockups.length * 5;
+    const customizationCredits = customizedMockups.length * 5;
     const totalCredits = baseCredits + customizationCredits;
 
     if ((userProfile.subscription.credits || 0) < totalCredits) {
@@ -60,36 +55,55 @@ export function useMockupGeneration() {
     const generationId = nanoid();
 
     try {
-      const processedDesign = await processDesignFile(designFile);
-      await updateUserCredits(user.uid, totalCredits);
+      // Process design file if provided
+      const processedDesign = designFile ? await processDesignFile(designFile) : null;
       
       const uuidPairs = selectedMockupData.map(m => ({
         mockupUuid: m.mockupUuid,
         smartObjectUuid: m.smartObjectUuid
       }));
 
+      const textCustomization = {
+        enabled: Boolean(customHtml),
+        appliedMockups: customizedMockups,
+        html: customHtml || ''
+      };
+
       const result = await generateMockups(
-        processedDesign, 
-        uuidPairs, 
-        generationId, 
+        processedDesign,
+        designUrl,
+        uuidPairs,
+        generationId,
         exportFormat,
-        customHtml
+        textCustomization
       );
 
       if (result.success && result.mockups) {
+        // Deduct credits before saving generation
+        await updateUserCredits(user.uid, totalCredits);
+
+        // Create generation document with valid data
         const generationData = {
           id: generationId,
           userId: user.uid,
-          designName: designFile.name,
-          mockups: result.mockups,
+          designName: designFile?.name || 'Design existant',
+          mockups: result.mockups.map(mockup => ({
+            id: mockup.id,
+            name: mockup.name,
+            url: mockup.url
+          })),
           exportFormat,
-          customHtml,
-          customizedMockups,
+          customHtml: customHtml || null,
+          customizedMockups: customizedMockups || [],
           creditsUsed: totalCredits,
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
+          status: 'completed'
         };
 
-        await addDoc(collection(db, 'generations'), generationData);
+        // Add generation to Firestore
+        const docRef = await addDoc(collection(db, 'generations'), generationData);
+        
+        // Add to local store
         addGeneration(generationData);
         
         toast.success('Génération réussie !');

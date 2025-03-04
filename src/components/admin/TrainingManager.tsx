@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Book, Plus, Edit, Trash2, Crown, Eye, EyeOff, Loader2 } from 'lucide-react';
-import { collection, addDoc, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { collection, addDoc, doc, updateDoc, deleteDoc, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { usePagination } from '../../hooks/usePagination';
 import Pagination from '../Pagination';
+import RichTextEditor from './RichTextEditor';
 import toast from 'react-hot-toast';
 import clsx from 'clsx';
 import type { Training, TrainingStatus, TrainingAccess } from '../../types/training';
@@ -13,23 +14,19 @@ interface TrainingManagerProps {
   onRefresh: () => Promise<void>;
 }
 
-const CATEGORIES = [
-  { id: 'tool', name: 'Utilisation de l\'outil' },
-  { id: 'etsy', name: 'Vendre sur Etsy' },
-  { id: 'shopify', name: 'Vendre sur Shopify' },
-  { id: 'social', name: 'Marketing sur les réseaux sociaux' },
-  { id: 'design', name: 'Créer ses designs' }
-];
+const TEMPLATE_CATEGORIES = ['Promotions', 'Produits', 'Social Media'] as const;
+const MAX_TEMPLATES = 10;
 
 export default function TrainingManager({ trainings, onRefresh }: TrainingManagerProps) {
+  const [loading, setLoading] = useState(false);
   const [showEditor, setShowEditor] = useState(false);
   const [editingTraining, setEditingTraining] = useState<Training | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [purchaseCount, setPurchaseCount] = useState(0);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     thumbnail: '',
-    category: CATEGORIES[0].id,
+    category: TEMPLATE_CATEGORIES[0],
     access: 'free' as TrainingAccess,
     credits: 0,
     sections: [{ id: '1', title: '', content: '', videoUrl: '' }]
@@ -44,14 +41,33 @@ export default function TrainingManager({ trainings, onRefresh }: TrainingManage
     paginatedItems: paginatedTrainings
   } = usePagination(trainings);
 
+  useEffect(() => {
+    const fetchPurchaseCount = async () => {
+      try {
+        const usersRef = collection(db, 'users');
+        const usersSnap = await getDocs(usersRef);
+        let count = 0;
+        
+        usersSnap.docs.forEach(doc => {
+          const userData = doc.data();
+          if (userData.purchasedTrainings) {
+            count += userData.purchasedTrainings.length;
+          }
+        });
+        
+        setPurchaseCount(count);
+      } catch (error) {
+        console.error('Error fetching purchase count:', error);
+      }
+    };
+
+    fetchPurchaseCount();
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.title || !formData.description || !formData.thumbnail) {
-      toast.error('Veuillez remplir tous les champs requis');
-      return;
-    }
-
     setLoading(true);
+
     try {
       const trainingData = {
         ...formData,
@@ -74,7 +90,7 @@ export default function TrainingManager({ trainings, onRefresh }: TrainingManage
         title: '',
         description: '',
         thumbnail: '',
-        category: CATEGORIES[0].id,
+        category: TEMPLATE_CATEGORIES[0],
         access: 'free',
         credits: 0,
         sections: [{ id: '1', title: '', content: '', videoUrl: '' }]
@@ -122,18 +138,18 @@ export default function TrainingManager({ trainings, onRefresh }: TrainingManage
 
   return (
     <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-      <div className="p-6 border-b border-gray-200">
+      <div className="p-6 border-b border-gray-100">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-indigo-100 rounded-lg">
               <Book className="h-5 w-5 text-indigo-600" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-gray-900">
                 Formations
-              </h2>
+              </h3>
               <p className="text-sm text-gray-500">
-                {trainings.length} formation{trainings.length > 1 ? 's' : ''}
+                {trainings.length} formation{trainings.length > 1 ? 's' : ''} • {purchaseCount} achat{purchaseCount > 1 ? 's' : ''}
               </p>
             </div>
           </div>
@@ -142,14 +158,14 @@ export default function TrainingManager({ trainings, onRefresh }: TrainingManage
             className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
           >
             <Plus className="h-5 w-5 mr-2" />
-            Nouvelle formation
+            Ajouter une formation
           </button>
         </div>
       </div>
 
       <div className="divide-y divide-gray-200">
         {paginatedTrainings.map((training) => (
-          <div key={training.id} className="p-6 hover:bg-gray-50">
+          <div key={training.id} className="p-6">
             <div className="flex items-start gap-4">
               {/* Thumbnail */}
               <div className="w-40 aspect-video rounded-lg overflow-hidden bg-gray-100">
@@ -161,12 +177,10 @@ export default function TrainingManager({ trainings, onRefresh }: TrainingManage
               </div>
 
               {/* Content */}
-              <div className="flex-1">
-                <div className="flex items-start justify-between">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-medium text-gray-900">
-                      {training.title}
-                    </h3>
+                    <h3 className="font-medium text-gray-900">{training.title}</h3>
                     <p className="text-sm text-gray-500 mt-1">
                       {training.description}
                     </p>
@@ -255,7 +269,7 @@ export default function TrainingManager({ trainings, onRefresh }: TrainingManage
 
       {/* Editor Modal */}
       {showEditor && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-200">
               <h3 className="text-xl font-semibold text-gray-900">
@@ -286,10 +300,11 @@ export default function TrainingManager({ trainings, onRefresh }: TrainingManage
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                    required
                   >
-                    {CATEGORIES.map(category => (
-                      <option key={category.id} value={category.id}>
-                        {category.name}
+                    {TEMPLATE_CATEGORIES.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
                       </option>
                     ))}
                   </select>
@@ -331,6 +346,7 @@ export default function TrainingManager({ trainings, onRefresh }: TrainingManage
                     value={formData.access}
                     onChange={(e) => setFormData({ ...formData, access: e.target.value as TrainingAccess })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                    required
                   >
                     <option value="free">Gratuit</option>
                     <option value="premium">Premium</option>
@@ -429,16 +445,13 @@ export default function TrainingManager({ trainings, onRefresh }: TrainingManage
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Contenu
                         </label>
-                        <textarea
+                        <RichTextEditor
                           value={section.content}
-                          onChange={(e) => {
+                          onChange={(content) => {
                             const newSections = [...formData.sections];
-                            newSections[index].content = e.target.value;
+                            newSections[index].content = content;
                             setFormData({ ...formData, sections: newSections });
                           }}
-                          rows={6}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
-                          required
                         />
                       </div>
                     </div>
@@ -456,7 +469,7 @@ export default function TrainingManager({ trainings, onRefresh }: TrainingManage
                       title: '',
                       description: '',
                       thumbnail: '',
-                      category: CATEGORIES[0].id,
+                      category: TEMPLATE_CATEGORIES[0],
                       access: 'free',
                       credits: 0,
                       sections: [{ id: '1', title: '', content: '', videoUrl: '' }]
