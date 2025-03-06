@@ -85,7 +85,7 @@ export default function FeaturesSlider() {
                     onMouseEnter={() => setIsPaused(true)}
                     onMouseLeave={() => setIsPaused(false)}
                     className={clsx(
-                      "group flex items-center space-y-2 p-4 bg-white rounded-xl hover:shadow-lg transition-all duration-200",
+                      "group flex items-center space-y-4 p-4 bg-white rounded-xl hover:shadow-lg transition-all duration-200",
                       activeIndex === index 
                         ? "bg-gradient-to-r from-purple-600 to-indigo-600 shadow-lg" 
                         : "hover:bg-white/50"

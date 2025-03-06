@@ -57,7 +57,7 @@ export default function BeforeAfterSection() {
           {/* Arguments */}
           <div className="space-y-12">
             {ARGUMENTS.map((arg, index) => (
-              <div key={index} className="space-y-2 p-4 bg-white rounded-xl hover:shadow-lg transition-all duration-200">
+              <div key={index} className="space-y-1 p-4 bg-white rounded-xl hover:shadow-lg transition-all duration-200">
                 <div className="flex items-baseline justify-between">
                   <h3 className="text-xl font-semibold text-gray-900">
                     {arg.title}

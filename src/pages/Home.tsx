@@ -49,9 +49,9 @@ export default function Home() {
         <div className="relative z-10 max-w-6xl mx-auto space-y-6 md:space-y-8 text-center px-4 md:px-8">
           <div className="space-y-4">
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-gray-900 leading-tight">
-              Créez et vendez{' '}
+              Monétiser{' '}
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600">
-                vos affiches personnalisés
+                vos designs
               </span>{' '}
               en quelques clics !
             </h1>
