@@ -43,7 +43,7 @@ export default function Features() {
 
       {/* Features Grid */}
       <div className="max-w-7xl mx-auto px-4">
-        <div className="border-t border-gray-200 mt-12 pt-12">
+        <div className="border-t border-gray-200 mt-12 pt-12 md:py-20">
           <h2 className="text-2xl font-bold text-gray-900 text-center mb-8">
             Des fonctionnalités pensées pour vous
           </h2>
