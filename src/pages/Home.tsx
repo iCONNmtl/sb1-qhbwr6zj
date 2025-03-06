@@ -118,11 +118,11 @@ export default function Home() {
       {/* Before/After Section */}
       <BeforeAfterSection />
 
-      {/* ROI Section */}
-      <ROISection />
-
       {/* Features */}
       <Features />
+
+       {/* ROI Section */}
+       <ROISection />
 
       {/* Testimonials */}
       <div className="px-4 md:px-0 py-20">

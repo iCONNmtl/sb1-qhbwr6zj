@@ -63,9 +63,14 @@ export default function FeaturesSlider() {
   return (
     <section className="bg-gray-50 py-12 md:py-20">
       <div className="max-w-7xl mx-auto px-4">
-        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 text-center mb-12">
-          Une solution complète pour vos mockups
-        </h2>
+      <div className="text-center mb-12">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          La solution complète pour votre business
+          </h2>
+          <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
+          De la création à la vente, gérez tout votre business depuis une seule plateforme
+          </p>
+        </div>
 
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Navigation - Responsive */}
@@ -80,8 +85,7 @@ export default function FeaturesSlider() {
                     onMouseEnter={() => setIsPaused(true)}
                     onMouseLeave={() => setIsPaused(false)}
                     className={clsx(
-                      "group flex items-center transition-all duration-300",
-                      "min-w-[280px] lg:min-w-0 p-3 rounded-xl",
+                      "group flex items-center bg-white rounded-xl hover:shadow-lg transition-all duration-200",
                       activeIndex === index 
                         ? "bg-gradient-to-r from-purple-600 to-indigo-600 shadow-lg" 
                         : "hover:bg-white/50"
@@ -123,15 +127,8 @@ export default function FeaturesSlider() {
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
           >
-            <div className="bg-white rounded-2xl overflow-hidden shadow-xl">
+            <div className="bg-white rounded-2xl overflow-hidden">
               {/* Image */}
-              <div className="aspect-[2/1] overflow-hidden">
-                <img 
-                  src={FEATURES[activeIndex].image}
-                  alt={FEATURES[activeIndex].title}
-                  className="w-full h-full object-cover"
-                />
-              </div>
               
               <div className="p-6 md:p-8 lg:p-12">
 
