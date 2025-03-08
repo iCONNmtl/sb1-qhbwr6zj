@@ -87,7 +87,7 @@ export default function Home() {
                     Commencer gratuitement
                   </Link>
                   <a
-                    href="https://calendly.com/your-link"
+                    href="https://calendly.com/contact-pixmock/30min"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 text-lg bg-white border-2 border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-200"
