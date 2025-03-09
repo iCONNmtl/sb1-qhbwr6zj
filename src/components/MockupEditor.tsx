@@ -75,7 +75,8 @@ export default function MockupEditor({ mockup, onClose, onSuccess }: MockupEdito
     category: mockup.category,
     aspectRatio: mockup.aspectRatio,
     mockupUuid: mockup.mockupUuid,
-    smartObjectUuid: mockup.smartObjectUuid
+    smartObjectUuid: mockup.smartObjectUuid,
+    previewUrlAfter: mockup.previewUrlAfter || ''
   });
 
   const validateUUID = (uuid: string): boolean => {
@@ -105,7 +106,8 @@ export default function MockupEditor({ mockup, onClose, onSuccess }: MockupEdito
         category: formData.category.trim(),
         aspectRatio: formData.aspectRatio,
         mockupUuid: formData.mockupUuid,
-        smartObjectUuid: formData.smartObjectUuid
+        smartObjectUuid: formData.smartObjectUuid,
+        previewUrlAfter: formData.previewUrlAfter.trim() || null
       });
 
       toast.success('Mockup mis à jour avec succès');
@@ -174,6 +176,22 @@ export default function MockupEditor({ mockup, onClose, onSuccess }: MockupEdito
               placeholder="87f83e41-5671-4918-9122-09e894ece8ea"
               required
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              URL de l'aperçu "après"
+            </label>
+            <input
+              type="url"
+              value={formData.previewUrlAfter}
+              onChange={(e) => setFormData({ ...formData, previewUrlAfter: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+              placeholder="https://example.com/preview-after.jpg"
+            />
+            <p className="mt-1 text-sm text-gray-500">
+              URL de l'image à afficher après le survol (optionnel)
+            </p>
           </div>
 
           <div>

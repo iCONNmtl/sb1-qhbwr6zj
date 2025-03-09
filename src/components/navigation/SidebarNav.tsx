@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Wand2, Calendar, Package, ShoppingBag, FileText, Book } from 'lucide-react';
+import { LayoutDashboard, Wand2, Calendar, Package, ShoppingBag, FileText, Book, CreditCard } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
@@ -102,6 +102,16 @@ export default function SidebarNav({ isCollapsed }: SidebarNavProps) {
           to: '/training',
           icon: Book,
           label: 'Cours'
+        }
+      ]
+    },
+    {
+      title: 'Tarifs',
+      items: [
+        {
+          to: '/pricing',
+          icon: CreditCard,
+          label: 'Tarifs'
         }
       ]
     }

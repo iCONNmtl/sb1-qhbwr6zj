@@ -75,7 +75,9 @@ export default function DesignUploader({
     },
     multiple,
     onDrop: (acceptedFiles) => {
-      acceptedFiles.forEach(handleUpload);
+      if (acceptedFiles.length > 0) {
+        handleUpload(acceptedFiles[0]);
+      }
     },
     onDropRejected: (fileRejections) => {
       const error = fileRejections[0]?.errors[0];
@@ -88,57 +90,92 @@ export default function DesignUploader({
   });
 
   return (
-    <div className="space-y-4">
-      <div
-        {...getRootProps()}
-        className={clsx(
-          'border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition',
-          isDragActive
-            ? 'border-indigo-600 bg-indigo-50'
-            : 'border-gray-300 hover:border-indigo-600'
-        )}
-      >
-        <input {...getInputProps()} />
-        {uploading ? (
-          <>
-            <Loader2 className="h-8 w-8 mx-auto mb-4 text-indigo-600 animate-spin" />
-            <p className="text-gray-600">Upload en cours...</p>
-          </>
-        ) : isDragActive ? (
-          <p className="text-gray-600">Déposez vos fichiers ici</p>
-        ) : (
-          <>
-            <div className="p-3 bg-indigo-100 rounded-xl w-fit mx-auto mb-4">
-              <Upload className="h-6 w-6 text-indigo-600" />
-            </div>
-            <p className="text-gray-600">
-              {multiple ? 'Glissez-déposez vos designs ou cliquez pour sélectionner' : 'Glissez-déposez votre design ou cliquez pour sélectionner'}
-            </p>
-            <p className="mt-2 text-sm text-gray-500">
-              WebP, JPG, JPEG ou PNG jusqu'à 10MB
-            </p>
-          </>
-        )}
-      </div>
-
-      {/* Preview */}
-      {selectedUrl && (
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-medium text-gray-900">Design sélectionné</h3>
-            {designDimensions && (
-              <div className="text-sm text-gray-500">
-                {designDimensions.width}×{designDimensions.height}px
-              </div>
+    <div className="bg-white rounded-xl shadow-sm p-6">
+      {selectedUrl ? (
+        // After upload layout - Split into two columns
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Dropzone */}
+          <div
+            {...getRootProps()}
+            className={clsx(
+              'border-2 border-dashed rounded-lg aspect-square transition cursor-pointer',
+              isDragActive
+                ? 'border-indigo-600 bg-indigo-50'
+                : 'border-gray-300 hover:border-indigo-600'
             )}
+          >
+            <input {...getInputProps()} />
+            <div className="h-full flex flex-col items-center justify-center p-6 text-center">
+              {uploading ? (
+                <>
+                  <Loader2 className="h-8 w-8 text-indigo-600 animate-spin mb-4" />
+                  <p className="text-gray-600">Upload en cours...</p>
+                </>
+              ) : isDragActive ? (
+                <p className="text-gray-600">Déposez vos fichiers ici</p>
+              ) : (
+                <>
+                  <div className="p-3 bg-indigo-100 rounded-xl w-fit mx-auto mb-4">
+                    <Upload className="h-6 w-6 text-indigo-600" />
+                  </div>
+                  <p className="text-gray-600 mb-2">
+                    Glissez-déposez votre design ou cliquez pour sélectionner
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    WebP, JPG, JPEG ou PNG jusqu'à 10MB
+                  </p>
+                </>
+              )}
+            </div>
           </div>
 
-          <div className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden">
+          {/* Preview */}
+          <div className="aspect-square bg-gray-50 rounded-lg overflow-hidden relative">
             <ImageLoader
               src={selectedUrl}
               alt="Design"
               className="absolute inset-0 w-full h-full object-contain"
             />
+            {designDimensions && (
+              <div className="absolute bottom-4 left-4 px-3 py-1.5 bg-black/75 backdrop-blur-sm rounded-lg text-white text-sm">
+                {designDimensions.width} × {designDimensions.height}px
+              </div>
+            )}
+          </div>
+        </div>
+      ) : (
+        // Before upload layout - Full width dropzone
+        <div
+          {...getRootProps()}
+          className={clsx(
+            'border-2 border-dashed rounded-lg transition cursor-pointer h-64',
+            isDragActive
+              ? 'border-indigo-600 bg-indigo-50'
+              : 'border-gray-300 hover:border-indigo-600'
+          )}
+        >
+          <input {...getInputProps()} />
+          <div className="h-full flex flex-col items-center justify-center p-6 text-center">
+            {uploading ? (
+              <>
+                <Loader2 className="h-8 w-8 text-indigo-600 animate-spin mb-4" />
+                <p className="text-gray-600">Upload en cours...</p>
+              </>
+            ) : isDragActive ? (
+              <p className="text-gray-600">Déposez vos fichiers ici</p>
+            ) : (
+              <>
+                <div className="p-3 bg-indigo-100 rounded-xl w-fit mx-auto mb-4">
+                  <Upload className="h-6 w-6 text-indigo-600" />
+                </div>
+                <p className="text-gray-600 mb-2">
+                  Glissez-déposez votre design ou cliquez pour sélectionner
+                </p>
+                <p className="text-sm text-gray-500">
+                  WebP, JPG, JPEG ou PNG jusqu'à 10MB
+                </p>
+              </>
+            )}
           </div>
         </div>
       )}

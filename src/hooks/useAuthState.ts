@@ -22,7 +22,7 @@ export function useAuthState() {
             subscription: {
               plan: 'Basic',
               startDate: new Date().toISOString(),
-              credits: 5,
+              credits: 25,
               active: true
             },
             createdAt: new Date().toISOString(),

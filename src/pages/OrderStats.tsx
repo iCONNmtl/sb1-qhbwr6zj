@@ -1,247 +1,246 @@
-import React from 'react';
-import { Package, CreditCard, TrendingUp, Wallet, Globe2, Ruler } from 'lucide-react';
-import type { Order } from '../types/order';
-
-interface DistributionItem {
-  id: string;
-  name: string;
-  salesCount: number;
-  revenue: number;
-  salesPercentage: number;
-  revenuePercentage: number;
-}
-
-interface DistributionProps {
-  title: string;
-  icon: React.ElementType;
-  items: DistributionItem[];
-}
-
-function DistributionChart({ title, icon: Icon, items }: DistributionProps) {
-  return (
-    <div className="bg-white rounded-xl shadow-sm p-6">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="p-2 bg-indigo-100 rounded-lg">
-          <Icon className="h-5 w-5 text-indigo-600" />
-        </div>
-        <h3 className="text-lg font-semibold text-gray-900">
-          {title}
-        </h3>
-      </div>
-
-      <div className="space-y-8">
-        {items.map((item) => (
-          <div key={item.id} className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <span className="font-medium text-gray-900">{item.name}</span>
-                <span className="ml-2 text-sm text-gray-500">
-                  ({item.salesCount} commande{item.salesCount > 1 ? 's' : ''})
-                </span>
-              </div>
-              <span className="text-sm font-medium text-gray-900">
-                {Number(item.revenue).toFixed(2)}€
-              </span>
-            </div>
-
-            {/* Progress bars container */}
-            <div className="space-y-4">
-              {/* Revenue Progress */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="font-medium text-indigo-600">Chiffre d'affaires</span>
-                  <span className="font-medium text-indigo-900">{Number(item.revenuePercentage).toFixed(1)}%</span>
-                </div>
-                <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-indigo-600 rounded-full transition-all duration-300"
-                    style={{ width: `${item.revenuePercentage}%` }}
-                  />
-                </div>
-              </div>
-
-              {/* Sales Progress */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="font-medium text-gray-600">Volume des ventes</span>
-                  <span className="font-medium text-gray-900">{Number(item.salesPercentage).toFixed(1)}%</span>
-                </div>
-                <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-gray-400 rounded-full transition-all duration-300"
-                    style={{ width: `${item.salesPercentage}%` }}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Legend */}
-      <div className="mt-8 pt-4 border-t border-gray-200">
-        <div className="flex items-center justify-center gap-8 text-sm">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-indigo-600 rounded-full" />
-            <span className="text-gray-600">Chiffre d'affaires</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-gray-400 rounded-full" />
-            <span className="text-gray-600">Volume des ventes</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+import React, { useMemo, useState } from 'react';
+import MetricsOverview from '../components/stats/MetricsOverview';
+import TimeSeriesChart from '../components/stats/TimeSeriesChart';
+import SizeMetrics from '../components/stats/SizeMetrics';
+import PlatformMetrics from '../components/stats/PlatformMetrics';
+import CountryMetrics from '../components/stats/CountryMetrics';
+import Filters from '../components/stats/Filters';
+import { PLATFORMS } from '../components/stats/constants';
+import type { Order, OrderPlatform } from '../types/order';
 
 interface OrderStatsProps {
   orders: Order[];
 }
 
 export default function OrderStats({ orders }: OrderStatsProps) {
-  // Calculate global stats
-  const stats = orders.reduce((acc, order) => {
-    acc.totalRevenue += Number(order.totalAmount);
-    acc.totalExpenses += Number(order.purchasePrice);
-    acc.totalOrders++;
-    if (order.status === 'pending') acc.pendingOrders++;
-    return acc;
-  }, {
-    totalOrders: 0,
-    totalRevenue: 0,
-    totalExpenses: 0,
-    pendingOrders: 0
+  const [dateRange, setDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({
+    from: undefined,
+    to: undefined
   });
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [selectedPlatforms, setSelectedPlatforms] = useState<OrderPlatform[]>([]);
+  const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
+  const [selectedMetrics, setSelectedMetrics] = useState<string[]>(['revenue', 'profit', 'cost']);
+  const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
 
-  const totalProfit = stats.totalRevenue - stats.totalExpenses;
+  const availableCountries = useMemo(() => {
+    const countries = new Set<string>();
+    orders.forEach(order => countries.add(order.shippingAddress.country));
+    return Array.from(countries);
+  }, [orders]);
 
-  // Calculate geographic distribution
-  const geoDistribution = orders.reduce((acc, order) => {
-    const country = order.shippingAddress.country;
-    if (!acc[country]) {
-      acc[country] = { salesCount: 0, revenue: 0 };
-    }
-    acc[country].salesCount += 1;
-    acc[country].revenue += Number(order.totalAmount);
-    return acc;
-  }, {} as Record<string, { salesCount: number; revenue: number }>);
+  const filteredOrders = useMemo(() => {
+    return orders.filter(order => {
+      const orderDate = new Date(order.createdAt);
+      const isInDateRange = !dateRange.from || !dateRange.to ? true :
+        orderDate >= dateRange.from && orderDate <= dateRange.to;
 
-  // Calculate size distribution
-  const sizeDistribution = orders.reduce((acc, order) => {
-    order.items.forEach(item => {
-      if (!acc[item.size]) {
-        acc[item.size] = { salesCount: 0, revenue: 0 };
-      }
-      acc[item.size].salesCount += Number(item.quantity);
-      acc[item.size].revenue += Number(item.price) * Number(item.quantity);
+      const isInPlatform = selectedPlatforms.length === 0 || 
+        selectedPlatforms.includes(order.platform);
+
+      const isInCountry = selectedCountries.length === 0 ||
+        selectedCountries.includes(order.shippingAddress.country);
+
+      const isInSize = selectedSizes.length === 0 ||
+        order.items.some(item => selectedSizes.includes(item.size));
+
+      return isInDateRange && isInPlatform && isInCountry && isInSize;
     });
-    return acc;
-  }, {} as Record<string, { salesCount: number; revenue: number }>);
+  }, [orders, dateRange, selectedPlatforms, selectedCountries, selectedSizes]);
 
-  const totalSales = orders.length;
-  const totalRevenue = stats.totalRevenue;
+  const metrics = useMemo(() => {
+    const stats = filteredOrders.reduce((acc, order) => {
+      acc.revenue += order.totalAmount;
+      acc.cost += order.purchasePrice;
+      acc.orders++;
+      acc.items += order.items.reduce((sum, item) => sum + item.quantity, 0);
+      return acc;
+    }, {
+      revenue: 0,
+      cost: 0,
+      orders: 0,
+      items: 0
+    });
 
-  // Prepare items for geographic distribution
-  const geoItems: DistributionItem[] = Object.entries(geoDistribution)
-    .map(([country, stats]) => ({
-      id: country,
-      name: country,
-      salesCount: Number(stats.salesCount),
-      revenue: Number(stats.revenue),
-      salesPercentage: (Number(stats.salesCount) / totalSales) * 100,
-      revenuePercentage: (Number(stats.revenue) / totalRevenue) * 100
-    }))
-    .sort((a, b) => b.revenue - a.revenue);
+    return {
+      ...stats,
+      profit: stats.revenue - stats.cost,
+      averageOrder: stats.orders > 0 ? stats.revenue / stats.orders : 0
+    };
+  }, [filteredOrders]);
 
-  // Prepare items for size distribution
-  const totalSizeQuantity = Object.values(sizeDistribution)
-    .reduce((sum, { salesCount }) => sum + Number(salesCount), 0);
-  
-  const sizeItems: DistributionItem[] = Object.entries(sizeDistribution)
-    .map(([size, stats]) => ({
-      id: size,
-      name: size,
-      salesCount: Number(stats.salesCount),
-      revenue: Number(stats.revenue),
-      salesPercentage: (Number(stats.salesCount) / totalSizeQuantity) * 100,
-      revenuePercentage: (Number(stats.revenue) / totalRevenue) * 100
-    }))
-    .sort((a, b) => b.revenue - a.revenue);
+  const timeSeriesData = useMemo(() => {
+    const data: Record<string, any> = {};
+    
+    filteredOrders.forEach(order => {
+      const date = order.createdAt.split('T')[0];
+      if (!data[date]) {
+        data[date] = {
+          date,
+          revenue: 0,
+          profit: 0,
+          cost: 0,
+          orders: 0,
+          averageOrder: 0
+        };
+        
+        PLATFORMS.forEach(platform => {
+          data[date][`revenue_${platform.id}`] = 0;
+          data[date][`profit_${platform.id}`] = 0;
+        });
+      }
+      
+      data[date].revenue += order.totalAmount;
+      data[date].cost += order.purchasePrice;
+      data[date].profit += order.totalAmount - order.purchasePrice;
+      data[date].orders++;
+      
+      data[date][`revenue_${order.platform}`] += order.totalAmount;
+      data[date][`profit_${order.platform}`] += order.totalAmount - order.purchasePrice;
+    });
+
+    return Object.values(data)
+      .map(day => ({
+        ...day,
+        averageOrder: day.orders > 0 ? day.revenue / day.orders : 0
+      }))
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  }, [filteredOrders]);
+
+  const sizeMetrics = useMemo(() => {
+    const metrics = new Map();
+    
+    filteredOrders.forEach(order => {
+      order.items.forEach(item => {
+        if (!metrics.has(item.size)) {
+          metrics.set(item.size, {
+            size: item.size,
+            quantity: 0,
+            revenue: 0,
+            cost: 0,
+            profit: 0
+          });
+        }
+        
+        const stats = metrics.get(item.size);
+        stats.quantity += item.quantity;
+        stats.revenue += item.price * item.quantity;
+        stats.cost += item.purchasePrice * item.quantity;
+        stats.profit += (item.price - item.purchasePrice) * item.quantity;
+      });
+    });
+    
+    return Array.from(metrics.values())
+      .sort((a, b) => b.revenue - a.revenue);
+  }, [filteredOrders]);
+
+  const platformMetrics = useMemo(() => {
+    const metrics = new Map();
+    
+    filteredOrders.forEach(order => {
+      if (!metrics.has(order.platform)) {
+        metrics.set(order.platform, {
+          platform: order.platform,
+          revenue: 0,
+          cost: 0,
+          orders: 0,
+          items: 0,
+          profit: 0,
+          averageOrder: 0
+        });
+      }
+      
+      const stats = metrics.get(order.platform);
+      stats.revenue += order.totalAmount;
+      stats.cost += order.purchasePrice;
+      stats.orders++;
+      stats.items += order.items.reduce((sum, item) => sum + item.quantity, 0);
+      stats.profit = stats.revenue - stats.cost;
+      stats.averageOrder = stats.revenue / stats.orders;
+    });
+    
+    return Array.from(metrics.values());
+  }, [filteredOrders]);
+
+  const countryMetrics = useMemo(() => {
+    const metrics = new Map();
+    
+    filteredOrders.forEach(order => {
+      const country = order.shippingAddress.country;
+      if (!metrics.has(country)) {
+        metrics.set(country, {
+          country,
+          revenue: 0,
+          cost: 0,
+          orders: 0,
+          items: 0,
+          profit: 0,
+          averageOrder: 0
+        });
+      }
+      
+      const stats = metrics.get(country);
+      stats.revenue += order.totalAmount;
+      stats.cost += order.purchasePrice;
+      stats.orders++;
+      stats.items += order.items.reduce((sum, item) => sum + item.quantity, 0);
+      stats.profit = stats.revenue - stats.cost;
+      stats.averageOrder = stats.revenue / stats.orders;
+    });
+    
+    return Array.from(metrics.values())
+      .sort((a, b) => b.revenue - a.revenue);
+  }, [filteredOrders]);
 
   return (
     <div className="space-y-8">
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {/* Chiffre d'affaires */}
-        <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-sm p-6">
-          <div className="text-white/80">Chiffre d'affaires</div>
-          <div className="text-3xl font-bold text-white mt-2">
-            {stats.totalRevenue.toFixed(2)}€
-          </div>
-          <div className="flex items-center mt-2">
-            <CreditCard className="h-4 w-4 text-white/60 mr-1" />
-            <span className="text-sm text-white/60">
-              {stats.totalOrders} commande{stats.totalOrders > 1 ? 's' : ''}
-            </span>
-          </div>
-        </div>
+      <Filters
+        dateRange={dateRange}
+        setDateRange={setDateRange}
+        showDatePicker={showDatePicker}
+        setShowDatePicker={setShowDatePicker}
+        selectedPlatforms={selectedPlatforms}
+        setSelectedPlatforms={setSelectedPlatforms}
+        selectedCountries={selectedCountries}
+        setSelectedCountries={setSelectedCountries}
+        selectedMetrics={selectedMetrics}
+        setSelectedMetrics={setSelectedMetrics}
+        selectedSizes={selectedSizes}
+        setSelectedSizes={setSelectedSizes}
+        availableCountries={availableCountries}
+      />
 
-        {/* Dépenses */}
-        <div className="bg-gradient-to-br from-red-500 to-red-600 rounded-xl shadow-sm p-6">
-          <div className="text-white/80">Dépenses</div>
-          <div className="text-3xl font-bold text-white mt-2">
-            {stats.totalExpenses.toFixed(2)}€
-          </div>
-          <div className="flex items-center mt-2">
-            <Wallet className="h-4 w-4 text-white/60 mr-1" />
-            <span className="text-sm text-white/60">
-              Coût d'achat total
-            </span>
-          </div>
-        </div>
+      <MetricsOverview metrics={metrics} />
 
-        {/* Bénéfices */}
-        <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl shadow-sm p-6">
-          <div className="text-white/80">Bénéfices</div>
-          <div className="text-3xl font-bold text-white mt-2">
-            {totalProfit.toFixed(2)}€
-          </div>
-          <div className="flex items-center mt-2">
-            <TrendingUp className="h-4 w-4 text-white/60 mr-1" />
-            <span className="text-sm text-white/60">
-              Marge {stats.totalRevenue > 0 ? Math.round((totalProfit / stats.totalRevenue) * 100) : 0}%
-            </span>
-          </div>
-        </div>
-
-        {/* Commandes en attente */}
-        <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl shadow-sm p-6">
-          <div className="text-white/80">Commandes en attente</div>
-          <div className="text-3xl font-bold text-white mt-2">
-            {stats.pendingOrders}
-          </div>
-          <div className="flex items-center mt-2">
-            <Package className="h-4 w-4 text-white/60 mr-1" />
-            <span className="text-sm text-white/60">
-              À traiter
-            </span>
-          </div>
-        </div>
+      <div className="bg-white rounded-xl shadow-sm p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-6">
+          Évolution dans le temps
+        </h3>
+        <TimeSeriesChart 
+          data={timeSeriesData}
+          selectedMetrics={selectedMetrics}
+        />
       </div>
 
-      {/* Distribution Charts */}
-      <div className="grid md:grid-cols-2 gap-6">
-        <DistributionChart
-          title="Répartition géographique"
-          icon={Globe2}
-          items={geoItems}
-        />
-        <DistributionChart
-          title="Répartition par tailles"
-          icon={Ruler}
-          items={sizeItems}
-        />
+      <div className="bg-white rounded-xl shadow-sm p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-6">
+          Performance par taille
+        </h3>
+        <SizeMetrics sizeMetrics={sizeMetrics} />
+      </div>
+
+      <div className="bg-white rounded-xl shadow-sm p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-6">
+          Performance par plateforme
+        </h3>
+        <PlatformMetrics platformMetrics={platformMetrics} />
+      </div>
+
+      <div className="bg-white rounded-xl shadow-sm p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-6">
+          Performance par pays
+        </h3>
+        <CountryMetrics countryMetrics={countryMetrics} />
       </div>
     </div>
   );

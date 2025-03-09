@@ -62,3 +62,66 @@
 .animate-marquee {
   animation: marquee 20s linear infinite;
 }
+
+/* Calendar Styles */
+.rdp {
+  @apply bg-white rounded-xl shadow-sm border border-gray-200 p-4;
+  margin: 0;
+}
+
+.rdp-months {
+  @apply bg-white;
+}
+
+.rdp-month {
+  @apply bg-white;
+}
+
+.rdp-caption {
+  @apply mb-4;
+}
+
+.rdp-caption_label {
+  @apply font-medium text-gray-900;
+}
+
+.rdp-nav {
+  @apply flex items-center justify-between;
+}
+
+.rdp-nav_button {
+  @apply p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors;
+}
+
+.rdp-cell {
+  @apply p-0;
+}
+
+.rdp-head_cell {
+  @apply font-medium text-gray-600 text-sm py-2;
+}
+
+.rdp-day {
+  @apply w-9 h-9 text-sm font-medium text-gray-700 hover:bg-indigo-50 rounded-lg transition-colors;
+}
+
+.rdp-day_selected {
+  @apply bg-indigo-600 text-white hover:bg-indigo-700;
+}
+
+.rdp-day_today {
+  @apply font-bold text-indigo-600;
+}
+
+.rdp-day_outside {
+  @apply text-gray-400;
+}
+
+.rdp-day_range_start,
+.rdp-day_range_end {
+  @apply bg-indigo-600 text-white hover:bg-indigo-700 !important;
+}
+
+.rdp-day_range_middle {
+  @apply bg-indigo-50 text-indigo-900 hover:bg-indigo-100 !important;
+}

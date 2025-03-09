@@ -25,7 +25,6 @@ const PLATFORMS = [
 const TABS = [
   { id: 'account', label: 'Compte', icon: User },
   { id: 'branding', label: 'Branding', icon: BookmarkIcon },
-  { id: 'orders', label: 'Commandes', icon: ShoppingBag },
   { id: 'invoices', label: 'Factures', icon: DollarSign }
 ] as const;
 
@@ -44,15 +43,6 @@ export default function Settings() {
   const [newAccount, setNewAccount] = useState<Partial<PlatformAccount>>({});
   const [showNewAccountForm, setShowNewAccountForm] = useState(false);
 
-  // États pour la modification du compte
-  const [newEmail, setNewEmail] = useState('');
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [isChangingEmail, setIsChangingEmail] = useState(false);
-  const [isChangingPassword, setIsChangingPassword] = useState(false);
-  const [autoPayOrders, setAutoPayOrders] = useState(false);
-
   const isAdmin = user?.uid === 'Juvh6BgsXhYsi3loKegWfzRIphG2';
 
   // Si l'utilisateur est admin, ajouter l'onglet plateformes
@@ -68,8 +58,6 @@ export default function Settings() {
           const userData = doc.data() as UserProfile;
           setUserProfile(userData);
           setPlatformAccounts(userData.platformAccounts || []);
-          setNewEmail(user.email || '');
-          setAutoPayOrders(userData.autoPayOrders || false);
         }
       }
     );
@@ -97,100 +85,6 @@ export default function Settings() {
       unsubscribeInvoices();
     };
   }, [user]);
-
-  const handleUpdateEmail = async () => {
-    if (!user || !currentPassword) {
-      toast.error('Mot de passe actuel requis');
-      return;
-    }
-
-    setIsSaving(true);
-    try {
-      // Réauthentifier l'utilisateur
-      const credential = EmailAuthProvider.credential(user.email!, currentPassword);
-      await reauthenticateWithCredential(user, credential);
-
-      // Mettre à jour l'email
-      await updateEmail(user, newEmail);
-      
-      // Mettre à jour Firestore
-      const userRef = doc(db, 'users', user.uid);
-      await updateDoc(userRef, { email: newEmail });
-
-      toast.success('Email mis à jour avec succès');
-      setIsChangingEmail(false);
-      setCurrentPassword('');
-    } catch (error: any) {
-      console.error('Error updating email:', error);
-      if (error.code === 'auth/wrong-password') {
-        toast.error('Mot de passe incorrect');
-      } else {
-        toast.error('Erreur lors de la mise à jour de l\'email');
-      }
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleUpdatePassword = async () => {
-    if (!user || !currentPassword) {
-      toast.error('Mot de passe actuel requis');
-      return;
-    }
-
-    if (newPassword !== confirmPassword) {
-      toast.error('Les mots de passe ne correspondent pas');
-      return;
-    }
-
-    if (newPassword.length < 6) {
-      toast.error('Le mot de passe doit contenir au moins 6 caractères');
-      return;
-    }
-
-    setIsSaving(true);
-    try {
-      // Réauthentifier l'utilisateur
-      const credential = EmailAuthProvider.credential(user.email!, currentPassword);
-      await reauthenticateWithCredential(user, credential);
-
-      // Mettre à jour le mot de passe
-      await updatePassword(user, newPassword);
-
-      toast.success('Mot de passe mis à jour avec succès');
-      setIsChangingPassword(false);
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-    } catch (error: any) {
-      console.error('Error updating password:', error);
-      if (error.code === 'auth/wrong-password') {
-        toast.error('Mot de passe actuel incorrect');
-      } else {
-        toast.error('Erreur lors de la mise à jour du mot de passe');
-      }
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleToggleAutoPay = async () => {
-    if (!user) return;
-
-    setIsSaving(true);
-    try {
-      const userRef = doc(db, 'users', user.uid);
-      await updateDoc(userRef, {
-        autoPayOrders: !autoPayOrders
-      });
-      toast.success('Paramètre mis à jour avec succès');
-    } catch (error) {
-      console.error('Error updating auto-pay setting:', error);
-      toast.error('Erreur lors de la mise à jour du paramètre');
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
   const handleSave = async () => {
     if (!user) return;
@@ -292,47 +186,6 @@ export default function Settings() {
             userId={user.uid}
             currentLogo={userProfile?.logoUrl}
           />
-        )}
-
-        {activeTab === 'orders' && user && (
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <DollarSign className="h-5 w-5 mr-2" />
-                Paiement automatique
-              </h3>
-              
-              <div className="bg-gray-50 rounded-xl p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-gray-900 mb-1">
-                      Payer automatiquement les commandes
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      Les nouvelles commandes seront payées automatiquement si vous avez assez de crédits disponibles
-                    </p>
-                  </div>
-                  <div className="relative">
-                    <button
-                      onClick={handleToggleAutoPay}
-                      disabled={isSaving}
-                      className={clsx(
-                        'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none',
-                        autoPayOrders ? 'bg-indigo-600' : 'bg-gray-200'
-                      )}
-                    >
-                      <span
-                        className={clsx(
-                          'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
-                          autoPayOrders ? 'translate-x-5' : 'translate-x-0'
-                        )}
-                      />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
         )}
 
         {activeTab === 'invoices' && user && (
