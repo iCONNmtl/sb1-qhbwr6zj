@@ -5,6 +5,11 @@ interface AspectRatioBadgeProps {
   ratio: AspectRatio;
 }
 
+const ASPECT_RATIOS = {
+  instagram: 4/5,
+  pinterest: 2/3
+};
+
 export default function AspectRatioBadge({ ratio }: AspectRatioBadgeProps) {
   const [showTooltip, setShowTooltip] = useState(false);
 
@@ -85,12 +90,12 @@ export default function AspectRatioBadge({ ratio }: AspectRatioBadgeProps) {
 
   return (
     <div 
-      className="absolute top-2 right-2 z-10"
+      className="absolute bottom-2 right-2 z-30"
       onMouseEnter={() => setShowTooltip(true)}
       onMouseLeave={() => setShowTooltip(false)}
     >
       {/* Badge principal */}
-      <div className="flex items-center space-x-1.5 bg-black/50 backdrop-blur-sm px-2 py-1 rounded-lg">
+      <div className="flex items-center space-x-1.5 bg-black/75 backdrop-blur-sm px-2 py-1 rounded-lg">
         <div 
           className="border-2 border-white rounded-sm"
           style={{
@@ -103,7 +108,7 @@ export default function AspectRatioBadge({ ratio }: AspectRatioBadgeProps) {
 
       {/* Tooltip avec formats similaires */}
       {showTooltip && hasMoreFormats && (
-        <div className="absolute right-0 mt-2 w-max bg-black/90 backdrop-blur-sm rounded-lg py-2 px-3 shadow-lg">
+        <div className="absolute bottom-full right-0 mb-2 w-max bg-black/90 backdrop-blur-sm rounded-lg py-2 px-3 shadow-lg">
           <div className="text-xs font-medium text-white/90 mb-2">
             Formats similaires :
           </div>
@@ -114,7 +119,7 @@ export default function AspectRatioBadge({ ratio }: AspectRatioBadgeProps) {
               </div>
             ))}
           </div>
-          <div className="absolute -top-1 right-4 w-2 h-2 bg-black/90 rotate-45" />
+          <div className="absolute -bottom-1 right-4 w-2 h-2 bg-black/90 rotate-45" />
         </div>
       )}
     </div>
