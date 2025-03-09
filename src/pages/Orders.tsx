@@ -5,6 +5,8 @@ import { db } from '../lib/firebase';
 import { Package, Clock, CheckCircle, XCircle, AlertTriangle, Truck, CreditCard, Loader2, DollarSign, MapPin, Box, ChevronUp, ChevronDown, Eye, FileText, BarChart2 } from 'lucide-react';
 import CreditPaymentDialog from '../components/orders/CreditPaymentDialog';
 import OrderStats from './OrderStats';
+import Pagination from '../components/Pagination';
+import { usePagination } from '../hooks/usePagination';
 import toast from 'react-hot-toast';
 import clsx from 'clsx';
 import type { Order } from '../types/order';
@@ -95,6 +97,15 @@ export default function Orders() {
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [autoPayEnabled, setAutoPayEnabled] = useState(false);
   const [savingAutoPaySetting, setSavingAutoPaySetting] = useState(false);
+
+  const {
+    currentPage,
+    setCurrentPage,
+    pageSize,
+    setPageSize,
+    totalItems,
+    paginatedItems: paginatedOrders
+  } = usePagination(orders);
 
   useEffect(() => {
     if (!user) return;
@@ -348,7 +359,7 @@ export default function Orders() {
                 </div>
               ) : (
                 <div className="divide-y divide-gray-200">
-                  {orders.map((order) => {
+                  {paginatedOrders.map((order) => {
                     const StatusIcon = order.status === 'pending' ? Clock :
                                      order.status === 'paid' ? CheckCircle :
                                      order.status === 'shipped' ? Truck : Package;
@@ -653,6 +664,17 @@ export default function Orders() {
                     );
                   })}
                 </div>
+              )}
+
+              {/* Pagination */}
+              {orders.length > 0 && (
+                <Pagination
+                  currentPage={currentPage}
+                  totalItems={totalItems}
+                  pageSize={pageSize}
+                  onPageChange={setCurrentPage}
+                  onPageSizeChange={setPageSize}
+                />
               )}
             </div>
           )}
