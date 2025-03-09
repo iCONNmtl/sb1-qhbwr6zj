@@ -1,3 +1,4 @@
+import React from 'react';
 import { Calendar, ChevronDown } from 'lucide-react';
 import { format, subDays } from 'date-fns';
 import { DayPicker } from 'react-day-picker';

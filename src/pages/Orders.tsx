@@ -1,17 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
-import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc, getDocs } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { Calendar, Clock, CheckCircle, XCircle, AlertTriangle, Truck, Package, Eye, CreditCard, BarChart2, FileText, ChevronDown, ChevronUp, Loader2, DollarSign, MapPin, Box } from 'lucide-react';
-import DateTimePicker from '../components/scheduling/DateTimePicker';
+import { Package, Clock, CheckCircle, XCircle, AlertTriangle, Truck, CreditCard, Loader2, DollarSign, MapPin, Box, ChevronUp, ChevronDown, Eye, FileText, BarChart2 } from 'lucide-react';
 import CreditPaymentDialog from '../components/orders/CreditPaymentDialog';
 import OrderStats from './OrderStats';
+import Pagination from '../components/Pagination';
+import { usePagination } from '../hooks/usePagination';
 import toast from 'react-hot-toast';
 import clsx from 'clsx';
 import type { Order } from '../types/order';
 import type { UserProfile } from '../types/user';
-import { usePagination } from '../hooks/usePagination';
-import Pagination from '../components/Pagination';
 
 const TABS = [
   { id: 'instructions', label: 'Instructions', icon: FileText },
@@ -90,16 +89,15 @@ export default function Orders() {
   const [activeTab, setActiveTab] = useState<Tab>('orders');
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showSetupInstructions, setShowSetupInstructions] = useState(true);
-  const [isSetupCompleted, setIsSetupCompleted] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [paymentDialog, setPaymentDialog] = useState<{
     orderId: string;
     purchasePrice: number;
   } | null>(null);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
-  const [designUrls, setDesignUrls] = useState<Record<string, string>>({});
-  
+  const [autoPayEnabled, setAutoPayEnabled] = useState(false);
+  const [savingAutoPaySetting, setSavingAutoPaySetting] = useState(false);
+
   const {
     currentPage,
     setCurrentPage,
@@ -112,75 +110,45 @@ export default function Orders() {
   useEffect(() => {
     if (!user) return;
 
-    const fetchProducts = async () => {
-      try {
-        const productsRef = collection(db, 'products');
-        const productsSnap = await getDocs(productsRef);
-        const designUrlMap: Record<string, string> = {};
-        
-        productsSnap.docs.forEach(doc => {
-          const product = doc.data();
-          product.variants.forEach((variant: any) => {
-            if (variant.sku && variant.designUrl) {
-              designUrlMap[variant.sku] = variant.designUrl;
-            }
-          });
-        });
-
-        setDesignUrls(designUrlMap);
-      } catch (error) {
-        console.error('Error fetching product design URLs:', error);
-      }
-    };
-
+    // Subscribe to user profile
     const unsubscribeUser = onSnapshot(
       doc(db, 'users', user.uid),
       (doc) => {
         if (doc.exists()) {
           const userData = doc.data() as UserProfile;
           setUserProfile(userData);
-          setIsSetupCompleted(!!userData.orderSetupCompleted);
-          setShowSetupInstructions(!userData.orderSetupCompleted);
+          setAutoPayEnabled(userData.autoPayOrders || false);
         }
       }
     );
 
+    // Subscribe to orders
     const ordersQuery = query(
       collection(db, 'orders'),
       where('userId', '==', user.uid)
     );
 
-    const unsubscribeOrders = onSnapshot(
-      ordersQuery,
-      (snapshot) => {
-        const ordersData = snapshot.docs.map(doc => ({
-          ...doc.data(),
-          firestoreId: doc.id,
-          totalAmount: Number(doc.data().totalAmount || 0),
-          purchasePrice: Number(doc.data().purchasePrice || 0),
-          items: doc.data().items.map((item: any) => ({
-            ...item,
-            price: Number(item.price || 0),
-            quantity: Number(item.quantity || 0),
-            purchasePrice: Number(item.purchasePrice || 0)
-          }))
-        })) as Order[];
+    const unsubscribeOrders = onSnapshot(ordersQuery, (snapshot) => {
+      const ordersData = snapshot.docs.map(doc => ({
+        ...doc.data(),
+        firestoreId: doc.id,
+        totalAmount: Number(doc.data().totalAmount || 0),
+        purchasePrice: Number(doc.data().purchasePrice || 0),
+        items: doc.data().items.map((item: any) => ({
+          ...item,
+          price: Number(item.price || 0),
+          quantity: Number(item.quantity || 0),
+          purchasePrice: Number(item.purchasePrice || 0)
+        }))
+      })) as Order[];
 
-        ordersData.sort((a, b) => 
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
+      ordersData.sort((a, b) => 
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
 
-        setOrders(ordersData);
-        setLoading(false);
-      },
-      (error) => {
-        console.error('Error fetching orders:', error);
-        toast.error('Erreur lors du chargement des commandes');
-        setLoading(false);
-      }
-    );
-
-    fetchProducts();
+      setOrders(ordersData);
+      setLoading(false);
+    });
 
     return () => {
       unsubscribeUser();
@@ -188,21 +156,22 @@ export default function Orders() {
     };
   }, [user]);
 
-  const handleSetupComplete = async () => {
+  const handleToggleAutoPay = async () => {
     if (!user) return;
 
+    setSavingAutoPaySetting(true);
     try {
       const userRef = doc(db, 'users', user.uid);
       await updateDoc(userRef, {
-        orderSetupCompleted: true
+        autoPayOrders: !autoPayEnabled
       });
-
-      setIsSetupCompleted(true);
-      setShowSetupInstructions(false);
-      toast.success('Configuration terminée !');
+      setAutoPayEnabled(!autoPayEnabled);
+      toast.success('Paramètre mis à jour avec succès');
     } catch (error) {
-      console.error('Error updating setup status:', error);
-      toast.error('Erreur lors de la sauvegarde du statut');
+      console.error('Error updating auto-pay setting:', error);
+      toast.error('Erreur lors de la mise à jour du paramètre');
+    } finally {
+      setSavingAutoPaySetting(false);
     }
   };
 
@@ -336,18 +305,6 @@ export default function Orders() {
                   );
                 })}
               </div>
-
-              {!isSetupCompleted && (
-                <div className="flex justify-center">
-                  <button
-                    onClick={handleSetupComplete}
-                    className="flex items-center px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition"
-                  >
-                    <CheckCircle className="h-5 w-5 mr-2" />
-                    J'ai terminé la configuration
-                  </button>
-                </div>
-              )}
             </div>
           )}
 
@@ -357,6 +314,39 @@ export default function Orders() {
 
           {activeTab === 'orders' && (
             <div className="space-y-6">
+              {/* Auto-pay Setting */}
+              <div className="bg-white rounded-xl p-6 border border-gray-200">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-indigo-100 rounded-lg">
+                      <CreditCard className="h-5 w-5 text-indigo-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-gray-900">Paiement automatique</h3>
+                      <p className="text-sm text-gray-500">
+                        Les nouvelles commandes seront payées automatiquement avec vos crédits
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleToggleAutoPay}
+                    disabled={savingAutoPaySetting}
+                    className={clsx(
+                      'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none',
+                      autoPayEnabled ? 'bg-indigo-600' : 'bg-gray-200'
+                    )}
+                  >
+                    <span
+                      className={clsx(
+                        'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
+                        autoPayEnabled ? 'translate-x-5' : 'translate-x-0'
+                      )}
+                    />
+                  </button>
+                </div>
+              </div>
+
+              {/* Orders List */}
               {orders.length === 0 ? (
                 <div className="text-center py-12">
                   <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -368,322 +358,323 @@ export default function Orders() {
                   </p>
                 </div>
               ) : (
-                <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-                  <div className="divide-y divide-gray-200">
-                    {paginatedOrders.map((order) => {
-                      const StatusIcon = order.status === 'pending' ? Clock :
-                                       order.status === 'paid' ? CheckCircle :
-                                       order.status === 'shipped' ? Truck : Package;
-                      const profit = order.totalAmount - order.purchasePrice;
+                <div className="divide-y divide-gray-200">
+                  {paginatedOrders.map((order) => {
+                    const StatusIcon = order.status === 'pending' ? Clock :
+                                     order.status === 'paid' ? CheckCircle :
+                                     order.status === 'shipped' ? Truck : Package;
+                    const profit = order.totalAmount - order.purchasePrice;
 
-                      return (
-                        <div key={order.firestoreId} className="p-6">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-8">
-                              {/* Order Info */}
-                              <div className="flex items-center gap-3">
-                                <div className={clsx(
-                                  'p-2 rounded-lg',
-                                  order.status === 'pending' ? 'bg-yellow-100' :
-                                  order.status === 'paid' ? 'bg-green-100' :
-                                  order.status === 'shipped' ? 'bg-blue-100' :
-                                  'bg-gray-100'
-                                )}>
-                                  <StatusIcon className={clsx(
-                                    'h-5 w-5',
-                                    order.status === 'pending' ? 'text-yellow-600' :
-                                    order.status === 'paid' ? 'text-green-600' :
-                                    order.status === 'shipped' ? 'text-blue-600' :
-                                    'text-gray-600'
-                                  )} />
-                                </div>
-                                <div>
-                                  <div className="text-sm font-medium text-gray-900">
-                                    {order.orderId}
-                                  </div>
-                                  <div className="text-sm text-gray-500">
-                                    {order.platform}
-                                  </div>
-                                </div>
+                    return (
+                      <div key={order.firestoreId} className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-8">
+                            {/* Order Info */}
+                            <div className="flex items-center gap-3">
+                              <div className={clsx(
+                                'p-2 rounded-lg',
+                                order.status === 'pending' ? 'bg-yellow-100' :
+                                order.status === 'paid' ? 'bg-green-100' :
+                                order.status === 'shipped' ? 'bg-blue-100' :
+                                'bg-gray-100'
+                              )}>
+                                <StatusIcon className={clsx(
+                                  'h-5 w-5',
+                                  order.status === 'pending' ? 'text-yellow-600' :
+                                  order.status === 'paid' ? 'text-green-600' :
+                                  order.status === 'shipped' ? 'text-blue-600' :
+                                  'text-gray-600'
+                                )} />
                               </div>
-
-                              {/* Customer Info */}
                               <div>
                                 <div className="text-sm font-medium text-gray-900">
-                                  {order.customerName}
+                                  {order.orderId}
                                 </div>
                                 <div className="text-sm text-gray-500">
-                                  {order.customerEmail}
+                                  {order.platform}
                                 </div>
-                              </div>
-
-                              {/* Financial Info */}
-                              <div className="flex items-center gap-6">
-                                <div>
-                                  <div className="flex items-center gap-2">
-                                    <DollarSign className="h-4 w-4 text-gray-400" />
-                                    <div className="text-sm font-medium text-gray-900">
-                                      {order.totalAmount.toFixed(2)}€
-                                    </div>
-                                  </div>
-                                  <div className="text-sm text-gray-500">
-                                    {order.items.length} article{order.items.length > 1 ? 's' : ''}
-                                  </div>
-                                </div>
-
-                                <div>
-                                  <div className="text-sm text-gray-500">
-                                    Coût: {order.purchasePrice.toFixed(2)}€
-                                  </div>
-                                  <div className={clsx(
-                                    "text-sm font-medium",
-                                    profit >= 0 ? "text-green-600" : "text-red-600"
-                                  )}>
-                                    {profit >= 0 ? "+" : ""}{profit.toFixed(2)}€
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* Status */}
-                              <div>
-                                <span className={clsx(
-                                  'px-3 py-1 text-sm font-medium rounded-full',
-                                  order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                                  order.status === 'paid' ? 'bg-green-100 text-green-800' :
-                                  order.status === 'shipped' ? 'bg-blue-100 text-blue-800' :
-                                  'bg-gray-100 text-gray-800'
-                                )}>
-                                  {order.status === 'pending' ? 'En attente' :
-                                   order.status === 'paid' ? 'Payée' :
-                                   order.status === 'shipped' ? 'Expédiée' :
-                                   'Livrée'}
-                                </span>
                               </div>
                             </div>
 
-                            <div className="flex items-center gap-4">
-                              {order.status === 'pending' && (
-                                <button
-                                  onClick={() => setPaymentDialog({
-                                    orderId: order.firestoreId,
-                                    purchasePrice: order.purchasePrice
-                                  })}
-                                  className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
-                                >
-                                  <CreditCard className="h-5 w-5 mr-2" />
-                                  Payer
-                                </button>
-                              )}
-                              <button
-                                onClick={() => setExpandedOrder(expandedOrder === order.firestoreId ? null : order.firestoreId)}
-                                className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition"
-                              >
-                                {expandedOrder === order.firestoreId ? (
-                                  <ChevronUp className="h-5 w-5" />
-                                ) : (
-                                  <ChevronDown className="h-5 w-5" />
-                                )}
-                              </button>
+                            {/* Customer Info */}
+                            <div>
+                              <div className="text-sm font-medium text-gray-900">
+                                {order.customerName}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                {order.customerEmail}
+                              </div>
+                            </div>
+
+                            {/* Financial Info */}
+                            <div className="flex items-center gap-6">
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <DollarSign className="h-4 w-4 text-gray-400" />
+                                  <div className="text-sm font-medium text-gray-900">
+                                    {order.totalAmount.toFixed(2)}€
+                                  </div>
+                                </div>
+                                <div className="text-sm text-gray-500">
+                                  {order.items.length} article{order.items.length > 1 ? 's' : ''}
+                                </div>
+                              </div>
+
+                              <div>
+                                <div className="text-sm text-gray-500">
+                                  Coût: {order.purchasePrice.toFixed(2)}€
+                                </div>
+                                <div className={clsx(
+                                  "text-sm font-medium",
+                                  profit >= 0 ? "text-green-600" : "text-red-600"
+                                )}>
+                                  {profit >= 0 ? "+" : ""}{profit.toFixed(2)}€
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Status */}
+                            <div>
+                              <span className={clsx(
+                                'px-3 py-1 text-sm font-medium rounded-full',
+                                order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                order.status === 'paid' ? 'bg-green-100 text-green-800' :
+                                order.status === 'shipped' ? 'bg-blue-100 text-blue-800' :
+                                'bg-gray-100 text-gray-800'
+                              )}>
+                                {order.status === 'pending' ? 'En attente' :
+                                 order.status === 'paid' ? 'Payée' :
+                                 order.status === 'shipped' ? 'Expédiée' :
+                                 'Livrée'}
+                              </span>
                             </div>
                           </div>
 
-                          {/* Order Details */}
-                          {expandedOrder === order.firestoreId && (
-                            <div className="mt-6 border-t border-gray-100 pt-6">
-                              <div className="grid grid-cols-2 gap-6">
-                                {/* Shipping Information */}
-                                <div className="space-y-4">
-                                  <h4 className="font-medium text-gray-900 flex items-center gap-2">
-                                    <MapPin className="h-4 w-4 text-gray-500" />
-                                    Informations de livraison
-                                  </h4>
-                                  <div className="bg-gray-50 rounded-lg p-4">
-                                    <div className="space-y-2">
+                          <div className="flex items-center gap-4">
+                            {order.status === 'pending' && (
+                              <button
+                                onClick={() => setPaymentDialog({
+                                  orderId: order.firestoreId,
+                                  purchasePrice: order.purchasePrice
+                                })}
+                                className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+                              >
+                                <CreditCard className="h-5 w-5 mr-2" />
+                                Payer
+                              </button>
+                            )}
+                            <button
+                              onClick={() => setExpandedOrder(expandedOrder === order.firestoreId ? null : order.firestoreId)}
+                              className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition"
+                            >
+                              {expandedOrder === order.firestoreId ? (
+                                <ChevronUp className="h-5 w-5" />
+                              ) : (
+                                <ChevronDown className="h-5 w-5" />
+                              )}
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Order Details */}
+                        {expandedOrder === order.firestoreId && (
+                          <div className="mt-6 border-t border-gray-100 pt-6">
+                            <div className="grid grid-cols-2 gap-6">
+                              {/* Shipping Information */}
+                              <div className="space-y-4">
+                                <h4 className="font-medium text-gray-900 flex items-center gap-2">
+                                  <MapPin className="h-4 w-4 text-gray-500" />
+                                  Informations de livraison
+                                </h4>
+                                <div className="bg-gray-50 rounded-lg p-4">
+                                  <div className="space-y-2">
+                                    <p className="text-sm text-gray-600">
+                                      {order.shippingAddress.street}
+                                    </p>
+                                    <p className="text-sm text-gray-600">
+                                      {order.shippingAddress.postalCode} {order.shippingAddress.city}
+                                    </p>
+                                    <p className="text-sm text-gray-600">
+                                      {order.shippingAddress.country}
+                                    </p>
+                                    {order.shippingAddress.phone && (
                                       <p className="text-sm text-gray-600">
-                                        {order.shippingAddress.street}
+                                        Tél: {order.shippingAddress.phone}
                                       </p>
-                                      <p className="text-sm text-gray-600">
-                                        {order.shippingAddress.postalCode} {order.shippingAddress.city}
-                                      </p>
-                                      <p className="text-sm text-gray-600">
-                                        {order.shippingAddress.country}
-                                      </p>
-                                      {order.shippingAddress.phone && (
-                                        <p className="text-sm text-gray-600">
-                                          Tél: {order.shippingAddress.phone}
-                                        </p>
-                                      )}
+                                    )}
+                                  </div>
+                                  <div className="mt-4 pt-4 border-t border-gray-200">
+                                    <div className="flex items-center justify-between text-sm">
+                                      <span className="text-gray-600">Méthode:</span>
+                                      <span className="font-medium text-gray-900">
+                                        {order.shippingMethod.carrier} - {order.shippingMethod.method}
+                                      </span>
                                     </div>
-                                    <div className="mt-4 pt-4 border-t border-gray-200">
-                                      <div className="flex items-center justify-between text-sm">
-                                        <span className="text-gray-600">Méthode:</span>
-                                        <span className="font-medium text-gray-900">
-                                          {order.shippingMethod.carrier} - {order.shippingMethod.method}
-                                        </span>
-                                      </div>
+                                    <div className="flex items-center justify-between text-sm mt-1">
+                                      <span className="text-gray-600">Délai estimé:</span>
+                                      <span className="font-medium text-gray-900">
+                                        {order.shippingMethod.estimatedDays} jours
+                                      </span>
+                                    </div>
+                                    {order.shippingMethod.trackingNumber && (
                                       <div className="flex items-center justify-between text-sm mt-1">
-                                        <span className="text-gray-600">Délai estimé:</span>
+                                        <span className="text-gray-600">Numéro de suivi:</span>
                                         <span className="font-medium text-gray-900">
-                                          {order.shippingMethod.estimatedDays} jours
+                                          {order.shippingMethod.trackingNumber}
                                         </span>
                                       </div>
-                                      {order.shippingMethod.trackingNumber && (
-                                        <div className="flex items-center justify-between text-sm mt-1">
-                                          <span className="text-gray-600">Numéro de suivi:</span>
-                                          <span className="font-medium text-gray-900">
-                                            {order.shippingMethod.trackingNumber}
-                                          </span>
-                                        </div>
-                                      )}
-                                    </div>
+                                    )}
                                   </div>
                                 </div>
+                              </div>
 
-                                {/* Order Timeline */}
-                                <div className="space-y-4">
-                                  <h4 className="font-medium text-gray-900 flex items-center gap-2">
-                                    <Clock className="h-4 w-4 text-gray-500" />
-                                    Historique de la commande
-                                  </h4>
-                                  <div className="bg-gray-50 rounded-lg p-4">
-                                    <div className="space-y-4">
+                              {/* Order Timeline */}
+                              <div className="space-y-4">
+                                <h4 className="font-medium text-gray-900 flex items-center gap-2">
+                                  <Clock className="h-4 w-4 text-gray-500" />
+                                  Historique de la commande
+                                </h4>
+                                <div className="bg-gray-50 rounded-lg p-4">
+                                  <div className="space-y-4">
+                                    <div className="flex items-start gap-3">
+                                      <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                        <CheckCircle className="h-4 w-4 text-green-600" />
+                                      </div>
+                                      <div>
+                                        <p className="text-sm font-medium text-gray-900">Commande créée</p>
+                                        <p className="text-xs text-gray-500">
+                                          {new Date(order.createdAt).toLocaleString()}
+                                        </p>
+                                      </div>
+                                    </div>
+                                    {order.paidAt && (
                                       <div className="flex items-start gap-3">
                                         <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                          <CheckCircle className="h-4 w-4 text-green-600" />
+                                          <DollarSign className="h-4 w-4 text-green-600" />
                                         </div>
                                         <div>
-                                          <p className="text-sm font-medium text-gray-900">Commande créée</p>
+                                          <p className="text-sm font-medium text-gray-900">Paiement reçu</p>
                                           <p className="text-xs text-gray-500">
-                                            {new Date(order.createdAt).toLocaleString()}
+                                            {new Date(order.paidAt).toLocaleString()}
                                           </p>
                                         </div>
                                       </div>
-                                      {order.paidAt && (
-                                        <div className="flex items-start gap-3">
-                                          <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                            <DollarSign className="h-4 w-4 text-green-600" />
-                                          </div>
-                                          <div>
-                                            <p className="text-sm font-medium text-gray-900">Paiement reçu</p>
-                                            <p className="text-xs text-gray-500">
-                                              {new Date(order.paidAt).toLocaleString()}
-                                            </p>
-                                          </div>
+                                    )}
+                                    {order.shippedAt && (
+                                      <div className="flex items-start gap-3">
+                                        <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                          <Truck className="h-4 w-4 text-blue-600" />
                                         </div>
-                                      )}
-                                      {order.shippedAt && (
-                                        <div className="flex items-start gap-3">
-                                          <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                            <Truck className="h-4 w-4 text-blue-600" />
-                                          </div>
-                                          <div>
-                                            <p className="text-sm font-medium text-gray-900">Commande expédiée</p>
-                                            <p className="text-xs text-gray-500">
-                                              {new Date(order.shippedAt).toLocaleString()}
-                                            </p>
-                                          </div>
+                                        <div>
+                                          <p className="text-sm font-medium text-gray-900">Commande expédiée</p>
+                                          <p className="text-xs text-gray-500">
+                                            {new Date(order.shippedAt).toLocaleString()}
+                                          </p>
                                         </div>
-                                      )}
-                                      {order.deliveredAt && (
-                                        <div className="flex items-start gap-3">
-                                          <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                            <Package className="h-4 w-4 text-green-600" />
-                                          </div>
-                                          <div>
-                                            <p className="text-sm font-medium text-gray-900">Commande livrée</p>
-                                            <p className="text-xs text-gray-500">
-                                              {new Date(order.deliveredAt).toLocaleString()}
-                                            </p>
-                                          </div>
+                                      </div>
+                                    )}
+                                    {order.deliveredAt && (
+                                      <div className="flex items-start gap-3">
+                                        <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                          <Package className="h-4 w-4 text-green-600" />
                                         </div>
-                                      )}
-                                    </div>
+                                        <div>
+                                          <p className="text-sm font-medium text-gray-900">Commande livrée</p>
+                                          <p className="text-xs text-gray-500">
+                                            {new Date(order.deliveredAt).toLocaleString()}
+                                          </p>
+                                        </div>
+                                      </div>
+                                    )}
                                   </div>
                                 </div>
                               </div>
+                            </div>
 
-                              {/* Products */}
-                              <div className="mt-6">
-                                <h4 className="font-medium text-gray-900 flex items-center gap-2 mb-4">
-                                  <Box className="h-4 w-4 text-gray-500" />
-                                  Produits commandés
-                                </h4>
-                                <div className="space-y-4">
-                                  {order.items.map((item, index) => (
-                                    <div key={index} className="bg-gray-50 rounded-lg p-4">
-                                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                        {/* Size Info */}
-                                        <div>
-                                          <div className="text-sm font-medium text-gray-900">
-                                            {item.size}
-                                          </div>
-                                          <div className="text-sm text-gray-500">
-                                            {item.dimensions.cm}
-                                          </div>
+                            {/* Products */}
+                            <div className="mt-6">
+                              <h4 className="font-medium text-gray-900 flex items-center gap-2 mb-4">
+                                <Box className="h-4 w-4 text-gray-500" />
+                                Produits commandés
+                              </h4>
+                              <div className="space-y-4">
+                                {order.items.map((item, index) => (
+                                  <div key={index} className="bg-gray-50 rounded-lg p-4">
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                      {/* Size Info */}
+                                      <div>
+                                        <div className="text-sm font-medium text-gray-900">
+                                          {item.size}
                                         </div>
-
-                                        {/* Price Info */}
-                                        <div>
-                                          <div className="text-sm font-medium text-gray-900">
-                                            Prix unitaire: {item.price}€
-                                          </div>
-                                          <div className="text-sm text-gray-500">
-                                            Quantité: {item.quantity}
-                                          </div>
-                                          <div className="text-sm font-medium text-green-600">
-                                            Total: {(item.price * item.quantity).toFixed(2)}€
-                                          </div>
-                                        </div>
-
-                                        {/* SKU */}
-                                        <div>
-                                          <div className="text-sm font-medium text-gray-900">
-                                            SKU
-                                          </div>
-                                          <div className="text-sm font-mono text-gray-500">
-                                            {item.sku}
-                                          </div>
-                                        </div>
-
-                                        {/* Design Link */}
-                                        <div>
-                                          {designUrls[item.sku] && (
-                                            <div>
-                                              <div className="text-sm font-medium text-gray-900 mb-2">
-                                                Design
-                                              </div>
-                                              <a
-                                                href={designUrls[item.sku]}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="inline-flex items-center px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-colors"
-                                              >
-                                                <Eye className="h-4 w-4 mr-2" />
-                                                Voir le design
-                                              </a>
-                                            </div>
-                                          )}
+                                        <div className="text-sm text-gray-500">
+                                          {item.dimensions.cm}
                                         </div>
                                       </div>
+
+                                      {/* Price Info */}
+                                      <div>
+                                        <div className="text-sm font-medium text-gray-900">
+                                          Prix unitaire: {item.price}€
+                                        </div>
+                                        <div className="text-sm text-gray-500">
+                                          Quantité: {item.quantity}
+                                        </div>
+                                        <div className="text-sm font-medium text-green-600">
+                                          Total: {(item.price * item.quantity).toFixed(2)}€
+                                        </div>
+                                      </div>
+
+                                      {/* SKU */}
+                                      <div>
+                                        <div className="text-sm font-medium text-gray-900">
+                                          SKU
+                                        </div>
+                                        <div className="text-sm font-mono text-gray-500">
+                                          {item.sku}
+                                        </div>
+                                      </div>
+
+                                      {/* Design Link */}
+                                      <div>
+                                        {item.designUrl && (
+                                          <div>
+                                            <div className="text-sm font-medium text-gray-900 mb-2">
+                                              Design
+                                            </div>
+                                            <a
+                                              href={item.designUrl}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="inline-flex items-center px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-colors"
+                                            >
+                                              <Eye className="h-4 w-4 mr-2" />
+                                              Voir le design
+                                            </a>
+                                          </div>
+                                        )}
+                                      </div>
                                     </div>
-                                  ))}
-                                </div>
+                                  </div>
+                                ))}
                               </div>
                             </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  <Pagination
-                    currentPage={currentPage}
-                    totalItems={totalItems}
-                    pageSize={pageSize}
-                    onPageChange={setCurrentPage}
-                    onPageSizeChange={setPageSize}
-                  />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
+              )}
+
+              {/* Pagination */}
+              {orders.length > 0 && (
+                <Pagination
+                  currentPage={currentPage}
+                  totalItems={totalItems}
+                  pageSize={pageSize}
+                  onPageChange={setCurrentPage}
+                  onPageSizeChange={setPageSize}
+                />
               )}
             </div>
           )}
