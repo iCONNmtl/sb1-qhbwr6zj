@@ -16,6 +16,8 @@ import type { UserProfile, PlatformAccount } from '../types/user';
 import type { Invoice } from '../types/invoice';
 import ShopifyAuthButton from '../components/settings/ShopifyAuthButton';
 import ShopifyCallback from '../components/settings/ShopifyCallback';
+import EtsyAuthButton from '../components/settings/EtsyAuthButton';
+import EtsyCallback from '../components/settings/EtsyCallback';
 
 const PLATFORMS = [
   { id: 'etsy', label: 'Etsy', icon: ShoppingBag },
@@ -144,6 +146,11 @@ export default function Settings() {
     window.location.reload();
   };
 
+  const handleEtsySuccess = () => {
+    navigate('/settings');
+    window.location.reload();
+  };
+
   const onRefresh = () => {
     window.location.reload();
   };
@@ -242,13 +249,28 @@ export default function Settings() {
                           Connecté
                         </span>
                       )}
+                      {/* Bouton de connexion Shopify */}
                       {account.platform === 'shopify' && user && !userProfile?.shopifyAuth && (
                         <ShopifyAuthButton 
                           userId={user.uid}
                           onSuccess={handleShopifySuccess}
                         />
                       )}
+                      {/* Statut de connexion Shopify */}
                       {account.platform === 'shopify' && userProfile?.shopifyAuth && (
+                        <span className="text-sm text-green-600 bg-green-50 px-3 py-1 rounded-full">
+                          Connecté
+                        </span>
+                      )}
+                      {/* Bouton de connexion Etsy */}
+                      {account.platform === 'etsy' && user && !userProfile?.etsyAuth && (
+                        <EtsyAuthButton 
+                          userId={user.uid}
+                          onSuccess={handleEtsySuccess}
+                        />
+                      )}
+                      {/* Statut de connexion Etsy */}
+                      {account.platform === 'etsy' && userProfile?.etsyAuth && (
                         <span className="text-sm text-green-600 bg-green-50 px-3 py-1 rounded-full">
                           Connecté
                         </span>
@@ -420,6 +442,14 @@ export default function Settings() {
         <ShopifyCallback 
           userId={user.uid} 
           onSuccess={handleShopifySuccess}
+        />
+      )}
+
+      {/* Etsy Callback */}
+      {searchParams.has('code') && user && (
+        <EtsyCallback 
+          userId={user.uid} 
+          onSuccess={handleEtsySuccess}
         />
       )}
     </div>

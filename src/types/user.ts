@@ -1,4 +1,4 @@
-import type { UserPlan } from './user';
+export type UserPlan = 'Basic' | 'Pro' | 'Expert';
 
 export interface UserSubscription {
   plan: UserPlan;
@@ -35,6 +35,11 @@ interface ShopifyAuth {
   connectedAt: string;
 }
 
+interface EtsyAuth {
+  tokens: string; // Token crypté en base64
+  connectedAt: string;
+}
+
 export interface UserAddress {
   street: string;
   city: string;
@@ -55,6 +60,7 @@ export interface UserProfile {
   logoUrl?: string;
   pinterestAuth?: PinterestAuth;
   shopifyAuth?: ShopifyAuth;
+  etsyAuth?: EtsyAuth;
   orderSetupCompleted?: boolean;
   purchasedTrainings?: string[];
   autoPayOrders?: boolean;
