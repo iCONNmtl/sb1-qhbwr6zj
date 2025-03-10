@@ -6,6 +6,8 @@ import { ShoppingBag, Camera, BookmarkIcon, Save, Loader2, Plus, Trash2, Edit, M
 import LogoUploader from '../components/settings/LogoUploader';
 import PinterestAuthButton from '../components/settings/PinterestAuthButton';
 import PinterestCallback from '../components/settings/PinterestCallback';
+import ShopifyAuthButton from '../components/settings/ShopifyAuthButton';
+import ShopifyCallback from '../components/settings/ShopifyCallback';
 import AccountDetails from '../components/settings/AccountDetails';
 import InvoiceList from '../components/settings/InvoiceList';
 import { useSearchParams, useNavigate } from 'react-router-dom';
@@ -222,6 +224,19 @@ export default function Settings() {
                       </div>
                     </div>
                     <div className="flex items-center space-x-4">
+                      {/* Bouton de connexion Shopify */}
+                      {account.platform === 'shopify' && user && !userProfile?.shopifyAuth && (
+                        <ShopifyAuthButton 
+                          userId={user.uid}
+                          onSuccess={handlePinterestSuccess}
+                        />
+                      )}
+                      {/* Statut de connexion Shopify */}
+                      {account.platform === 'shopify' && userProfile?.shopifyAuth && (
+                        <span className="text-sm text-green-600 bg-green-50 px-3 py-1 rounded-full">
+                          Connecté
+                        </span>
+                      )}
                       {/* Bouton de connexion Pinterest */}
                       {account.platform === 'pinterest' && user && !userProfile?.pinterestAuth && (
                         <PinterestAuthButton 
@@ -390,8 +405,16 @@ export default function Settings() {
       )}
 
       {/* Pinterest Callback */}
-      {searchParams.has('code') && user && (
+      {searchParams.has('code') && !searchParams.has('shop') && user && (
         <PinterestCallback 
+          userId={user.uid} 
+          onSuccess={handlePinterestSuccess}
+        />
+      )}
+
+      {/* Shopify Callback */}
+      {searchParams.has('code') && searchParams.has('shop') && user && (
+        <ShopifyCallback 
           userId={user.uid} 
           onSuccess={handlePinterestSuccess}
         />
