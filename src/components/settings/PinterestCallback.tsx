@@ -4,16 +4,16 @@ import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import toast from 'react-hot-toast';
 
-interface PinterestCallbackProps {
+interface ShopifyCallbackProps {
   userId: string;
   onSuccess: () => void;
 }
 
-const PINTEREST_CLIENT_ID = '1511992';
-const PINTEREST_CLIENT_SECRET = '4d5be2564aedfbba73c3530209628e25190b35db';
+const SHOPIFY_CLIENT_ID = '122db044cf9755d37812d2fdce612493';
+const SHOPIFY_CLIENT_SECRET = 'c322df317ca9f7b525763a743bd9ea6b';
 const REDIRECT_URI = `${window.location.origin}/settings`;
 
-export default function PinterestCallback({ userId, onSuccess }: PinterestCallbackProps) {
+export default function ShopifyCallback({ userId, onSuccess }: ShopifyCallbackProps) {
   const [searchParams] = useSearchParams();
   const [processing, setProcessing] = useState(false);
   const navigate = useNavigate();
@@ -22,25 +22,25 @@ export default function PinterestCallback({ userId, onSuccess }: PinterestCallba
     const processAuth = async () => {
       const code = searchParams.get('code');
       const state = searchParams.get('state');
-      const storedState = localStorage.getItem('pinterest_state');
+      const storedState = localStorage.getItem('shopify_state');
 
       if (!code || !state || state !== storedState) {
-        toast.error('Erreur de validation Pinterest');
+        toast.error('Erreur de validation Shopify');
         navigate('/settings');
         return;
       }
 
       setProcessing(true);
       try {
-        // Échanger le code contre un token d'accès
-        const tokenResponse = await fetch('https://api.pinterest.com/v5/oauth/token', {
+        // Exchange code for access token
+        const tokenResponse = await fetch('https://accounts.shopify.com/oauth/access_token', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Authorization': `Basic ${btoa(`${PINTEREST_CLIENT_ID}:${PINTEREST_CLIENT_SECRET}`)}`
+            'Content-Type': 'application/json'
           },
-          body: new URLSearchParams({
-            grant_type: 'authorization_code',
+          body: JSON.stringify({
+            client_id: SHOPIFY_CLIENT_ID,
+            client_secret: SHOPIFY_CLIENT_SECRET,
             code,
             redirect_uri: REDIRECT_URI
           })
@@ -52,26 +52,26 @@ export default function PinterestCallback({ userId, onSuccess }: PinterestCallba
 
         const { access_token, refresh_token } = await tokenResponse.json();
 
-        // Crypter le token avant de le stocker
-        const encryptedToken = btoa(JSON.stringify({
+        // Encrypt tokens before storing
+        const encryptedTokens = btoa(JSON.stringify({
           access_token,
           refresh_token,
           created_at: new Date().toISOString()
         }));
 
-        // Mettre à jour le document utilisateur avec les tokens cryptés
+        // Update user document with encrypted tokens
         const userRef = doc(db, 'users', userId);
         await updateDoc(userRef, {
-          'pinterestAuth.tokens': encryptedToken,
-          'pinterestAuth.connectedAt': new Date().toISOString()
+          'shopifyAuth.tokens': encryptedTokens,
+          'shopifyAuth.connectedAt': new Date().toISOString()
         });
 
-        localStorage.removeItem('pinterest_state');
-        toast.success('Compte Pinterest connecté avec succès');
+        localStorage.removeItem('shopify_state');
+        toast.success('Compte Shopify connecté avec succès');
         onSuccess();
       } catch (error) {
-        console.error('Pinterest token exchange error:', error);
-        toast.error('Erreur lors de la connexion du compte Pinterest');
+        console.error('Shopify token exchange error:', error);
+        toast.error('Erreur lors de la connexion du compte Shopify');
         navigate('/settings');
       } finally {
         setProcessing(false);
@@ -87,7 +87,7 @@ export default function PinterestCallback({ userId, onSuccess }: PinterestCallba
     return (
       <div className="flex items-center justify-center p-4">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-        <span className="ml-2">Connexion du compte Pinterest...</span>
+        <span className="ml-2">Connexion du compte Shopify...</span>
       </div>
     );
   }

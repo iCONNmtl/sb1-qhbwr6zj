@@ -1,4 +1,4 @@
-export type UserPlan = 'Basic' | 'Pro' | 'Expert';
+import type { UserPlan } from './user';
 
 export interface UserSubscription {
   plan: UserPlan;
@@ -30,15 +30,32 @@ interface PinterestAuth {
   connectedAt: string;
 }
 
+interface ShopifyAuth {
+  tokens: string; // Token crypté en base64
+  connectedAt: string;
+}
+
+export interface UserAddress {
+  street: string;
+  city: string;
+  postalCode: string;
+  country: string;
+  phone?: string;
+}
+
 export interface UserProfile {
   email: string;
   subscription: UserSubscription;
   createdAt: string;
+  organizationName?: string;
+  fullName?: string;
+  address?: UserAddress;
   favorites?: string[];
   platformAccounts?: PlatformAccount[];
   logoUrl?: string;
   pinterestAuth?: PinterestAuth;
+  shopifyAuth?: ShopifyAuth;
   orderSetupCompleted?: boolean;
   purchasedTrainings?: string[];
-  autoPayOrders?: boolean; // Added this field
+  autoPayOrders?: boolean;
 }
