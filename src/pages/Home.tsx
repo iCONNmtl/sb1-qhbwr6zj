@@ -16,13 +16,13 @@ const USERS = [
   {
     id: 1,
     name: "Sophie M.",
-    designation: "15,600€/mois",
+    designation: "7,600€/mois",
     image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8YXZhdGFyfGVufDB8fDB8fHww&auto=format&fit=crop&w=800&q=60",
   },
   {
     id: 2,
     name: "Marc D.",
-    designation: "8,900€/mois",
+    designation: "4,900€/mois",
     image: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YXZhdGFyfGVufDB8fDB8fHww&auto=format&fit=crop&w=800&q=60",
   },
   {
@@ -56,7 +56,7 @@ export default function Home() {
               en quelques clics !
             </h1>
             <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto">
-              La plateforme de print on demand tout en un indispensable pour créer votre business d'affiches et enchaîner les ventes.
+              La plateforme de print on demand la plus complète pour créer et gérer votre business d'affiches.
             </p>
           </div>
 
