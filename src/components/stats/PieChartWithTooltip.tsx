@@ -20,6 +20,7 @@ interface PieChartWithTooltipProps {
   valuePrefix?: string;
   valueSuffix?: string;
   title: string;
+  showLegend?: boolean;
 }
 
 const RADIAN = Math.PI / 180;
@@ -53,7 +54,8 @@ export default function PieChartWithTooltip({
   total,
   valuePrefix = '',
   valueSuffix = '',
-  title
+  title,
+  showLegend = false
 }: PieChartWithTooltipProps) {
   return (
     <div className="relative h-full">
@@ -88,7 +90,7 @@ export default function PieChartWithTooltip({
               />
             )}
           />
-          <Legend />
+          {showLegend && <Legend />}
         </PieChart>
       </ResponsiveContainer>
     </div>

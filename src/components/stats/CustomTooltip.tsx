@@ -21,11 +21,12 @@ export default function CustomTooltip({
   if (!active || !payload || !payload.length) return null;
 
   const value = payload[0].value;
+  const name = payload[0].name;
   const percentage = (value / total) * 100;
 
   return (
     <div style={CUSTOM_TOOLTIP_STYLES}>
-      <p className="font-medium mb-1">{label}</p>
+      <p className="font-medium mb-1">{name}</p>
       <div className="space-y-1">
         <p className="text-gray-600">
           {valuePrefix}{value.toFixed(2)}{valueSuffix}

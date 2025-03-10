@@ -66,6 +66,7 @@ export default function CountryMetrics({ countryMetrics }: CountryMetricsProps) 
               valuePrefix=""
               valueSuffix="€"
               title=""
+              showLegend={false}
             />
           </div>
         </div>
@@ -86,6 +87,7 @@ export default function CountryMetrics({ countryMetrics }: CountryMetricsProps) 
               valuePrefix=""
               valueSuffix="€"
               title=""
+              showLegend={false}
             />
           </div>
         </div>
@@ -106,67 +108,97 @@ export default function CountryMetrics({ countryMetrics }: CountryMetricsProps) 
               valuePrefix=""
               valueSuffix=" affiches"
               title=""
+              showLegend={false}
             />
           </div>
         </div>
       </div>
 
+      {/* Centralized Legend */}
+      <div className="bg-white rounded-xl p-4 shadow-sm">
+        <ul className="flex flex-wrap justify-center gap-6">
+          {countryMetrics.map((country, index) => (
+            <li key={country.country} className="flex items-center gap-2">
+              <div 
+                className="w-3 h-3 rounded-full"
+                style={{ backgroundColor: countryColors[index] }}
+              />
+              <span className="text-2xl mr-1" role="img" aria-label={`Drapeau ${country.country}`}>
+                {COUNTRY_FLAGS[country.country] || '🌍'}
+              </span>
+              <span className="text-sm text-gray-600">{country.country}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
       {/* Metrics Details */}
       <div className="bg-white rounded-xl shadow-sm p-6">
-        <div className="grid grid-cols-2 gap-6">
+        <div className="space-y-6">
           {countryMetrics.map((country, index) => (
             <div 
               key={country.country} 
-              className="bg-gray-50 rounded-xl p-6 hover:shadow-md transition-shadow duration-200"
+              className="flex items-center gap-8 p-6 bg-gray-50 rounded-xl hover:shadow-md transition-shadow duration-200"
               style={{ borderLeft: `4px solid ${countryColors[index]}` }}
             >
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg" style={{ backgroundColor: `${countryColors[index]}20` }}>
-                    <Globe2 className="h-5 w-5" style={{ color: countryColors[index] }} />
+              {/* Country Info */}
+              <div className="flex items-center gap-3 w-48">
+                <span className="text-2xl" role="img" aria-label={`Drapeau ${country.country}`}>
+                  {COUNTRY_FLAGS[country.country] || '🌍'}
+                </span>
+                <span className="font-medium text-gray-900">
+                  {country.country}
+                </span>
+              </div>
+
+              {/* Revenue */}
+              <div className="flex-1">
+                <div className="text-sm text-gray-500 mb-1">Chiffre d'affaires</div>
+                <div className="flex items-baseline gap-2">
+                  <div className="text-lg font-medium text-gray-900">
+                    {country.revenue.toFixed(2)}€
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl" role="img" aria-label={`Drapeau ${country.country}`}>
-                      {COUNTRY_FLAGS[country.country] || '🌍'}
-                    </span>
-                    <span className="font-medium text-gray-900">
-                      {country.country}
-                    </span>
+                  <div className="text-sm text-gray-600">
+                    ({((country.revenue / totalRevenue) * 100).toFixed(1)}%)
                   </div>
-                </div>
-                <div className="text-sm font-medium text-gray-500">
-                  {country.items} affiches
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-6">
-                <div>
-                  <div className="text-sm text-gray-500 mb-1">CA</div>
-                  <div className="font-medium text-gray-900">
-                    {((country.revenue / totalRevenue) * 100).toFixed(1)}%
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    {country.revenue.toFixed(2)}€
-                  </div>
-                </div>
-
-                <div>
-                  <div className="text-sm text-gray-500 mb-1">Bénéfices</div>
-                  <div className="font-medium text-green-600">
-                    {((country.profit / totalProfit) * 100).toFixed(1)}%
-                  </div>
-                  <div className="text-sm text-gray-500">
+              {/* Profit */}
+              <div className="flex-1">
+                <div className="text-sm text-gray-500 mb-1">Bénéfices</div>
+                <div className="flex items-baseline gap-2">
+                  <div className="text-lg font-medium text-green-600">
                     {country.profit.toFixed(2)}€
                   </div>
+                  <div className="text-sm text-gray-600">
+                    ({((country.profit / totalProfit) * 100).toFixed(1)}%)
+                  </div>
                 </div>
+              </div>
 
-                <div>
-                  <div className="text-sm text-gray-500 mb-1">Marge</div>
-                  <div className="font-medium text-indigo-600">
+              {/* Items */}
+              <div className="flex-1">
+                <div className="text-sm text-gray-500 mb-1">Affiches vendues</div>
+                <div className="flex items-baseline gap-2">
+                  <div className="text-lg font-medium text-gray-900">
+                    {country.items}
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    ({((country.items / totalItems) * 100).toFixed(1)}%)
+                  </div>
+                </div>
+              </div>
+
+              {/* Margin */}
+              <div className="flex-1">
+                <div className="text-sm text-gray-500 mb-1">Marge moyenne</div>
+                <div className="flex items-baseline gap-2">
+                  <div className="text-lg font-medium text-indigo-600">
                     {((country.profit / country.revenue) * 100).toFixed(1)}%
                   </div>
-                  <div className="text-sm text-gray-500">
-                    {(country.profit / country.items).toFixed(2)}€/unité
+                  <div className="text-sm text-gray-600">
+                    ({(country.profit / country.items).toFixed(2)}€/unité)
                   </div>
                 </div>
               </div>

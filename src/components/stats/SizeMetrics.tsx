@@ -60,6 +60,7 @@ export default function SizeMetrics({ sizeMetrics }: SizeMetricsProps) {
               valuePrefix=""
               valueSuffix="€"
               title=""
+              showLegend={false}
             />
           </div>
         </div>
@@ -80,6 +81,7 @@ export default function SizeMetrics({ sizeMetrics }: SizeMetricsProps) {
               valuePrefix=""
               valueSuffix="€"
               title=""
+              showLegend={false}
             />
           </div>
         </div>
@@ -100,64 +102,106 @@ export default function SizeMetrics({ sizeMetrics }: SizeMetricsProps) {
               valuePrefix=""
               valueSuffix=" affiches"
               title=""
+              showLegend={false}
             />
           </div>
         </div>
       </div>
 
+      {/* Centralized Legend */}
+      <div className="bg-white rounded-xl p-4 shadow-sm">
+        <ul className="flex flex-wrap justify-center gap-6">
+          {SIZES.map((size) => (
+            <li key={size.id} className="flex items-center gap-2">
+              <div 
+                className="w-3 h-3 rounded-full"
+                style={{ backgroundColor: size.color }}
+              />
+              <span 
+                className="text-sm"
+                style={{ color: size.color }}
+              >
+                {size.label}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
       {/* Metrics Details */}
       <div className="bg-white rounded-xl shadow-sm p-6">
-        <div className="grid grid-cols-2 gap-6">
+        <div className="space-y-6">
           {sizeMetrics.map((size) => {
             const sizeConfig = SIZES.find(s => s.id === size.size);
             return (
               <div 
                 key={size.size} 
-                className="bg-gray-50 rounded-xl p-6 hover:shadow-md transition-shadow duration-200"
+                className="flex items-center gap-8 p-6 bg-gray-50 rounded-xl hover:shadow-md transition-shadow duration-200"
                 style={{ borderLeft: `4px solid ${sizeConfig?.color || COLORS.revenue}` }}
               >
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg" style={{ backgroundColor: `${sizeConfig?.color}20` }}>
-                      <Package className="h-5 w-5" style={{ color: sizeConfig?.color }} />
-                    </div>
-                    <span className="font-medium text-gray-900">
-                      {sizeConfig?.label || size.size}
-                    </span>
+                {/* Size Info */}
+                <div className="flex items-center gap-3 w-48">
+                  <div className="p-2 rounded-lg" style={{ backgroundColor: `${sizeConfig?.color}20` }}>
+                    <Package className="h-5 w-5" style={{ color: sizeConfig?.color }} />
                   </div>
-                  <div className="text-sm font-medium text-gray-500">
-                    {size.quantity} affiches
+                  <div>
+                    <div 
+                      className="font-medium"
+                      style={{ color: sizeConfig?.color }}
+                    >
+                      {sizeConfig?.label || size.size}
+                    </div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-6">
-                  <div>
-                    <div className="text-sm text-gray-500 mb-1">CA</div>
-                    <div className="font-medium text-gray-900">
-                      {((size.revenue / totalRevenue) * 100).toFixed(1)}%
-                    </div>
-                    <div className="text-sm text-gray-500">
+                {/* Revenue */}
+                <div className="flex-1">
+                  <div className="text-sm text-gray-500 mb-1">Chiffre d'affaires</div>
+                  <div className="flex items-baseline gap-2">
+                    <div className="text-lg font-medium text-gray-900">
                       {size.revenue.toFixed(2)}€
                     </div>
-                  </div>
-
-                  <div>
-                    <div className="text-sm text-gray-500 mb-1">Bénéfices</div>
-                    <div className="font-medium text-green-600">
-                      {((size.profit / totalProfit) * 100).toFixed(1)}%
+                    <div className="text-sm text-gray-600">
+                      ({((size.revenue / totalRevenue) * 100).toFixed(1)}%)
                     </div>
-                    <div className="text-sm text-gray-500">
+                  </div>
+                </div>
+
+                {/* Profit */}
+                <div className="flex-1">
+                  <div className="text-sm text-gray-500 mb-1">Bénéfices</div>
+                  <div className="flex items-baseline gap-2">
+                    <div className="text-lg font-medium text-green-600">
                       {size.profit.toFixed(2)}€
                     </div>
+                    <div className="text-sm text-gray-600">
+                      ({((size.profit / totalProfit) * 100).toFixed(1)}%)
+                    </div>
                   </div>
+                </div>
 
-                  <div>
-                    <div className="text-sm text-gray-500 mb-1">Marge</div>
-                    <div className="font-medium text-indigo-600">
+                {/* Items */}
+                <div className="flex-1">
+                  <div className="text-sm text-gray-500 mb-1">Affiches vendues</div>
+                  <div className="flex items-baseline gap-2">
+                    <div className="text-lg font-medium text-gray-900">
+                      {size.quantity}
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      ({((size.quantity / totalItems) * 100).toFixed(1)}%)
+                    </div>
+                  </div>
+                </div>
+
+                {/* Margin */}
+                <div className="flex-1">
+                  <div className="text-sm text-gray-500 mb-1">Marge moyenne</div>
+                  <div className="flex items-baseline gap-2">
+                    <div className="text-lg font-medium text-indigo-600">
                       {((size.profit / size.revenue) * 100).toFixed(1)}%
                     </div>
-                    <div className="text-sm text-gray-500">
-                      {(size.profit / size.quantity).toFixed(2)}€/unité
+                    <div className="text-sm text-gray-600">
+                      ({(size.profit / size.quantity).toFixed(2)}€/unité)
                     </div>
                   </div>
                 </div>
