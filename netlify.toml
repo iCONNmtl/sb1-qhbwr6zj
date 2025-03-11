@@ -16,3 +16,22 @@
   to = "https://stellular-palmier-ea7df4.netlify.app/:splat"
   status = 301
   force = true
+
+# Shopify Privacy Webhooks
+[[redirects]]
+  from = "/api/shopify/customers/data_request"
+  to = "/.netlify/functions/shopify-privacy"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/shopify/customers/redact"
+  to = "/.netlify/functions/shopify-privacy"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/shopify/shop/redact"
+  to = "/.netlify/functions/shopify-privacy"
+  status = 200
+  force = true
