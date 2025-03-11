@@ -17,6 +17,13 @@
   status = 301
   force = true
 
+# Shopify Auth Redirects
+[[redirects]]
+  from = "/api/shopify/auth"
+  to = "/.netlify/functions/shopify-auth"
+  status = 200
+  force = true
+
 # Shopify Privacy Webhooks
 [[redirects]]
   from = "/api/shopify/customers/data_request"
