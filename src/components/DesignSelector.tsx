@@ -30,7 +30,7 @@ export default function DesignSelector({
   const [uploading, setUploading] = useState(false);
   const [designDimensions, setDesignDimensions] = useState<{ width: number; height: number } | null>(null);
 
-  // Initialiser la position au centre
+  // Initialize dimensions when URL changes
   useEffect(() => {
     if (selectedUrl) {
       const img = new Image();
@@ -68,6 +68,7 @@ export default function DesignSelector({
 
       const formData = new FormData();
       formData.append('image', file);
+      formData.append('userId', userId);
 
       const response = await fetch(MAKE_WEBHOOK_URL, {
         method: 'POST',

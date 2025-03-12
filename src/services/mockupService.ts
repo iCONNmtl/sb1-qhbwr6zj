@@ -29,9 +29,7 @@ export async function generateMockups(
   const formData = new FormData();
   
   // Add either the file or URL
-  if (design) {
-    formData.append('design', design);
-  } else if (designUrl) {
+  if (designUrl) {
     formData.append('designUrl', designUrl);
   }
 
