@@ -13,7 +13,7 @@ const SCOPES = [
   'write_orders',
   'read_inventory',
   'write_inventory'
-].join(',');
+].join(' ');
 
 const generateNonce = () => crypto.randomBytes(16).toString('hex');
 
@@ -40,29 +40,26 @@ export const handler: Handler = async (event) => {
     const query: { [key: string]: string } = {};
     params.forEach((value, key) => { query[key] = value; });
 
-    // Vérifier HMAC si présent
-    if (query.hmac && !verifyHmac(query)) {
-      return {
-        statusCode: 401,
-        body: JSON.stringify({ error: 'Invalid HMAC' })
-      };
-    }
-
     // Installation initiale
     if (query.shop && !query.code) {
+      const shop = query.shop.replace('.myshopify.com', '');
       const nonce = generateNonce();
-      const redirectUri = `${APP_URL}/api/shopify/oauth/callback`;
       
-      const authUrl = new URL(`https://${query.shop}/admin/oauth/authorize`);
+      // Construire l'URL d'autorisation Shopify
+      const shopifyUrl = `https://${shop}.myshopify.com/admin/oauth/authorize`;
+      const redirectUri = `${APP_URL}/settings`;
+      
+      const authUrl = new URL(shopifyUrl);
       authUrl.searchParams.append('client_id', SHOPIFY_CLIENT_ID!);
       authUrl.searchParams.append('scope', SCOPES);
       authUrl.searchParams.append('redirect_uri', redirectUri);
       authUrl.searchParams.append('state', nonce);
 
+      // Rediriger vers Shopify
       return {
         statusCode: 302,
         headers: {
-          Location: authUrl.toString(),
+          'Location': authUrl.toString(),
           'Set-Cookie': `shopify_nonce=${nonce}; Path=/; Secure; SameSite=Lax`
         },
         body: ''
@@ -70,7 +67,7 @@ export const handler: Handler = async (event) => {
     }
 
     // Callback OAuth avec code d'autorisation
-    if (query.code) {
+    if (query.code && query.shop) {
       const shop = query.shop;
       
       // Échanger le code contre un token d'accès
@@ -92,7 +89,7 @@ export const handler: Handler = async (event) => {
 
       const { access_token } = await tokenResponse.json();
 
-      // Rediriger vers l'app avec le token et le shop
+      // Rediriger vers l'app avec le token
       return {
         statusCode: 302,
         headers: {
