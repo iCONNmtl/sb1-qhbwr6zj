@@ -10,6 +10,10 @@
 
 [build.environment]
   NODE_VERSION = "18"
+  SHOPIFY_CLIENT_ID = "e2b20adf1c1b49a62ec2d42c0c119355"
+  SHOPIFY_CLIENT_SECRET = "c31a40911d06210a0fd1ff8ca4aa9715" 
+  SHOPIFY_WEBHOOK_SECRET = "your_webhook_secret_here"
+  APP_URL = "https://pixmock.com"
 
 [[redirects]]
   from = "https://visionary-klepon-c89c8c.netlify.app/*"
