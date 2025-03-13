@@ -21,9 +21,15 @@
   status = 301
   force = true
 
-# Shopify Auth Redirects
+# Shopify OAuth URLs
 [[redirects]]
   from = "/api/shopify/auth"
+  to = "/.netlify/functions/shopify-auth"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/shopify/oauth/callback"
   to = "/.netlify/functions/shopify-auth"
   status = 200
   force = true
