@@ -1,11 +1,13 @@
 import { Handler } from '@netlify/functions';
 import crypto from 'crypto';
+import fetch from 'node-fetch';
+import { serialize } from 'cookie';
 
 const SHOPIFY_CLIENT_ID = process.env.SHOPIFY_CLIENT_ID;
 const SHOPIFY_CLIENT_SECRET = process.env.SHOPIFY_CLIENT_SECRET;
 const APP_URL = process.env.APP_URL || 'https://pixmock.com';
 
-// Scopes nécessaires pour l'application
+// Scopes Shopify
 const SCOPES = [
   'read_products',
   'write_products',
@@ -15,10 +17,11 @@ const SCOPES = [
 
 const generateNonce = () => crypto.randomBytes(16).toString('hex');
 
+// Vérification sécurisée de l'HMAC
 const verifyHmac = (query: { [key: string]: string }): boolean => {
   const hmac = query.hmac;
-  const map = Object.assign({}, query);
-  delete map['hmac'];
+  const map = { ...query };
+  delete map.hmac;
 
   const message = Object.keys(map)
     .sort()
@@ -30,7 +33,7 @@ const verifyHmac = (query: { [key: string]: string }): boolean => {
     .update(message)
     .digest('hex');
 
-  return hmac === generatedHash;
+  return crypto.timingSafeEqual(Buffer.from(hmac, 'utf-8'), Buffer.from(generatedHash, 'utf-8'));
 };
 
 export const handler: Handler = async (event) => {
@@ -44,20 +47,31 @@ export const handler: Handler = async (event) => {
     const query = event.queryStringParameters || {};
     const shop = query.shop;
 
+    // Vérification du format du shop
+    const isValidShop = shop && /^[a-zA-Z0-9][a-zA-Z0-9-]*\.myshopify\.com$/.test(shop);
+    if (!isValidShop) {
+      return { statusCode: 400, body: JSON.stringify({ error: 'Invalid shop parameter' }) };
+    }
+
     // Vérifier l'HMAC si présent
     if (query.hmac && !verifyHmac(query as any)) {
-      return {
-        statusCode: 403,
-        body: JSON.stringify({ error: 'Invalid HMAC' })
-      };
+      return { statusCode: 403, body: JSON.stringify({ error: 'Invalid HMAC' }) };
     }
 
     // Installation initiale
     if (shop && !query.code) {
       console.log('Initial installation request for shop:', shop);
       const nonce = generateNonce();
-      
-      const redirectUri = `${APP_URL}/api/shopify/oauth/callback`;
+
+      // Stocker le nonce dans un cookie sécurisé
+      const cookie = serialize('shopify_nonce', nonce, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict',
+        path: '/'
+      });
+
+      const redirectUri = `${APP_URL}/shopify-oauth/redirect`;
       const authUrl = new URL(`https://${shop}/admin/oauth/authorize`);
       authUrl.searchParams.set('client_id', SHOPIFY_CLIENT_ID!);
       authUrl.searchParams.set('scope', SCOPES);
@@ -70,6 +84,7 @@ export const handler: Handler = async (event) => {
         statusCode: 302,
         headers: {
           'Location': authUrl.toString(),
+          'Set-Cookie': cookie,
           'Cache-Control': 'no-cache'
         },
         body: ''
@@ -79,6 +94,18 @@ export const handler: Handler = async (event) => {
     // Callback OAuth
     if (query.code && shop) {
       console.log('Processing OAuth callback for shop:', shop);
+
+      // Vérifier que le nonce reçu correspond au cookie stocké
+      const cookies = event.headers.cookie || '';
+      const nonceCookie = cookies.split('; ').find(row => row.startsWith('shopify_nonce='));
+      const savedNonce = nonceCookie ? nonceCookie.split('=')[1] : null;
+
+      if (!savedNonce || savedNonce !== query.state) {
+        return {
+          statusCode: 403,
+          body: JSON.stringify({ error: 'Invalid OAuth state' })
+        };
+      }
 
       const accessTokenUrl = `https://${shop}/admin/oauth/access_token`;
       const accessTokenPayload = {
@@ -120,6 +147,7 @@ export const handler: Handler = async (event) => {
 
       console.log('Shop access verified, redirecting to app');
 
+      // Rediriger vers la page des paramètres avec le token
       return {
         statusCode: 302,
         headers: {

@@ -3,33 +3,30 @@
   publish = "dist"
   functions = "netlify/functions"
 
+[build.environment]
+  NODE_VERSION = "18"
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
-[build.environment]
-  NODE_VERSION = "18"
-  SHOPIFY_CLIENT_ID = "e2b20adf1c1b49a62ec2d42c0c119355"
-  SHOPIFY_CLIENT_SECRET = "c31a40911d06210a0fd1ff8ca4aa9715" 
-  SHOPIFY_WEBHOOK_SECRET = "your_webhook_secret_here"
-  APP_URL = "https://pixmock.com"
-
-[[redirects]]
-  from = "https://visionary-klepon-c89c8c.netlify.app/*"
-  to = "https://stellular-palmier-ea7df4.netlify.app/:splat"
-  status = 301
-  force = true
+# Vérifie si cette redirection est utile
+# [[redirects]]
+#   from = "https://visionary-klepon-c89c8c.netlify.app/*"
+#   to = "https://stellular-palmier-ea7df4.netlify.app/:splat"
+#   status = 301
+#   force = true
 
 # Shopify Auth Redirects
 [[redirects]]
-  from = "/api/shopify/auth"
+  from = "/shopify-oauth/init"
   to = "/.netlify/functions/shopify-auth"
   status = 200
   force = true
 
 [[redirects]]
-  from = "/api/shopify/oauth/callback"
+  from = "/shopify-oauth/redirect"
   to = "/.netlify/functions/shopify-auth"
   status = 200
   force = true
