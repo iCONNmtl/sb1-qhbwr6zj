@@ -18,8 +18,8 @@ const SCOPES = [
 const generateNonce = () => crypto.randomBytes(16).toString('hex');
 
 const verifyHmac = (query: { [key: string]: string }): boolean => {
-  const hmac = query.hmac;
-  delete query.hmac;
+  const { hmac, ...queryWithoutHmac } = query;  // ✅ Crée un nouvel objet sans hmac
+
   
   const message = Object.keys(query)
     .sort()
@@ -47,7 +47,7 @@ export const handler: Handler = async (event) => {
       
       // Construire l'URL d'autorisation Shopify
       const shopifyUrl = `https://${shop}.myshopify.com/admin/oauth/authorize`;
-      const redirectUri = `${APP_URL}/settings`;
+      const redirectUri = `${APP_URL}/api/shopify/oauth/callback`;
       
       const authUrl = new URL(shopifyUrl);
       authUrl.searchParams.append('client_id', SHOPIFY_CLIENT_ID!);
