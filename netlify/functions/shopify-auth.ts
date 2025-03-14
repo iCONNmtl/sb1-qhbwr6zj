@@ -10,10 +10,8 @@ const SCOPES = [
   'read_products',
   'write_products',
   'read_orders',
-  'write_orders',
-  'read_inventory',
-  'write_inventory'
-].join(',');
+  'write_orders'
+].join(' ');
 
 const generateNonce = () => crypto.randomBytes(16).toString('hex');
 
@@ -21,7 +19,6 @@ const verifyHmac = (query: { [key: string]: string }): boolean => {
   const hmac = query.hmac;
   const map = Object.assign({}, query);
   delete map['hmac'];
-  delete map['signature'];
 
   const message = Object.keys(map)
     .sort()
@@ -38,21 +35,17 @@ const verifyHmac = (query: { [key: string]: string }): boolean => {
 
 export const handler: Handler = async (event) => {
   try {
-    // Log pour le débogage
-    console.log('Event:', {
+    console.log('Auth function called:', {
       path: event.path,
       httpMethod: event.httpMethod,
-      queryStringParameters: event.queryStringParameters,
-      rawQuery: event.rawQuery
+      queryStringParameters: event.queryStringParameters
     });
 
-    const params = new URLSearchParams(event.rawQuery);
-    const query: { [key: string]: string } = {};
-    params.forEach((value, key) => { query[key] = value; });
+    const query = event.queryStringParameters || {};
+    const shop = query.shop;
 
-    // Vérifier l'HMAC pour les requêtes provenant de Shopify
-    if (query.hmac && !verifyHmac(query)) {
-      console.log('HMAC verification failed');
+    // Vérifier l'HMAC si présent
+    if (query.hmac && !verifyHmac(query as any)) {
       return {
         statusCode: 403,
         body: JSON.stringify({ error: 'Invalid HMAC' })
@@ -60,60 +53,58 @@ export const handler: Handler = async (event) => {
     }
 
     // Installation initiale
-    if (query.shop && !query.code) {
-      const shop = query.shop;
+    if (shop && !query.code) {
+      console.log('Initial installation request for shop:', shop);
       const nonce = generateNonce();
       
-      // Construire l'URL d'autorisation Shopify
-      const shopifyUrl = `https://${shop}/admin/oauth/authorize`;
       const redirectUri = `${APP_URL}/api/shopify/oauth/callback`;
-      
-      const authUrl = new URL(shopifyUrl);
-      authUrl.searchParams.append('client_id', SHOPIFY_CLIENT_ID!);
-      authUrl.searchParams.append('scope', SCOPES);
-      authUrl.searchParams.append('redirect_uri', redirectUri);
-      authUrl.searchParams.append('state', nonce);
+      const authUrl = new URL(`https://${shop}/admin/oauth/authorize`);
+      authUrl.searchParams.set('client_id', SHOPIFY_CLIENT_ID!);
+      authUrl.searchParams.set('scope', SCOPES);
+      authUrl.searchParams.set('redirect_uri', redirectUri);
+      authUrl.searchParams.set('state', nonce);
 
-      console.log('Redirecting to Shopify auth URL:', authUrl.toString());
+      console.log('Redirecting to:', authUrl.toString());
 
-      // Rediriger vers Shopify
       return {
         statusCode: 302,
         headers: {
           'Location': authUrl.toString(),
-          'Cache-Control': 'no-cache',
-          'Set-Cookie': `shopify_nonce=${nonce}; Path=/; Secure; SameSite=Lax; HttpOnly`
+          'Cache-Control': 'no-cache'
         },
         body: ''
       };
     }
 
-    // Callback OAuth avec code d'autorisation
-    if (query.code && query.shop) {
-      console.log('Processing OAuth callback');
-      const shop = query.shop;
-      
-      // Échanger le code contre un token d'accès
-      const tokenResponse = await fetch(`https://${shop}/admin/oauth/access_token`, {
+    // Callback OAuth
+    if (query.code && shop) {
+      console.log('Processing OAuth callback for shop:', shop);
+
+      const accessTokenUrl = `https://${shop}/admin/oauth/access_token`;
+      const accessTokenPayload = {
+        client_id: SHOPIFY_CLIENT_ID,
+        client_secret: SHOPIFY_CLIENT_SECRET,
+        code: query.code
+      };
+
+      console.log('Requesting access token from:', accessTokenUrl);
+
+      const tokenResponse = await fetch(accessTokenUrl, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          client_id: SHOPIFY_CLIENT_ID,
-          client_secret: SHOPIFY_CLIENT_SECRET,
-          code: query.code
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(accessTokenPayload)
       });
 
       if (!tokenResponse.ok) {
-        console.error('Token exchange failed:', await tokenResponse.text());
-        throw new Error('Failed to get access token');
+        const error = await tokenResponse.text();
+        console.error('Token exchange failed:', error);
+        throw new Error(`Failed to get access token: ${error}`);
       }
 
       const { access_token } = await tokenResponse.json();
+      console.log('Access token obtained successfully');
 
-      // Vérifier que l'app est bien installée
+      // Vérifier l'accès à l'API
       const shopResponse = await fetch(`https://${shop}/admin/api/2024-01/shop.json`, {
         headers: {
           'X-Shopify-Access-Token': access_token,
@@ -122,13 +113,13 @@ export const handler: Handler = async (event) => {
       });
 
       if (!shopResponse.ok) {
-        console.error('Shop verification failed:', await shopResponse.text());
-        throw new Error('Failed to verify shop');
+        const error = await shopResponse.text();
+        console.error('Shop verification failed:', error);
+        throw new Error('Failed to verify shop access');
       }
 
-      console.log('Redirecting to app with token');
+      console.log('Shop access verified, redirecting to app');
 
-      // Rediriger vers l'app avec le token
       return {
         statusCode: 302,
         headers: {
@@ -139,7 +130,6 @@ export const handler: Handler = async (event) => {
       };
     }
 
-    console.log('Invalid request - no matching conditions');
     return {
       statusCode: 400,
       body: JSON.stringify({ error: 'Invalid request' })
@@ -149,7 +139,10 @@ export const handler: Handler = async (event) => {
     console.error('Auth error:', error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: error.message })
+      body: JSON.stringify({ 
+        error: 'Internal server error',
+        details: error.message 
+      })
     };
   }
 };
