@@ -21,10 +21,10 @@ const verifyHmac = (query: { [key: string]: string }): boolean => {
   const { hmac, ...queryWithoutHmac } = query;  // ✅ Crée un nouvel objet sans hmac
 
   
-  const message = Object.keys(query)
-    .sort()
-    .map(key => `${key}=${query[key]}`)
-    .join('&');
+  const message = Object.keys(queryWithoutHmac)
+  .sort()
+  .map(key => `${key}=${queryWithoutHmac[key]}`)
+  .join('&');
 
   const generatedHash = crypto
     .createHmac('sha256', SHOPIFY_CLIENT_SECRET!)
@@ -47,7 +47,7 @@ export const handler: Handler = async (event) => {
       
       // Construire l'URL d'autorisation Shopify
       const shopifyUrl = `https://${shop}.myshopify.com/admin/oauth/authorize`;
-      const redirectUri = `${APP_URL}/api/shopify/oauth/callback`;
+      const redirectUri = `https://${query.shop}/admin/oauth/authorize`;
       
       const authUrl = new URL(shopifyUrl);
       authUrl.searchParams.append('client_id', SHOPIFY_CLIENT_ID!);
