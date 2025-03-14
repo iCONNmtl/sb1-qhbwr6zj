@@ -38,12 +38,21 @@ const verifyHmac = (query: { [key: string]: string }): boolean => {
 
 export const handler: Handler = async (event) => {
   try {
+    // Log pour le débogage
+    console.log('Event:', {
+      path: event.path,
+      httpMethod: event.httpMethod,
+      queryStringParameters: event.queryStringParameters,
+      rawQuery: event.rawQuery
+    });
+
     const params = new URLSearchParams(event.rawQuery);
     const query: { [key: string]: string } = {};
     params.forEach((value, key) => { query[key] = value; });
 
     // Vérifier l'HMAC pour les requêtes provenant de Shopify
     if (query.hmac && !verifyHmac(query)) {
+      console.log('HMAC verification failed');
       return {
         statusCode: 403,
         body: JSON.stringify({ error: 'Invalid HMAC' })
@@ -65,11 +74,14 @@ export const handler: Handler = async (event) => {
       authUrl.searchParams.append('redirect_uri', redirectUri);
       authUrl.searchParams.append('state', nonce);
 
+      console.log('Redirecting to Shopify auth URL:', authUrl.toString());
+
       // Rediriger vers Shopify
       return {
         statusCode: 302,
         headers: {
           'Location': authUrl.toString(),
+          'Cache-Control': 'no-cache',
           'Set-Cookie': `shopify_nonce=${nonce}; Path=/; Secure; SameSite=Lax; HttpOnly`
         },
         body: ''
@@ -78,6 +90,7 @@ export const handler: Handler = async (event) => {
 
     // Callback OAuth avec code d'autorisation
     if (query.code && query.shop) {
+      console.log('Processing OAuth callback');
       const shop = query.shop;
       
       // Échanger le code contre un token d'accès
@@ -94,6 +107,7 @@ export const handler: Handler = async (event) => {
       });
 
       if (!tokenResponse.ok) {
+        console.error('Token exchange failed:', await tokenResponse.text());
         throw new Error('Failed to get access token');
       }
 
@@ -108,19 +122,24 @@ export const handler: Handler = async (event) => {
       });
 
       if (!shopResponse.ok) {
+        console.error('Shop verification failed:', await shopResponse.text());
         throw new Error('Failed to verify shop');
       }
+
+      console.log('Redirecting to app with token');
 
       // Rediriger vers l'app avec le token
       return {
         statusCode: 302,
         headers: {
-          'Location': `${APP_URL}/settings?shop=${shop}&token=${access_token}`
+          'Location': `${APP_URL}/settings?shop=${shop}&token=${access_token}`,
+          'Cache-Control': 'no-cache'
         },
         body: ''
       };
     }
 
+    console.log('Invalid request - no matching conditions');
     return {
       statusCode: 400,
       body: JSON.stringify({ error: 'Invalid request' })
