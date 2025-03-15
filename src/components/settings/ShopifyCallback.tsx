@@ -15,18 +15,31 @@ export default function ShopifyCallback({ userId, onSuccess }) {
   const { user } = useStore();
 
   useEffect(() => {
+    console.log("🔍 ShopifyCallback lancé !");
+    console.log("📌 Paramètres URL:", Object.fromEntries(searchParams.entries()));
+    console.log("👤 Utilisateur actuel:", user);
+    
     const processAuth = async () => {
       const code = searchParams.get('code');
       const shop = searchParams.get('shop');
       const hmac = searchParams.get('hmac');
 
-      if (!code || !shop || !hmac || !user || !user.uid) {
+      if (!code || !shop || !hmac) {
+        console.error("❌ Paramètres Shopify manquants:", { code, shop, hmac });
         toast.error('Paramètres d\'authentification manquants');
         navigate('/settings');
         return;
       }
 
+      if (!user || !user.uid) {
+        console.error("❌ Utilisateur introuvable ou non connecté !", user);
+        toast.error("Erreur : utilisateur non authentifié");
+        navigate('/login');
+        return;
+      }
+
       setProcessing(true);
+      console.log("✅ Début de l'échange de token avec Shopify...");
 
       try {
         const response = await fetch(`https://${shop}.myshopify.com/admin/oauth/access_token`, {
@@ -43,11 +56,12 @@ export default function ShopifyCallback({ userId, onSuccess }) {
 
         if (!response.ok) {
           const errorMessage = await response.text();
-          console.error('Erreur Shopify:', errorMessage);
+          console.error('❌ Erreur Shopify:', response.status, errorMessage);
           throw new Error(`Erreur Shopify: ${response.status} - ${errorMessage}`);
         }
 
         const { access_token, scope } = await response.json();
+        console.log("✅ Token reçu:", { access_token, scope });
 
         const userRef = doc(db, 'users', user.uid);
         const encryptedTokens = btoa(JSON.stringify({
@@ -63,10 +77,11 @@ export default function ShopifyCallback({ userId, onSuccess }) {
           'shopifyAuth.shop': shop
         });
 
+        console.log("✅ Shopify connecté avec succès pour l'utilisateur", user.uid);
         toast.success('Compte Shopify connecté avec succès');
         onSuccess();
       } catch (error) {
-        console.error('Shopify token exchange error:', error);
+        console.error('❌ Erreur lors de l\'échange de token Shopify:', error);
         toast.error('Erreur lors de la connexion du compte Shopify');
         navigate('/settings');
       } finally {
