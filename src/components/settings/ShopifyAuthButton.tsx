@@ -8,7 +8,6 @@ interface ShopifyAuthButtonProps {
 }
 
 const SHOPIFY_CLIENT_ID = 'e2b20adf1c1b49a62ec2d42c0c119355';
-const REDIRECT_URI = `${window.location.origin}/shopify-oauth/redirect`;
 const SCOPES = [
   'read_customers',
   'write_customers',
@@ -39,11 +38,8 @@ export default function ShopifyAuthButton({ userId, onSuccess }: ShopifyAuthButt
       // Remove .myshopify.com if user added it
       const shop = shopUrl.replace('.myshopify.com', '');
       
-      // Build the authorization URL
-      const authUrl = `https://${shop}.myshopify.com/admin/oauth/authorize?client_id=${SHOPIFY_CLIENT_ID}&scope=${SCOPES}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
-
-      // Redirect to Shopify
-      window.location.href = authUrl;
+      // Redirect to Shopify OAuth init endpoint
+      window.location.href = `/shopify-oauth/init?shop=${shop}.myshopify.com&state=${userId}`;
     } catch (error) {
       console.error('Shopify auth error:', error);
       toast.error('Erreur lors de la connexion à Shopify');

@@ -1,9 +1,8 @@
 import { Handler } from '@netlify/functions';
-import { doc, updateDoc } from 'firebase/firestore';
-import { db } from '../../src/lib/firebase';
+import crypto from 'crypto';
 
-const SHOPIFY_CLIENT_ID = process.env.SHOPIFY_CLIENT_ID;
-const SHOPIFY_CLIENT_SECRET = process.env.SHOPIFY_CLIENT_SECRET;
+const SHOPIFY_CLIENT_ID = 'e2b20adf1c1b49a62ec2d42c0c119355';
+const SHOPIFY_CLIENT_SECRET = 'c31a40911d06210a0fd1ff8ca4aa9715';
 const APP_URL = process.env.APP_URL || 'https://pixmock.com';
 
 const SCOPES = [
@@ -78,22 +77,7 @@ export const handler: Handler = async (event) => {
 
       const { access_token, scope } = await tokenResponse.json();
 
-      // Store encrypted token in Firebase
-      const userRef = doc(db, 'users', state);
-      const encryptedTokens = btoa(JSON.stringify({
-        access_token,
-        scope,
-        shop,
-        created_at: new Date().toISOString()
-      }));
-
-      await updateDoc(userRef, {
-        'shopifyAuth.tokens': encryptedTokens,
-        'shopifyAuth.connectedAt': new Date().toISOString(),
-        'shopifyAuth.shop': shop
-      });
-
-      // Redirect back to settings
+      // Redirect back to settings with success parameter
       return {
         statusCode: 302,
         headers: {
