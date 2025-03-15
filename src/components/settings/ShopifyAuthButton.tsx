@@ -38,8 +38,16 @@ export default function ShopifyAuthButton({ userId, onSuccess }: ShopifyAuthButt
       // Remove .myshopify.com if user added it
       const shop = shopUrl.replace('.myshopify.com', '');
       
-      // Redirect to Shopify OAuth init endpoint
-      window.location.href = `/shopify-oauth/init?shop=${shop}.myshopify.com&state=${userId}`;
+      // Build the authorization URL directly
+      const authUrl = `https://${shop}.myshopify.com/admin/oauth/authorize?` + new URLSearchParams({
+        client_id: SHOPIFY_CLIENT_ID,
+        scope: SCOPES,
+        redirect_uri: `${window.location.origin}/settings`,
+        state: userId
+      }).toString();
+
+      // Redirect to Shopify
+      window.location.href = authUrl;
     } catch (error) {
       console.error('Shopify auth error:', error);
       toast.error('Erreur lors de la connexion à Shopify');

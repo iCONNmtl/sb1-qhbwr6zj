@@ -4,7 +4,6 @@ import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { useStore } from '../../store/useStore';
 import toast from 'react-hot-toast';
-import crypto from 'crypto';
 
 interface ShopifyCallbackProps {
   userId: string;
@@ -20,53 +19,22 @@ export default function ShopifyCallback({ userId, onSuccess }: ShopifyCallbackPr
   const navigate = useNavigate();
   const { user } = useStore();
 
-  const verifyHmac = (queryParams: URLSearchParams, hmac: string): boolean => {
-    // Remove hmac from params and sort remaining params
-    const params = Array.from(queryParams.entries())
-      .filter(([key]) => key !== 'hmac')
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([key, value]) => `${key}=${value}`)
-      .join('&');
-
-    // Calculate HMAC
-    const calculatedHmac = crypto
-      .createHmac('sha256', SHOPIFY_CLIENT_SECRET)
-      .update(params)
-      .digest('hex');
-
-    return crypto.timingSafeEqual(
-      Buffer.from(hmac),
-      Buffer.from(calculatedHmac)
-    );
-  };
-
-  const validateShopDomain = (shop: string): boolean => {
-    const shopRegex = /^[a-zA-Z0-9][a-zA-Z0-9\-]*\.myshopify\.com$/;
-    return shopRegex.test(shop);
-  };
-
   useEffect(() => {
     const processAuth = async () => {
       const code = searchParams.get('code');
       const shop = searchParams.get('shop');
-      const hmac = searchParams.get('hmac');
+      const state = searchParams.get('state');
 
-      if (!code || !shop || !hmac || !user) {
+      if (!code || !shop || !state || !user) {
         toast.error('Paramètres d\'authentification manquants');
         navigate('/settings');
         return;
       }
 
       // Validate shop domain
-      if (!validateShopDomain(shop)) {
+      const shopRegex = /^[a-zA-Z0-9][a-zA-Z0-9\-]*\.myshopify\.com$/;
+      if (!shopRegex.test(shop)) {
         toast.error('Domaine de boutique invalide');
-        navigate('/settings');
-        return;
-      }
-
-      // Verify HMAC
-      if (!verifyHmac(searchParams, hmac)) {
-        toast.error('Signature HMAC invalide');
         navigate('/settings');
         return;
       }
