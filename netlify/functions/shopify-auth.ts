@@ -16,58 +16,31 @@ const SCOPES = [
   'read_products'
 ].join(',');
 
-const generateNonce = () => crypto.randomBytes(16).toString('hex');
-
-const verifyHmac = (query: { [key: string]: string }): boolean => {
-  const hmac = query.hmac;
-  delete query.hmac;
-  
-  const message = Object.keys(query)
-    .sort()
-    .map(key => `${key}=${Array.isArray(query[key]) ? query[key].join(',') : query[key]}`)
-    .join('&');
-
-  const generatedHash = crypto
-    .createHmac('sha256', SHOPIFY_CLIENT_SECRET!)
-    .update(message)
-    .digest('hex');
-
-  return hmac === generatedHash;
-};
-
 export const handler: Handler = async (event) => {
   try {
     const query = event.queryStringParameters || {};
     const shop = query.shop;
-    const { path } = event;
-    const userId = query.state; // Using state parameter to pass userId
+    const userId = query.state;
+    const path = event.path;
 
-    console.log('Auth function called:', {
+    console.log('Shopify Auth Handler:', {
       path,
-      httpMethod: event.httpMethod,
       query,
       userId
     });
 
-    // Vérifier que le shop est un domaine Shopify valide
-    if (shop && !shop.match(/^[a-zA-Z0-9][a-zA-Z0-9-]*\.myshopify\.com$/)) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: 'Invalid shop domain' })
-      };
-    }
-
-    // Installation initiale
+    // Initial auth request
     if (path.includes('/init')) {
       if (!shop || !userId) {
         return {
           statusCode: 400,
-          body: JSON.stringify({ error: 'Missing required parameters' })
+          body: JSON.stringify({ error: 'Missing shop or userId' })
         };
       }
 
       const redirectUri = `${APP_URL}/shopify-oauth/redirect`;
-      
+      const nonce = crypto.randomBytes(16).toString('hex');
+
       const authUrl = new URL(`https://${shop}/admin/oauth/authorize`);
       authUrl.searchParams.append('client_id', SHOPIFY_CLIENT_ID!);
       authUrl.searchParams.append('scope', SCOPES);
@@ -75,40 +48,35 @@ export const handler: Handler = async (event) => {
       authUrl.searchParams.append('state', userId);
       authUrl.searchParams.append('grant_options[]', 'per-user');
 
-      console.log('Redirecting to Shopify auth:', authUrl.toString());
+      console.log('Redirecting to:', authUrl.toString());
 
       return {
         statusCode: 302,
         headers: {
-          'Location': authUrl.toString(),
+          Location: authUrl.toString(),
           'Cache-Control': 'no-cache'
         },
         body: ''
       };
     }
 
-    // Callback OAuth
+    // OAuth callback
     if (path.includes('/redirect')) {
-      if (!shop || !query.code || !query.state) {
+      console.log('Received callback:', query);
+
+      if (!query.code || !query.shop || !query.state) {
         return {
           statusCode: 400,
           body: JSON.stringify({ error: 'Missing required parameters' })
         };
       }
 
-      // Vérifier l'HMAC
-      if (!verifyHmac(query as any)) {
-        console.error('HMAC verification failed');
-        return {
-          statusCode: 403,
-          body: JSON.stringify({ error: 'Invalid signature' })
-        };
-      }
-
-      // Échanger le code contre un token
-      const tokenResponse = await fetch(`https://${shop}/admin/oauth/access_token`, {
+      // Exchange code for access token
+      const tokenResponse = await fetch(`https://${query.shop}/admin/oauth/access_token`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify({
           client_id: SHOPIFY_CLIENT_ID,
           client_secret: SHOPIFY_CLIENT_SECRET,
@@ -117,39 +85,34 @@ export const handler: Handler = async (event) => {
       });
 
       if (!tokenResponse.ok) {
-        const error = await tokenResponse.text();
-        console.error('Token exchange failed:', error);
-        throw new Error(`Failed to get access token: ${error}`);
+        throw new Error(`Token exchange failed: ${await tokenResponse.text()}`);
       }
 
       const { access_token, scope } = await tokenResponse.json();
-      console.log('Access token obtained successfully');
+      console.log('Token obtained successfully');
 
-      // Store encrypted tokens in Firebase
-      const userId = query.state;
-      const userRef = doc(db, 'users', userId);
-      
+      // Store encrypted token in Firebase
+      const userRef = doc(db, 'users', query.state);
       const encryptedTokens = btoa(JSON.stringify({
         access_token,
         scope,
-        shop,
+        shop: query.shop,
         created_at: new Date().toISOString()
       }));
 
       await updateDoc(userRef, {
         'shopifyAuth.tokens': encryptedTokens,
         'shopifyAuth.connectedAt': new Date().toISOString(),
-        'shopifyAuth.shop': shop
+        'shopifyAuth.shop': query.shop
       });
 
-      // Redirect to settings page with success parameter
-      const settingsUrl = `${APP_URL}/settings?shopifyConnected=true`;
-      console.log('Redirecting to settings:', settingsUrl);
+      console.log('Token stored in Firebase');
 
+      // Redirect back to settings
       return {
         statusCode: 302,
         headers: {
-          'Location': settingsUrl,
+          Location: `${APP_URL}/settings?shopifyConnected=true`,
           'Cache-Control': 'no-cache'
         },
         body: ''
@@ -162,12 +125,12 @@ export const handler: Handler = async (event) => {
     };
 
   } catch (error: any) {
-    console.error('Auth error:', error);
+    console.error('Shopify auth error:', error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ 
+      body: JSON.stringify({
         error: 'Internal server error',
-        details: error.message 
+        message: error.message
       })
     };
   }

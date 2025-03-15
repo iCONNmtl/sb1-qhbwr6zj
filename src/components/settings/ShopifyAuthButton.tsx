@@ -28,8 +28,9 @@ export default function ShopifyAuthButton({ userId, onSuccess }: ShopifyAuthButt
 
     setLoading(true);
     try {
-      // Build the authorization URL with userId as state parameter
+      // Redirect to Shopify OAuth
       const authUrl = `/shopify-oauth/init?shop=${shop}.myshopify.com&state=${userId}`;
+      console.log('Redirecting to:', authUrl);
       window.location.href = authUrl;
     } catch (error) {
       console.error('Shopify auth error:', error);
@@ -47,7 +48,7 @@ export default function ShopifyAuthButton({ userId, onSuccess }: ShopifyAuthButt
             value={shopUrl}
             onChange={(e) => setShopUrl(e.target.value)}
             placeholder="votre-boutique"
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-[#96BF47] focus:border-[#96BF47] pr-[.myshopify.com]"
+            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-[#96BF47] focus:border-[#96BF47] pr-[120px]"
           />
           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
             .myshopify.com

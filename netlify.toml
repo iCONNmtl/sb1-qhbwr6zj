@@ -23,13 +23,7 @@
 
 # Shopify Auth Redirects
 [[redirects]]
-  from = "/shopify-oauth/init"
-  to = "/.netlify/functions/shopify-auth"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/shopify-oauth/redirect"
+  from = "/shopify-oauth/*"
   to = "/.netlify/functions/shopify-auth"
   status = 200
   force = true
