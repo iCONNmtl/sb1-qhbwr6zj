@@ -4,45 +4,77 @@ import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { useStore } from '../../store/useStore';
 import toast from 'react-hot-toast';
+import crypto from 'crypto';
+
+interface ShopifyCallbackProps {
+  userId: string;
+  onSuccess: () => void;
+}
 
 const SHOPIFY_CLIENT_ID = 'e2b20adf1c1b49a62ec2d42c0c119355';
 const SHOPIFY_CLIENT_SECRET = 'c31a40911d06210a0fd1ff8ca4aa9715';
 
-export default function ShopifyCallback({ userId, onSuccess }) {
+export default function ShopifyCallback({ userId, onSuccess }: ShopifyCallbackProps) {
   const [searchParams] = useSearchParams();
   const [processing, setProcessing] = useState(false);
   const navigate = useNavigate();
   const { user } = useStore();
 
+  const verifyHmac = (queryParams: URLSearchParams, hmac: string): boolean => {
+    // Remove hmac from params and sort remaining params
+    const params = Array.from(queryParams.entries())
+      .filter(([key]) => key !== 'hmac')
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([key, value]) => `${key}=${value}`)
+      .join('&');
+
+    // Calculate HMAC
+    const calculatedHmac = crypto
+      .createHmac('sha256', SHOPIFY_CLIENT_SECRET)
+      .update(params)
+      .digest('hex');
+
+    return crypto.timingSafeEqual(
+      Buffer.from(hmac),
+      Buffer.from(calculatedHmac)
+    );
+  };
+
+  const validateShopDomain = (shop: string): boolean => {
+    const shopRegex = /^[a-zA-Z0-9][a-zA-Z0-9\-]*\.myshopify\.com$/;
+    return shopRegex.test(shop);
+  };
+
   useEffect(() => {
-    console.log("🔍 ShopifyCallback lancé !");
-    console.log("📌 Paramètres URL:", Object.fromEntries(searchParams.entries()));
-    console.log("👤 Utilisateur actuel:", user);
-    
     const processAuth = async () => {
       const code = searchParams.get('code');
       const shop = searchParams.get('shop');
       const hmac = searchParams.get('hmac');
 
-      if (!code || !shop || !hmac) {
-        console.error("❌ Paramètres Shopify manquants:", { code, shop, hmac });
+      if (!code || !shop || !hmac || !user) {
         toast.error('Paramètres d\'authentification manquants');
         navigate('/settings');
         return;
       }
 
-      if (!user || !user.uid) {
-        console.error("❌ Utilisateur introuvable ou non connecté !", user);
-        toast.error("Erreur : utilisateur non authentifié");
-        navigate('/login');
+      // Validate shop domain
+      if (!validateShopDomain(shop)) {
+        toast.error('Domaine de boutique invalide');
+        navigate('/settings');
+        return;
+      }
+
+      // Verify HMAC
+      if (!verifyHmac(searchParams, hmac)) {
+        toast.error('Signature HMAC invalide');
+        navigate('/settings');
         return;
       }
 
       setProcessing(true);
-      console.log("✅ Début de l'échange de token avec Shopify...");
-
       try {
-        const response = await fetch(`https://${shop}.myshopify.com/admin/oauth/access_token`, {
+        // Exchange code for access token
+        const tokenResponse = await fetch(`https://${shop}/admin/oauth/access_token`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -54,15 +86,13 @@ export default function ShopifyCallback({ userId, onSuccess }) {
           })
         });
 
-        if (!response.ok) {
-          const errorMessage = await response.text();
-          console.error('❌ Erreur Shopify:', response.status, errorMessage);
-          throw new Error(`Erreur Shopify: ${response.status} - ${errorMessage}`);
+        if (!tokenResponse.ok) {
+          throw new Error('Erreur lors de l\'échange du code');
         }
 
-        const { access_token, scope } = await response.json();
-        console.log("✅ Token reçu:", { access_token, scope });
+        const { access_token, scope } = await tokenResponse.json();
 
+        // Store encrypted token in Firebase
         const userRef = doc(db, 'users', user.uid);
         const encryptedTokens = btoa(JSON.stringify({
           access_token,
@@ -77,11 +107,10 @@ export default function ShopifyCallback({ userId, onSuccess }) {
           'shopifyAuth.shop': shop
         });
 
-        console.log("✅ Shopify connecté avec succès pour l'utilisateur", user.uid);
         toast.success('Compte Shopify connecté avec succès');
         onSuccess();
       } catch (error) {
-        console.error('❌ Erreur lors de l\'échange de token Shopify:', error);
+        console.error('Shopify token exchange error:', error);
         toast.error('Erreur lors de la connexion du compte Shopify');
         navigate('/settings');
       } finally {
