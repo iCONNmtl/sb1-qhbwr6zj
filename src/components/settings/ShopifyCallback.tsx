@@ -5,15 +5,10 @@ import { db } from '../../lib/firebase';
 import { useStore } from '../../store/useStore';
 import toast from 'react-hot-toast';
 
-interface ShopifyCallbackProps {
-  userId: string;
-  onSuccess: () => void;
-}
-
 const SHOPIFY_CLIENT_ID = 'e2b20adf1c1b49a62ec2d42c0c119355';
 const SHOPIFY_CLIENT_SECRET = 'c31a40911d06210a0fd1ff8ca4aa9715';
 
-export default function ShopifyCallback({ userId, onSuccess }: ShopifyCallbackProps) {
+export default function ShopifyCallback({ userId, onSuccess }) {
   const [searchParams] = useSearchParams();
   const [processing, setProcessing] = useState(false);
   const navigate = useNavigate();
@@ -23,17 +18,18 @@ export default function ShopifyCallback({ userId, onSuccess }: ShopifyCallbackPr
     const processAuth = async () => {
       const code = searchParams.get('code');
       const shop = searchParams.get('shop');
+      const hmac = searchParams.get('hmac');
 
-      if (!code || !shop || !user) {
+      if (!code || !shop || !hmac || !user || !user.uid) {
         toast.error('Paramètres d\'authentification manquants');
         navigate('/settings');
         return;
       }
 
       setProcessing(true);
+
       try {
-        // Exchange code for access token
-        const tokenResponse = await fetch(`https://${shop}/admin/oauth/access_token`, {
+        const response = await fetch(`https://${shop}.myshopify.com/admin/oauth/access_token`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -45,13 +41,14 @@ export default function ShopifyCallback({ userId, onSuccess }: ShopifyCallbackPr
           })
         });
 
-        if (!tokenResponse.ok) {
-          throw new Error('Erreur lors de l\'échange du code');
+        if (!response.ok) {
+          const errorMessage = await response.text();
+          console.error('Erreur Shopify:', errorMessage);
+          throw new Error(`Erreur Shopify: ${response.status} - ${errorMessage}`);
         }
 
-        const { access_token, scope } = await tokenResponse.json();
+        const { access_token, scope } = await response.json();
 
-        // Store encrypted token in Firebase
         const userRef = doc(db, 'users', user.uid);
         const encryptedTokens = btoa(JSON.stringify({
           access_token,
