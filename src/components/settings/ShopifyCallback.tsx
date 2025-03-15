@@ -9,9 +9,8 @@ interface ShopifyCallbackProps {
   onSuccess: () => void;
 }
 
-const SHOPIFY_CLIENT_ID = '122db044cf9755d37812d2fdce612493';
-const SHOPIFY_CLIENT_SECRET = 'c322df317ca9f7b525763a743bd9ea6b';
-const REDIRECT_URI = `https://pixmock.com/settings`;
+const SHOPIFY_CLIENT_ID = 'e2b20adf1c1b49a62ec2d42c0c119355';
+const SHOPIFY_CLIENT_SECRET = 'c31a40911d06210a0fd1ff8ca4aa9715';
 
 export default function ShopifyCallback({ userId, onSuccess }: ShopifyCallbackProps) {
   const [searchParams] = useSearchParams();
@@ -21,10 +20,10 @@ export default function ShopifyCallback({ userId, onSuccess }: ShopifyCallbackPr
   useEffect(() => {
     const processAuth = async () => {
       const code = searchParams.get('code');
+      const shop = searchParams.get('shop');
       const state = searchParams.get('state');
-      const storedState = localStorage.getItem('shopify_state');
 
-      if (!code || !state || state !== storedState) {
+      if (!code || !shop || state !== userId) {
         toast.error('Erreur de validation Shopify');
         navigate('/settings');
         return;
@@ -33,7 +32,7 @@ export default function ShopifyCallback({ userId, onSuccess }: ShopifyCallbackPr
       setProcessing(true);
       try {
         // Exchange code for access token
-        const tokenResponse = await fetch('https://accounts.shopify.com/oauth/access_token', {
+        const tokenResponse = await fetch(`https://${shop}/admin/oauth/access_token`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -41,8 +40,7 @@ export default function ShopifyCallback({ userId, onSuccess }: ShopifyCallbackPr
           body: JSON.stringify({
             client_id: SHOPIFY_CLIENT_ID,
             client_secret: SHOPIFY_CLIENT_SECRET,
-            code,
-            redirect_uri: REDIRECT_URI
+            code
           })
         });
 
@@ -50,23 +48,23 @@ export default function ShopifyCallback({ userId, onSuccess }: ShopifyCallbackPr
           throw new Error('Erreur lors de l\'échange du code');
         }
 
-        const { access_token, refresh_token } = await tokenResponse.json();
+        const { access_token, scope } = await tokenResponse.json();
 
-        // Encrypt tokens before storing
+        // Store encrypted token in Firebase
+        const userRef = doc(db, 'users', userId);
         const encryptedTokens = btoa(JSON.stringify({
           access_token,
-          refresh_token,
+          scope,
+          shop,
           created_at: new Date().toISOString()
         }));
 
-        // Update user document with encrypted tokens
-        const userRef = doc(db, 'users', userId);
         await updateDoc(userRef, {
           'shopifyAuth.tokens': encryptedTokens,
-          'shopifyAuth.connectedAt': new Date().toISOString()
+          'shopifyAuth.connectedAt': new Date().toISOString(),
+          'shopifyAuth.shop': shop
         });
 
-        localStorage.removeItem('shopify_state');
         toast.success('Compte Shopify connecté avec succès');
         onSuccess();
       } catch (error) {

@@ -7,6 +7,16 @@ interface ShopifyAuthButtonProps {
   onSuccess: () => void;
 }
 
+const SHOPIFY_CLIENT_ID = 'e2b20adf1c1b49a62ec2d42c0c119355';
+const SCOPES = [
+  'read_customers',
+  'write_customers',
+  'read_orders',
+  'write_orders',
+  'write_products',
+  'read_products'
+].join(',');
+
 export default function ShopifyAuthButton({ userId, onSuccess }: ShopifyAuthButtonProps) {
   const [loading, setLoading] = useState(false);
   const [shopUrl, setShopUrl] = useState('');
@@ -23,13 +33,15 @@ export default function ShopifyAuthButton({ userId, onSuccess }: ShopifyAuthButt
       return;
     }
 
-    // Remove .myshopify.com if user added it
-    const shop = shopUrl.replace('.myshopify.com', '');
-
     setLoading(true);
     try {
-      // Redirect to Shopify OAuth
-      const authUrl = `/shopify-oauth/init?shop=${shop}.myshopify.com&state=${userId}`;
+      // Remove .myshopify.com if user added it
+      const shop = shopUrl.replace('.myshopify.com', '');
+      
+      // Build the Shopify OAuth URL directly
+      const redirectUri = encodeURIComponent('https://pixmock.com/settings');
+      const authUrl = `https://${shop}.myshopify.com/admin/oauth/authorize?client_id=${SHOPIFY_CLIENT_ID}&scope=${SCOPES}&redirect_uri=${redirectUri}&state=${userId}`;
+      
       console.log('Redirecting to:', authUrl);
       window.location.href = authUrl;
     } catch (error) {
