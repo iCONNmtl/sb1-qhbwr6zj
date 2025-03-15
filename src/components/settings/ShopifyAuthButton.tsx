@@ -8,7 +8,7 @@ interface ShopifyAuthButtonProps {
 }
 
 const SHOPIFY_CLIENT_ID = 'e2b20adf1c1b49a62ec2d42c0c119355';
-const REDIRECT_URI = `${window.location.origin}/settings`;
+const REDIRECT_URI = `${window.location.origin}/shopify-oauth/redirect`;
 const SCOPES = [
   'read_customers',
   'write_customers',

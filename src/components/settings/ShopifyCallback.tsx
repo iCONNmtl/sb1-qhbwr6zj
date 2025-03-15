@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
+import { useStore } from '../../store/useStore';
 import toast from 'react-hot-toast';
 
 interface ShopifyCallbackProps {
@@ -16,15 +17,15 @@ export default function ShopifyCallback({ userId, onSuccess }: ShopifyCallbackPr
   const [searchParams] = useSearchParams();
   const [processing, setProcessing] = useState(false);
   const navigate = useNavigate();
+  const { user } = useStore();
 
   useEffect(() => {
     const processAuth = async () => {
       const code = searchParams.get('code');
       const shop = searchParams.get('shop');
-      const state = searchParams.get('state');
 
-      if (!code || !shop || state !== userId) {
-        toast.error('Erreur de validation Shopify');
+      if (!code || !shop || !user) {
+        toast.error('Paramètres d\'authentification manquants');
         navigate('/settings');
         return;
       }
@@ -51,7 +52,7 @@ export default function ShopifyCallback({ userId, onSuccess }: ShopifyCallbackPr
         const { access_token, scope } = await tokenResponse.json();
 
         // Store encrypted token in Firebase
-        const userRef = doc(db, 'users', userId);
+        const userRef = doc(db, 'users', user.uid);
         const encryptedTokens = btoa(JSON.stringify({
           access_token,
           scope,
@@ -79,7 +80,7 @@ export default function ShopifyCallback({ userId, onSuccess }: ShopifyCallbackPr
     if (searchParams.has('code')) {
       processAuth();
     }
-  }, [searchParams, userId, onSuccess, navigate]);
+  }, [searchParams, userId, onSuccess, navigate, user]);
 
   if (processing) {
     return (
