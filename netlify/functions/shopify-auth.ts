@@ -3,8 +3,8 @@ import crypto from 'crypto';
 import fetch from 'node-fetch';
 import { serialize } from 'cookie';
 
-const SHOPIFY_CLIENT_ID = process.env.SHOPIFY_CLIENT_ID;
-const SHOPIFY_CLIENT_SECRET = process.env.SHOPIFY_CLIENT_SECRET;
+const SHOPIFY_CLIENT_ID = 'e2b20adf1c1b49a62ec2d42c0c119355';
+const SHOPIFY_CLIENT_SECRET = 'c31a40911d06210a0fd1ff8ca4aa9715';
 const APP_URL = process.env.APP_URL || 'https://pixmock.com';
 
 // Scopes Shopify
