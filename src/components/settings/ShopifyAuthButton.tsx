@@ -1,22 +1,11 @@
 import React, { useState } from 'react';
 import { ShoppingBag, Loader2 } from 'lucide-react';
-import { doc, updateDoc } from 'firebase/firestore';
-import { db } from '../../lib/firebase';
 import toast from 'react-hot-toast';
 
 interface ShopifyAuthButtonProps {
   userId: string;
   onSuccess: () => void;
 }
-
-const SHOPIFY_CLIENT_ID = '122db044cf9755d37812d2fdce612493';
-const REDIRECT_URI = `https://pixmock.com/settings`;
-const SCOPES = [
-  'read_products',
-  'write_products',
-  'read_orders',
-  'write_orders'
-].join(' ');
 
 export default function ShopifyAuthButton({ userId, onSuccess }: ShopifyAuthButtonProps) {
   const [loading, setLoading] = useState(false);
@@ -39,20 +28,9 @@ export default function ShopifyAuthButton({ userId, onSuccess }: ShopifyAuthButt
 
     setLoading(true);
     try {
-      // Generate a random state for security
-      const state = Math.random().toString(36).substring(7);
-      localStorage.setItem('shopify_state', state);
-
-      // Build the authorization URL
-      const shopifyUrl = new URL(`https://${shop}.myshopify.com/admin/oauth/authorize`);
-      shopifyUrl.searchParams.append('client_id', SHOPIFY_CLIENT_ID);
-      shopifyUrl.searchParams.append('redirect_uri', REDIRECT_URI);
-      shopifyUrl.searchParams.append('scope', SCOPES);
-      shopifyUrl.searchParams.append('state', state);
-      shopifyUrl.searchParams.append('grant_options[]', 'per-user');
-
-      // Redirect to Shopify
-      window.location.href = shopifyUrl.toString();
+      // Build the authorization URL with userId as state parameter
+      const authUrl = `/shopify-oauth/init?shop=${shop}.myshopify.com&state=${userId}`;
+      window.location.href = authUrl;
     } catch (error) {
       console.error('Shopify auth error:', error);
       toast.error('Erreur lors de la connexion à Shopify');
