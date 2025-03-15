@@ -7,6 +7,17 @@ interface ShopifyAuthButtonProps {
   onSuccess: () => void;
 }
 
+const SHOPIFY_CLIENT_ID = 'e2b20adf1c1b49a62ec2d42c0c119355';
+const REDIRECT_URI = `${window.location.origin}/settings`;
+const SCOPES = [
+  'read_customers',
+  'write_customers',
+  'read_orders',
+  'write_orders',
+  'write_products',
+  'read_products'
+].join(',');
+
 export default function ShopifyAuthButton({ userId, onSuccess }: ShopifyAuthButtonProps) {
   const [loading, setLoading] = useState(false);
   const [shopUrl, setShopUrl] = useState('');
@@ -28,8 +39,11 @@ export default function ShopifyAuthButton({ userId, onSuccess }: ShopifyAuthButt
       // Remove .myshopify.com if user added it
       const shop = shopUrl.replace('.myshopify.com', '');
       
-      // Redirect to Netlify function
-      window.location.href = `/shopify-oauth/init?shop=${shop}.myshopify.com&state=${userId}`;
+      // Build the authorization URL
+      const authUrl = `https://${shop}.myshopify.com/admin/oauth/authorize?client_id=${SHOPIFY_CLIENT_ID}&scope=${SCOPES}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
+
+      // Redirect to Shopify
+      window.location.href = authUrl;
     } catch (error) {
       console.error('Shopify auth error:', error);
       toast.error('Erreur lors de la connexion à Shopify');
