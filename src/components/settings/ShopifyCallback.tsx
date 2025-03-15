@@ -24,9 +24,10 @@ export default function ShopifyCallback({ userId, onSuccess }: ShopifyCallbackPr
       const code = searchParams.get('code');
       const shop = searchParams.get('shop');
       const state = searchParams.get('state');
+      const storedState = localStorage.getItem('shopify_state');
 
-      if (!code || !shop || !state || !user) {
-        toast.error('Paramètres d\'authentification manquants');
+      if (!code || !shop || !state || state !== storedState) {
+        toast.error('Paramètres d\'authentification invalides');
         navigate('/settings');
         return;
       }
@@ -61,7 +62,7 @@ export default function ShopifyCallback({ userId, onSuccess }: ShopifyCallbackPr
         const { access_token, scope } = await tokenResponse.json();
 
         // Store encrypted token in Firebase
-        const userRef = doc(db, 'users', user.uid);
+        const userRef = doc(db, 'users', user?.uid || userId);
         const encryptedTokens = btoa(JSON.stringify({
           access_token,
           scope,
@@ -75,6 +76,7 @@ export default function ShopifyCallback({ userId, onSuccess }: ShopifyCallbackPr
           'shopifyAuth.shop': shop
         });
 
+        localStorage.removeItem('shopify_state');
         toast.success('Compte Shopify connecté avec succès');
         onSuccess();
       } catch (error) {
