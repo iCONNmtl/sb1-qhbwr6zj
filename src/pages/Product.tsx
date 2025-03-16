@@ -14,7 +14,6 @@ import type { UserProfile } from '../types/user';
 
 type ProductType = 'art-poster' | 'premium-mat' | 'premium-semigloss' | 'classic-mat' | 'classic-semigloss';
 
-// Groupes de formats similaires
 const SIZE_GROUPS = [
   {
     id: '8x10',
@@ -214,7 +213,6 @@ const SIZE_GROUPS = [
   }
 ];
 
-// Flatten sizes for easy access
 const SIZES = SIZE_GROUPS.flatMap(group => group.sizes);
 
 const PRODUCT_TYPES = {
@@ -250,9 +248,7 @@ interface SizeConfiguration {
   isLocked: boolean;
 }
 
-// Add this helper function at the top level
 const getSimilarSizes = (sizeId: string): string[] => {
-  // Map of similar size groups
   const similarGroups = {
     '8x12': ['12x18', '24x36'],
     '12x18': ['8x12', '24x36'],
@@ -275,6 +271,7 @@ export default function Product() {
   const [loading, setLoading] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [currentSizeId, setCurrentSizeId] = useState<string | null>(null);
+  const [productTitle, setProductTitle] = useState('');
   const [sizeConfigurations, setSizeConfigurations] = useState<SizeConfiguration[]>(
     SIZES.map(size => ({
       size,
@@ -337,7 +334,6 @@ export default function Product() {
       return;
     }
 
-    // Check if there's a similar size that's already configured
     const similarSizes = getSimilarSizes(sizeId);
     const configuredSimilarSize = sizeConfigurations.find(
       config => similarSizes.includes(config.size.id) && config.isLocked
@@ -345,7 +341,6 @@ export default function Product() {
 
     setSizeConfigurations(prev => prev.map(config => {
       if (config.size.id === sizeId) {
-        // If there's a configured similar size, copy its design and validation
         if (configuredSimilarSize) {
           return {
             ...config,
@@ -355,7 +350,6 @@ export default function Product() {
             isValid: true
           };
         }
-        // Otherwise just mark as selected
         return {
           ...config,
           selected: true
@@ -367,8 +361,9 @@ export default function Product() {
   };
 
   const handlePriceChange = (sizeId: string, price: number) => {
+    const roundedPrice = Math.round(price);
     setSizeConfigurations(prev => prev.map(config => 
-      config.size.id === sizeId ? { ...config, price } : config
+      config.size.id === sizeId ? { ...config, price: roundedPrice } : config
     ));
   };
 
@@ -401,6 +396,11 @@ export default function Product() {
       return;
     }
 
+    if (!productTitle.trim()) {
+      toast.error('Veuillez saisir un titre pour le produit');
+      return;
+    }
+
     const selectedConfigs = sizeConfigurations.filter(config => config.selected && config.isLocked);
     if (selectedConfigs.length === 0) {
       toast.error('Veuillez configurer au moins une taille');
@@ -412,15 +412,15 @@ export default function Product() {
       const productId = nanoid();
       const productRef = collection(db, 'products');
       
-      // Get the first configured size's design URL for the product thumbnail
       const firstDesignUrl = selectedConfigs[0].designUrl;
       
       await addDoc(productRef, {
         id: productId,
         userId: user.uid,
         type: productType,
+        title: productTitle.trim(),
         name: product.name,
-        designUrl: firstDesignUrl, // Add the design URL here
+        designUrl: firstDesignUrl,
         variants: selectedConfigs.map(config => ({
           sizeId: config.size.id,
           name: product.name,
@@ -460,7 +460,7 @@ export default function Product() {
         </div>
         <button
           onClick={handleCreateProduct}
-          disabled={loading || !sizeConfigurations.some(config => config.isLocked)}
+          disabled={loading || !sizeConfigurations.some(config => config.isLocked) || !productTitle.trim()}
           className="flex items-center px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition disabled:opacity-50"
         >
           {loading ? (
@@ -477,8 +477,20 @@ export default function Product() {
         </button>
       </div>
 
+      <div className="bg-white rounded-xl shadow-sm p-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          Titre du produit
+        </h2>
+        <input
+          type="text"
+          value={productTitle}
+          onChange={(e) => setProductTitle(e.target.value)}
+          placeholder="Ex: Affiche Minimaliste Nature"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+        />
+      </div>
+
       <div className="grid grid-cols-3 gap-8">
-        {/* Size Groups */}
         <div className="col-span-1 space-y-4">
           {SIZE_GROUPS.map(group => (
             <div 
@@ -538,7 +550,7 @@ export default function Product() {
                                   value={config.price}
                                   onChange={(e) => handlePriceChange(size.id, Number(e.target.value))}
                                   min={size.cost}
-                                  step={0.01}
+                                  step={1}
                                   className={clsx(
                                     'w-20 px-2 py-1 text-right border rounded',
                                     config.price < size.cost
@@ -563,7 +575,6 @@ export default function Product() {
           ))}
         </div>
 
-        {/* Configuration Panel */}
         <div className="col-span-2">
           {currentSize ? (
             <div className="bg-white rounded-xl shadow-sm p-6">
@@ -598,7 +609,6 @@ export default function Product() {
                     </div>
                   </div>
 
-                  {/* Design Rights Disclaimer */}
                   <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
                     <div className="flex items-start gap-3">
                       <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
@@ -632,7 +642,6 @@ export default function Product() {
                   </h3>
                   <div className="bg-gray-50 rounded-xl p-6">
                     <div className="grid grid-cols-3 gap-6">
-                      {/* Prix d'achat */}
                       <div>
                         <div className="text-sm text-gray-500 mb-1">Prix d'achat</div>
                         <div className="text-2xl font-semibold text-gray-900">
@@ -640,7 +649,6 @@ export default function Product() {
                         </div>
                       </div>
 
-                      {/* Prix de vente */}
                       <div>
                         <div className="text-sm text-gray-500 mb-1">Prix de vente</div>
                         <input
@@ -648,7 +656,7 @@ export default function Product() {
                           value={currentConfig?.price || currentSize.suggestedPrice}
                           onChange={(e) => handlePriceChange(currentSize.id, Number(e.target.value))}
                           min={currentSize.cost}
-                          step={0.01}
+                          step={1}
                           className={clsx(
                             'w-full px-3 py-2 text-2xl font-semibold border rounded-lg',
                             (currentConfig?.price || 0) < currentSize.cost
@@ -658,7 +666,6 @@ export default function Product() {
                         />
                       </div>
 
-                      {/* Bénéfice */}
                       <div>
                         <div className="text-sm text-gray-500 mb-1">Bénéfice</div>
                         <div className={clsx(

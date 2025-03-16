@@ -14,6 +14,7 @@ interface Product {
   id: string;
   firestoreId: string;
   type: string;
+  title: string;
   name: string;
   designUrl: string;
   variants: {
@@ -22,7 +23,6 @@ interface Product {
     price: number;
     cost: number;
     sku: string;
-    designUrl: string;
     dimensions: {
       cm: string;
       inches: string;
@@ -152,7 +152,7 @@ export default function MyProducts() {
                   <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
                     <ImageLoader
                       src={product.designUrl}
-                      alt={product.name}
+                      alt={product.title || product.name}
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -160,10 +160,10 @@ export default function MyProducts() {
                   {/* Product Info */}
                   <div className="flex-1 min-w-0">
                     <h3 className="font-medium text-gray-900">
-                      {product.name}
+                      {product.title || product.name}
                     </h3>
                     <div className="text-sm text-gray-500">
-                      {product.variants.length} taille{product.variants.length > 1 ? 's' : ''} • 
+                      {product.type} • {product.variants.length} taille{product.variants.length > 1 ? 's' : ''} • 
                       Créé le {new Date(product.createdAt).toLocaleDateString()}
                     </div>
                   </div>
@@ -255,7 +255,7 @@ export default function MyProducts() {
                                 Design
                               </div>
                               <a
-                                href={variant.designUrl}
+                                href={product.designUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-colors"
