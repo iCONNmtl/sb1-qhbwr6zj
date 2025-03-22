@@ -15,27 +15,39 @@ import { AnimatedTooltip } from '../components/ui/animated-tooltip';
 const USERS = [
   {
     id: 1,
-    name: "Sophie M.",
+    name: "Sylvain P.",
     designation: "7,600€/mois",
-    image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8YXZhdGFyfGVufDB8fDB8fHww&auto=format&fit=crop&w=800&q=60",
+    image: "https://d2v7vpg8oce97p.cloudfront.net/Branding/AHome1.webp",
   },
   {
     id: 2,
-    name: "Marc D.",
+    name: "Julie L.",
     designation: "4,900€/mois",
-    image: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YXZhdGFyfGVufDB8fDB8fHww&auto=format&fit=crop&w=800&q=60",
+    image: "https://d2v7vpg8oce97p.cloudfront.net/Branding/AHome2.webp",
   },
   {
     id: 3,
-    name: "Julie L.",
+    name: "Marc D.",
     designation: "12,300€/mois",
-    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fGF2YXRhcnxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=800&q=60",
+    image: "https://d2v7vpg8oce97p.cloudfront.net/Branding/AHome3.webp",
   },
   {
     id: 4,
-    name: "Thomas R.",
+    name: "Marine R.",
     designation: "9,800€/mois",
-    image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=3540&q=80",
+    image: "https://d2v7vpg8oce97p.cloudfront.net/Branding/AHome4.webp",
+  },
+  {
+    id: 5,
+    name: "Tom B.",
+    designation: "12,300€/mois",
+    image: "https://d2v7vpg8oce97p.cloudfront.net/Branding/AHome5.webp",
+  },
+  {
+    id: 6,
+    name: "Lisa M.",
+    designation: "9,800€/mois",
+    image: "https://d2v7vpg8oce97p.cloudfront.net/Branding/AHome6.webp",
   }
 ];
 
@@ -64,7 +76,7 @@ export default function Home() {
             <div className="flex flex-col items-center gap-4">
               <AnimatedTooltip items={USERS} />
               <p className="text-sm text-gray-600">
-                Déjà plus de <span className="font-semibold text-indigo-600">300</span> utilisateurs ont lancé leur business grâce à Pixmock
+                Déjà plus de <span className="font-semibold text-indigo-600">250</span> utilisateurs ont lancé leur business grâce à Pixmock
               </p>
             </div>
 
