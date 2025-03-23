@@ -157,23 +157,6 @@ export default function Products() {
         </div>
       </div>
 
-            {/* Benefits Section */}
-            <div className="grid md:grid-cols-3 gap-8">
-        {BENEFITS.map((benefit, index) => {
-          const Icon = benefit.icon;
-          return (
-            <div key={index} className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                {benefit.title}
-              </h3>
-              <p className="text-gray-600">
-                {benefit.description}
-              </p>
-            </div>
-          );
-        })}
-      </div>
-
       {/* Worldwide Shipping Section */}
       <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl p-8 sm:p-12 text-white">
         <div className="text-center mb-12">
