@@ -10,7 +10,7 @@ export default function CustomMockupInstructions() {
           Comment créer votre mockup ?
         </h2>
         <p className="mt-1 text-sm text-gray-500">
-          Suivez ces instructions pour créer votre propre mockup personnalisé
+          Suivez ces instructions pour configurer votre propre mockup personnalisé
         </p>
       </div>
 
@@ -30,23 +30,19 @@ export default function CustomMockupInstructions() {
               <ul className="text-sm text-gray-600 space-y-2">
                 <li className="flex items-center">
                   <span className="w-2 h-2 bg-indigo-600 rounded-full mr-2"></span>
-                  Taille recommandée : 3000x2000px
+                  Format PSD
                 </li>
                 <li className="flex items-center">
                   <span className="w-2 h-2 bg-indigo-600 rounded-full mr-2"></span>
-                  Résolution : 300 DPI
+                  Taille recommandée : 2000x2000px
                 </li>
                 <li className="flex items-center">
                   <span className="w-2 h-2 bg-indigo-600 rounded-full mr-2"></span>
-                  Mode couleur : RGB
+                  Smart Object nommé "Design" avec fond blanc
                 </li>
                 <li className="flex items-center">
                   <span className="w-2 h-2 bg-indigo-600 rounded-full mr-2"></span>
-                  Smart Object nommé "Design"
-                </li>
-                <li className="flex items-center">
-                  <span className="w-2 h-2 bg-indigo-600 rounded-full mr-2"></span>
-                  Calques organisés en groupes
+                  Arrière plan nommé "Background"
                 </li>
               </ul>
             </div>

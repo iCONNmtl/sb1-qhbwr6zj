@@ -15,9 +15,7 @@ const FORMATS = [
     icon: FileImage,
     description: 'Format optimisé pour le web',
     features: [
-      'Meilleure compression',
-      'Qualité optimale',
-      'Taille réduite'
+      'Meilleure compression'
     ],
     recommended: true
   },
@@ -27,9 +25,7 @@ const FORMATS = [
     icon: FileImage,
     description: 'Format universel',
     features: [
-      'Compatible partout',
-      'Sans perte de qualité',
-      'Transparence supportée'
+      'Compatible partout'
     ]
   }
 ];

@@ -28,7 +28,7 @@ const USERS = [
   {
     id: 3,
     name: "Marc D.",
-    designation: "12,300€/mois",
+    designation: "1,300€/mois",
     image: "https://d2v7vpg8oce97p.cloudfront.net/Branding/AHome3.webp",
   },
   {
@@ -46,7 +46,7 @@ const USERS = [
   {
     id: 6,
     name: "Lisa M.",
-    designation: "9,800€/mois",
+    designation: "6,500€/mois",
     image: "https://d2v7vpg8oce97p.cloudfront.net/Branding/AHome6.webp",
   }
 ];
@@ -68,7 +68,7 @@ export default function Home() {
               en quelques clics !
             </h1>
             <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto">
-              La plateforme de print on demand la plus complète pour créer et gérer votre business d'affiches.
+              La plateforme de print on demand pour créer et gérer votre business d'affiches de A à Z.
             </p>
           </div>
 

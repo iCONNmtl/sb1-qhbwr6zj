@@ -295,7 +295,7 @@ export default function MockupGenerator() {
 
             <Link
               to="/custom-mockup"
-              className="flex items-center px-4 py-2 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors"
+              className="flex items-center px-4 py-2 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 border border-indigo-600 rounded-lg transition-colors"
             >
               <Plus className="h-5 w-5 mr-2" />
               <span>Ajouter votre mockup</span>
