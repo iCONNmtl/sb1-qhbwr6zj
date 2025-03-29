@@ -160,7 +160,7 @@ function PriceComparison() {
           <table className="w-full min-w-[640px]">
             <thead>
               <tr>
-                <th className="text-left py-4 px-3 sm:px-4 bg-gray-50 rounded-tl-xl sticky left-0 z-10 bg-white">
+                <th className="text-left py-4 px-3 sm:px-4 bg-gray-50 rounded-tl-xl sticky left-0 z-10 bg-white/5 backdrop-blur-sm">
                   <div className="font-semibold text-gray-900">Format</div>
                   <div className="text-sm text-gray-500">Dimensions</div>
                 </th>
@@ -179,7 +179,7 @@ function PriceComparison() {
 
                 return (
                   <tr key={size.id} className="hover:bg-gray-50">
-                    <td className="py-4 px-3 sm:px-4 sticky left-0 bg-white">
+                    <td className="py-4 px-3 sm:px-4 sticky left-0 bg-white/5 backdrop-blur-sm">
                       <div className="font-medium text-gray-900">{size.dimensions.inches}</div>
                       <div className="text-sm text-gray-500">{size.dimensions.cm}</div>
                     </td>
@@ -395,11 +395,6 @@ export default function Products() {
         </div>
       </div>
 
-       {/* Price Comparison */}
-       <div className="px-4 sm:px-0">
-        <PriceComparison />
-      </div>
-
       {/* Worldwide Shipping Section */}
       <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl p-8 sm:p-12 text-white">
         <div className="text-center mb-12">
@@ -412,26 +407,10 @@ export default function Products() {
           </p>
         </div>
 
-        <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-6">
-          {SHIPPING_COUNTRIES.map((country) => (
-            <div key={country.name} className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
-              <div className="flex items-center gap-3 mb-3">
-                <span className="text-2xl">{country.icon}</span>
-                <h3 className="font-medium text-lg">{country.name}</h3>
-              </div>
-              <div className="space-y-1 text-sm text-white/90">
-                <div className="flex items-center gap-2">
-                  <Truck className="h-4 w-4" />
-                  <span>{country.time}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Package className="h-4 w-4" />
-                  <span>{country.price.toFixed(2)}€</span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+        {/* Price Comparison */}
+       <div className="px-4 sm:px-0">
+        <PriceComparison />
+      </div>
 
         {/* Shipping Features */}
         <div className="grid md:grid-cols-3 gap-8 mt-12">
@@ -457,11 +436,11 @@ export default function Products() {
             </p>
           </div>
         </div>
-
-        {/* FAQ Section */}
-      <div className="px-4 sm:px-0">
-        <FAQ />
       </div>
+
+       {/* FAQ Section */}
+       <div className="px-4 sm:px-0">
+        <FAQ />
       </div>
     </div>
   );
