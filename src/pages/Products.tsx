@@ -160,14 +160,13 @@ function PriceComparison() {
           <table className="w-full min-w-[640px]">
             <thead>
               <tr>
-                <th className="text-left py-4 px-3 sm:px-4 bg-gray-50 rounded-tl-xl sticky left-0 z-10 bg-white/5 backdrop-blur-sm">
+                <th className="text-left py-4 px-3 sm:px-4 rounded-tl-xl sticky left-0 z-10 bg-white/5 backdrop-blur-sm">
                   <div className="font-semibold text-gray-900">Format</div>
                   <div className="text-sm text-gray-500">Dimensions</div>
                 </th>
                 {PRODUCTS.map(product => (
                   <th key={product.id} className="px-3 sm:px-4 py-4 bg-gray-50 text-center">
                     <div className="font-semibold text-gray-900">{product.name}</div>
-                    <div className="text-xs sm:text-sm text-gray-500 line-clamp-2">{product.description}</div>
                   </th>
                 ))}
               </tr>
@@ -187,8 +186,6 @@ function PriceComparison() {
                       const basePrice = continentPricing.price * (index === 0 ? 1 : 1.2);
                       const shippingPrice = continentPricing.shipping.basePrice;
                       const totalPrice = basePrice + shippingPrice;
-                      const profit = totalPrice - size.cost - shippingPrice;
-                      const profitPercentage = (profit / totalPrice) * 100;
                       
                       return (
                         <td key={product.id} className="py-4 px-3 sm:px-4">
@@ -200,9 +197,6 @@ function PriceComparison() {
                               <div className="flex items-center gap-1 text-gray-500">
                                 <Truck className="h-4 w-4" />
                                 <span>+{shippingPrice.toFixed(2)}€</span>
-                              </div>
-                              <div className="text-green-600 font-medium">
-                                +{profit.toFixed(2)}€ ({Math.round(profitPercentage)}%)
                               </div>
                             </div>
                           </div>
