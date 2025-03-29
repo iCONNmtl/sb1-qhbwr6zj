@@ -3,7 +3,7 @@ import { useStore } from '../store/useStore';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { Link } from 'react-router-dom';
-import { Plus, Ruler, ChevronDown } from 'lucide-react';
+import { Plus, Ruler, ChevronDown, Info } from 'lucide-react';
 import clsx from 'clsx';
 import toast from 'react-hot-toast';
 
@@ -97,6 +97,48 @@ const SIZE_GROUPS = [
     name: '28x40"',
     description: '70x100cm',
     similar: ['A4', '5x7', '20x28']
+  },
+  {
+    id: '16:9',
+    name: 'Paysage 16:9',
+    description: 'Format écran large',
+    similar: ['3:2', '4:3']
+  },
+  {
+    id: '3:2',
+    name: 'Paysage 3:2',
+    description: 'Format photo standard',
+    similar: ['16:9', '4:3']
+  },
+  {
+    id: '4:3',
+    name: 'Paysage 4:3',
+    description: 'Format classique',
+    similar: ['16:9', '3:2']
+  },
+  {
+    id: '1:1',
+    name: 'Carré 1:1',
+    description: 'Format carré',
+    similar: []
+  },
+  {
+    id: '9:16',
+    name: 'Portrait 16:9',
+    description: 'Format vertical écran',
+    similar: ['2:3', '3:4']
+  },
+  {
+    id: '2:3',
+    name: 'Portrait 3:2',
+    description: 'Format photo vertical',
+    similar: ['9:16', '3:4']
+  },
+  {
+    id: '3:4',
+    name: 'Portrait 4:3',
+    description: 'Format classique vertical',
+    similar: ['9:16', '2:3']
   }
 ];
 
@@ -205,12 +247,12 @@ export default function MockupGenerator() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 md:space-y-8">
       {isGenerating && <GenerationProgress totalMockups={selectedMockups.length} />}
 
       {/* Design Selection */}
       <section>
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">
+        <h2 className="text-xl font-semibold text-gray-900 mb-4 px-4 md:px-0">
           1. Choisissez votre design
         </h2>
         <DesignUploader
@@ -224,18 +266,20 @@ export default function MockupGenerator() {
 
       {/* Mockup Selection */}
       <section className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-4 md:px-0">
           <h2 className="text-xl font-semibold text-gray-900">
             2. Sélectionnez vos mockups
           </h2>
-          <div className="flex items-center gap-4">
-            <div className="relative">
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="relative flex-1 md:flex-none">
               <button
                 onClick={() => setShowSizeDropdown(!showSizeDropdown)}
-                className="flex items-center px-4 py-2 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 border border-indigo-600 rounded-lg transition-colors"
+                className="w-full md:w-auto flex items-center px-4 py-2 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors"
               >
                 <Ruler className="h-5 w-5 mr-2" />
-                {selectedSize === 'all' ? 'Toutes les tailles' : SIZE_GROUPS.find(g => g.id === selectedSize)?.name}
+                <span className="flex-1 text-left">
+                  {selectedSize === 'all' ? 'Toutes les tailles' : SIZE_GROUPS.find(g => g.id === selectedSize)?.name}
+                </span>
                 <ChevronDown className={clsx(
                   "h-5 w-5 ml-2 transition-transform",
                   showSizeDropdown && "transform rotate-180"
@@ -244,7 +288,7 @@ export default function MockupGenerator() {
 
               {/* Size Dropdown */}
               {showSizeDropdown && (
-                <div className="absolute z-50 mt-2 w-72 bg-white rounded-xl shadow-lg border border-gray-200 py-2">
+                <div className="absolute z-50 mt-2 w-full md:w-72 bg-white rounded-xl shadow-lg border border-gray-200 py-2">
                   <button
                     onClick={() => handleSizeChange('all')}
                     className={clsx(
@@ -295,32 +339,29 @@ export default function MockupGenerator() {
 
             <Link
               to="/custom-mockup"
-              className="flex items-center px-4 py-2 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 border border-indigo-600 rounded-lg transition-colors"
+              className="flex items-center px-4 py-2 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors whitespace-nowrap"
             >
               <Plus className="h-5 w-5 mr-2" />
               <span>Ajouter votre mockup</span>
             </Link>
-            {userProfile && (
-              <div className="text-sm text-gray-600">
-                {selectedMockups.length} mockup{selectedMockups.length > 1 ? 's' : ''} sélectionné{selectedMockups.length > 1 ? 's' : ''}
-              </div>
-            )}
           </div>
         </div>
 
         <div className="space-y-4">
-          {/* Category Filter */}
-          <div className="flex space-x-4 overflow-x-auto pb-2">
-            {categories.map((category) => (
-              <CategoryCount
-                key={category.id}
-                category={category}
-                mockups={mockups}
-                favorites={favorites}
-                isSelected={selectedCategory === category.id}
-                onClick={() => handleCategoryChange(category.id)}
-              />
-            ))}
+          {/* Category Filter - Scrollable on mobile */}
+          <div className="overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0">
+            <div className="flex space-x-4 min-w-max md:min-w-0 md:flex-wrap md:gap-4">
+              {categories.map((category) => (
+                <CategoryCount
+                  key={category.id}
+                  category={category}
+                  mockups={mockups}
+                  favorites={favorites}
+                  isSelected={selectedCategory === category.id}
+                  onClick={() => handleCategoryChange(category.id)}
+                />
+              ))}
+            </div>
           </div>
         </div>
 
@@ -330,25 +371,29 @@ export default function MockupGenerator() {
             <p className="mt-4 text-gray-500">Chargement des mockups...</p>
           </div>
         ) : filteredMockups.length === 0 ? (
-          <div className="text-center py-12 text-gray-500">
+          <div className="text-center py-12 text-gray-500 px-4">
             {selectedCategory === 'favorites' ? 'Aucun favori' : 'Aucun mockup disponible'}
           </div>
         ) : (
           <>
-            <MockupGrid
-              mockups={currentMockups}
-              selectedMockups={selectedMockups}
-              favorites={favorites}
-              userId={user?.uid || ''}
-              onSelect={handleMockupSelection}
-            />
+            <div className="px-4 md:px-0">
+              <MockupGrid
+                mockups={currentMockups}
+                selectedMockups={selectedMockups}
+                favorites={favorites}
+                userId={user?.uid || ''}
+                onSelect={handleMockupSelection}
+              />
+            </div>
             
             {totalPages > 1 && (
-              <MockupPagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-              />
+              <div className="px-4 md:px-0">
+                <MockupPagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={setCurrentPage}
+                />
+              </div>
             )}
           </>
         )}
@@ -356,7 +401,7 @@ export default function MockupGenerator() {
 
       {/* Text Customization */}
       {selectedMockups.length > 0 && (
-        <section>
+        <section className="px-4 md:px-0">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">
             3. Personnalisez votre texte
           </h2>
@@ -381,7 +426,7 @@ export default function MockupGenerator() {
       )}
 
       {/* Export Format */}
-      <section>
+      <section className="px-4 md:px-0">
         <h2 className="text-xl font-semibold text-gray-900 mb-4">
           {selectedMockups.length > 0 ? '4' : '3'}. Choisissez le format d'export
         </h2>
@@ -391,17 +436,22 @@ export default function MockupGenerator() {
         />
       </section>
 
-      {/* Generation Footer */}
-      <GenerationFooter
-        userProfile={userProfile}
-        selectedMockups={selectedMockups}
-        isGenerating={isGenerating}
-        onGenerate={handleGenerate}
-        designFile={designFile}
-        designUrl={designUrl}
-        isTextCustomizationEnabled={isTextCustomizationEnabled}
-        customizedMockups={customizedMockups}
-      />
+      {/* Generation Footer - Fixed on mobile */}
+      <div className="fixed bottom-0 left-0 right-0 md:relative bg-white border-t border-gray-200 md:border-0 px-4 py-4 md:p-0">
+        <GenerationFooter
+          userProfile={userProfile}
+          selectedMockups={selectedMockups}
+          isGenerating={isGenerating}
+          onGenerate={handleGenerate}
+          designFile={designFile}
+          designUrl={designUrl}
+          isTextCustomizationEnabled={isTextCustomizationEnabled}
+          customizedMockups={customizedMockups}
+        />
+      </div>
+
+      {/* Spacer for fixed footer on mobile */}
+      <div className="h-24 md:h-0" />
     </div>
   );
 }

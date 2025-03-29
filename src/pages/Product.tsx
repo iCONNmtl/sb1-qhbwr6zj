@@ -149,9 +149,9 @@ const SIZE_GROUPS = [
     ]
   },
   {
-    id: 'standard',
-    name: 'Formats standards',
-    description: 'Formats internationaux courants',
+    id: 'a-series',
+    name: 'Formats A (ISO 216)',
+    description: 'Formats standards internationaux',
     sizes: [
       {
         id: 'A4',
@@ -167,6 +167,69 @@ const SIZE_GROUPS = [
         cost: 7,
         suggestedPrice: 18
       },
+      {
+        id: 'A3',
+        name: 'A3',
+        dimensions: {
+          inches: 'A3',
+          cm: '29,7x42cm'
+        },
+        recommendedSize: {
+          width: 3508,
+          height: 4961
+        },
+        cost: 12,
+        suggestedPrice: 25
+      },
+      {
+        id: 'A2',
+        name: 'A2',
+        dimensions: {
+          inches: 'A2',
+          cm: '42x59,4cm'
+        },
+        recommendedSize: {
+          width: 4961,
+          height: 7016
+        },
+        cost: 20,
+        suggestedPrice: 35
+      },
+      {
+        id: 'A1',
+        name: 'A1',
+        dimensions: {
+          inches: 'A1',
+          cm: '59,4x84,1cm'
+        },
+        recommendedSize: {
+          width: 7016,
+          height: 9933
+        },
+        cost: 30,
+        suggestedPrice: 50
+      },
+      {
+        id: 'A0',
+        name: 'A0',
+        dimensions: {
+          inches: 'A0',
+          cm: '84,1x118,9cm'
+        },
+        recommendedSize: {
+          width: 9933,
+          height: 14043
+        },
+        cost: 45,
+        suggestedPrice: 75
+      }
+    ]
+  },
+  {
+    id: 'standard',
+    name: 'Autres formats standards',
+    description: 'Formats courants',
+    sizes: [
       {
         id: '5x7',
         name: '5x7"',
@@ -213,8 +276,6 @@ const SIZE_GROUPS = [
   }
 ];
 
-const SIZES = SIZE_GROUPS.flatMap(group => group.sizes);
-
 const PRODUCT_TYPES = {
   'art-poster': {
     name: 'Poster d\'Art',
@@ -253,7 +314,11 @@ const getSimilarSizes = (sizeId: string): string[] => {
     '8x12': ['12x18', '24x36'],
     '12x18': ['8x12', '24x36'],
     '24x36': ['8x12', '12x18'],
-    'A4': ['5x7', '20x28', '28x40'],
+    'A4': ['5x7', '20x28', '28x40', 'A3'],
+    'A3': ['A4', 'A2'],
+    'A2': ['A3', 'A1'],
+    'A1': ['A2', 'A0'],
+    'A0': ['A1'],
     '5x7': ['A4', '20x28', '28x40'],
     '20x28': ['A4', '5x7', '28x40'],
     '28x40': ['A4', '5x7', '20x28']
@@ -261,6 +326,8 @@ const getSimilarSizes = (sizeId: string): string[] => {
 
   return similarGroups[sizeId as keyof typeof similarGroups] || [];
 };
+
+const SIZES = SIZE_GROUPS.flatMap(group => group.sizes);
 
 export default function Product() {
   const [searchParams] = useSearchParams();

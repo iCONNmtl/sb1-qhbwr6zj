@@ -370,19 +370,17 @@ export default function ProductDetails() {
       <div className="bg-white rounded-2xl shadow-sm p-8">
         <div className="flex items-center gap-3 mb-8">
           <div className="p-2 bg-indigo-100 rounded-lg">
-            <Truck className="h-5 w-5 text-indigo-600" />
+            <Info className="h-5 w-5 text-indigo-600" />
           </div>
           <h2 className="text-xl font-semibold text-gray-900">
-            Informations de livraison
+            Informations importantes
           </h2>
         </div>
 
         {/* Shipping Notes */}
         <div className="mt-8 p-4 bg-indigo-50 rounded-xl">
           <div className="flex items-start gap-3">
-            <Info className="h-5 w-5 text-indigo-600 mt-0.5" />
             <div className="text-sm text-indigo-900">
-              <p className="font-medium mb-2">Informations importantes</p>
               <ul className="space-y-1 list-disc pl-4">
                 <li>Tous les envois sont effectués via des transporteurs express</li>
                 <li>Suivi en ligne disponible pour toutes les commandes</li>
