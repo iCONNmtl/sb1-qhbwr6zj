@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Package, Globe2, Truck, Shield, Star, Zap, CheckCircle, Image, DollarSign, Crown, Users, Info, ChevronRight, Plus, ChevronDown, ChevronUp } from 'lucide-react';
-import { CONTINENTS } from '../data/shipping';
-import { SIZES, SIZE_PRICING } from '../data/sizes';
+import { CONTINENTS, PRODUCT_PRICING } from '../data/shipping';
+import { SIZES } from '../data/sizes';
 import clsx from 'clsx';
 
 const PRODUCTS = [
@@ -125,7 +125,7 @@ function PriceComparison() {
         Comparaison des prix par région
       </h2>
 
-      {/* Region Selector - Scrollable on mobile */}
+      {/* Region Selector */}
       <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 pb-4 mb-4">
         <div className="flex gap-2 sm:gap-4 min-w-max sm:min-w-0 sm:flex-wrap">
           {Object.entries(CONTINENTS).map(([code, continent]) => (
@@ -153,59 +153,64 @@ function PriceComparison() {
         </div>
       </div>
 
-      {/* Price Table - Responsive with horizontal scroll */}
+      {/* Price Table */}
       <div className="relative">
         <div className="absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none sm:hidden" />
         <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
           <table className="w-full min-w-[640px]">
             <thead>
               <tr>
-                <th className="text-left py-4 px-3 sm:px-4 rounded-tl-xl sticky left-0 z-10 bg-white/5 backdrop-blur-sm">
+                <th className="text-left py-4 px-3 sm:px-4 bg-gray-50 rounded-tl-xl sticky left-0 z-10 bg-white">
                   <div className="font-semibold text-gray-900">Format</div>
                   <div className="text-sm text-gray-500">Dimensions</div>
                 </th>
-                {PRODUCTS.map(product => (
-                  <th key={product.id} className="px-3 sm:px-4 py-4 bg-gray-50 text-center">
-                    <div className="font-semibold text-gray-900">{product.name}</div>
+                {Object.entries(PRODUCT_PRICING).map(([productId, product]) => (
+                  <th key={productId} className="px-3 sm:px-4 py-4 bg-gray-50 text-center">
+                    <div className="font-semibold text-gray-900">
+                      {productId === 'art-poster' ? 'Poster d\'Art' :
+                       productId === 'premium-mat' ? 'Poster Premium Mat' :
+                       'Poster Premium Semi-Brillant'}
+                    </div>
                   </th>
                 ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {SIZES.map((size) => {
-                const pricing = SIZE_PRICING[size.id];
-                const continentPricing = pricing.continents[selectedRegion];
+              {SIZES.map((size) => (
+                <tr key={size.id} className="hover:bg-gray-50">
+                  <td className="py-4 px-3 sm:px-4 sticky left-0 bg-white">
+                    <div className="font-medium text-gray-900">{size.dimensions.inches}</div>
+                    <div className="text-sm text-gray-500">{size.dimensions.cm}</div>
+                  </td>
+                  {Object.entries(PRODUCT_PRICING).map(([productId, product]) => {
+                    const pricing = product.sizes[size.id]?.[selectedRegion];
+                    if (!pricing) return <td key={productId} className="py-4 px-3 sm:px-4 text-center">-</td>;
 
-                return (
-                  <tr key={size.id} className="hover:bg-gray-50">
-                    <td className="py-4 px-3 sm:px-4 sticky left-0 bg-white/5 backdrop-blur-sm">
-                      <div className="font-medium text-gray-900">{size.dimensions.inches}</div>
-                      <div className="text-sm text-gray-500">{size.dimensions.cm}</div>
-                    </td>
-                    {PRODUCTS.map((product, index) => {
-                      const basePrice = continentPricing.price * (index === 0 ? 1 : 1.2);
-                      const shippingPrice = continentPricing.shipping.basePrice;
-                      const totalPrice = basePrice + shippingPrice;
-                      
-                      return (
-                        <td key={product.id} className="py-4 px-3 sm:px-4">
-                          <div className="text-center space-y-2">
-                            <div className="text-lg font-semibold text-gray-900">
-                              {totalPrice.toFixed(2)}€
+                    const totalPrice = pricing.price + pricing.shipping.basePrice;
+                    const profit = totalPrice - size.cost - pricing.shipping.basePrice;
+                    const profitPercentage = (profit / totalPrice) * 100;
+
+                    return (
+                      <td key={productId} className="py-4 px-3 sm:px-4">
+                        <div className="text-center space-y-2">
+                          <div className="text-lg font-semibold text-gray-900">
+                            {totalPrice.toFixed(2)}€
+                          </div>
+                          <div className="flex flex-col items-center gap-1 text-sm">
+                            <div className="flex items-center gap-1 text-gray-500">
+                              <Truck className="h-4 w-4" />
+                              <span>+{pricing.shipping.basePrice.toFixed(2)}€</span>
                             </div>
-                            <div className="flex flex-col items-center gap-1 text-sm">
-                              <div className="flex items-center gap-1 text-gray-500">
-                                <Truck className="h-4 w-4" />
-                                <span>+{shippingPrice.toFixed(2)}€</span>
-                              </div>
+                            <div className="text-green-600 font-medium">
+                              +{profit.toFixed(2)}€ ({Math.round(profitPercentage)}%)
                             </div>
                           </div>
-                        </td>
-                      );
-                    })}
-                  </tr>
-                );
-              })}
+                        </div>
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

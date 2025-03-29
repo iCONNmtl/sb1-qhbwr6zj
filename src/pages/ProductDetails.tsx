@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Settings, ArrowRight, Truck, Package, Shield, Globe2, Info, Clock } from 'lucide-react';
-import { SIZES, SIZE_PRICING } from '../data/sizes';
-import { CONTINENTS } from '../data/shipping';
+import { SIZES } from '../data/sizes';
+import { CONTINENTS, PRODUCT_PRICING, getProductPricing } from '../data/shipping';
 import clsx from 'clsx';
 
 const PRODUCTS = {
@@ -58,34 +58,11 @@ const PRODUCTS = {
 
 type ProductId = keyof typeof PRODUCTS;
 
-function calculateProfit(size: typeof SIZES[0], continentCode: string): {
-  profit: number;
-  profitPercentage: number;
-  totalPrice: number;
-} {
-  const pricing = SIZE_PRICING[size.id];
-  const continentPricing = pricing.continents[continentCode];
-  
-  // Calculate total price including shipping
-  const totalPrice = continentPricing.price + continentPricing.shipping.basePrice;
-  
-  // Calculate profit (selling price - cost - shipping)
-  const profit = totalPrice - size.cost - continentPricing.shipping.basePrice;
-  
-  // Calculate profit percentage
-  const profitPercentage = (profit / totalPrice) * 100;
-  
-  return {
-    profit,
-    profitPercentage,
-    totalPrice
-  };
-}
-
 export default function ProductDetails() {
   const { id } = useParams<{ id: string }>();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [selectedContinent, setSelectedContinent] = useState('europe');
+  const [selectedRegion, setSelectedRegion] = useState('europe');
+  const continent = CONTINENTS[selectedRegion];
 
   if (!id || !PRODUCTS[id as ProductId]) {
     return (
@@ -107,6 +84,17 @@ export default function ProductDetails() {
   const prevImage = () => {
     setCurrentImageIndex((prev) => (prev - 1 + product.images.length) % product.images.length);
   };
+
+  // Calculate pricing for each size
+  const sizePricing = SIZES.map(size => {
+    const pricing = getProductPricing(id || '', size.id, selectedRegion);
+    return {
+      size,
+      pricing,
+      profit: pricing ? pricing.total - size.cost - pricing.shipping.basePrice : 0,
+      profitPercentage: pricing ? ((pricing.total - size.cost - pricing.shipping.basePrice) / pricing.total) * 100 : 0
+    };
+  });
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-12">
@@ -236,10 +224,10 @@ export default function ProductDetails() {
                 return (
                   <button
                     key={code}
-                    onClick={() => setSelectedContinent(code)}
+                    onClick={() => setSelectedRegion(code)}
                     className={clsx(
                       'p-6 rounded-xl border-2 transition-all duration-200 w-full',
-                      selectedContinent === code
+                      selectedRegion === code
                         ? 'border-indigo-600 bg-indigo-50'
                         : 'border-gray-200 hover:border-gray-300'
                     )}
@@ -320,7 +308,7 @@ export default function ProductDetails() {
           <div>
             <div className="mb-6">
               <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                Tailles disponibles pour {CONTINENTS[selectedContinent].name}
+                Tailles disponibles pour {CONTINENTS[selectedRegion].name}
               </h2>
               <p className="text-gray-600">
                 Découvrez nos différents formats et leurs prix optimisés pour votre région. Les prix incluent 
@@ -330,37 +318,31 @@ export default function ProductDetails() {
             </div>
 
             <div className="grid gap-4">
-              {SIZES.map((size) => {
-                const pricing = SIZE_PRICING[size.id];
-                const continentPricing = pricing.continents[selectedContinent];
-                const { profit, profitPercentage, totalPrice } = calculateProfit(size, selectedContinent);
-                
-                return (
-                  <div key={size.id} className="bg-gray-50 rounded-xl p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <div>
-                        <div className="font-medium text-gray-900">{size.dimensions.inches}</div>
-                        <div className="text-sm text-gray-500">{size.dimensions.cm}</div>
-                      </div>
-                      <div className="text-right">
-                        <div className="font-medium text-gray-900">{totalPrice}€</div>
-                        <div className="text-sm text-green-600">
-                          +{profit}€ ({Math.round(profitPercentage)}% de marge)
-                        </div>
-                      </div>
+              {sizePricing.map(({ size, pricing, profit, profitPercentage }) => (
+                <div key={size.id} className="bg-gray-50 rounded-xl p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <div className="font-medium text-gray-900">{size.dimensions.inches}</div>
+                      <div className="text-sm text-gray-500">{size.dimensions.cm}</div>
                     </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <div className="text-gray-500">
-                        Coût: {size.cost}€ + {continentPricing.shipping.basePrice}€ (livraison)
-                      </div>
-                      <div className="flex items-center text-gray-500">
-                        <Info className="h-4 w-4 mr-1" />
-                        Prix recommandé: {size.suggestedPrice}€
+                    <div className="text-right">
+                      <div className="font-medium text-gray-900">{pricing?.total}€</div>
+                      <div className="text-sm text-green-600">
+                        +{profit}€ ({Math.round(profitPercentage)}% de marge)
                       </div>
                     </div>
                   </div>
-                );
-              })}
+                  <div className="flex items-center justify-between text-sm">
+                    <div className="text-gray-500">
+                      Coût: {size.cost}€ + {pricing?.shipping.basePrice}€ (livraison)
+                    </div>
+                    <div className="flex items-center text-gray-500">
+                      <Info className="h-4 w-4 mr-1" />
+                      Prix recommandé: {size.suggestedPrice}€
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -370,7 +352,7 @@ export default function ProductDetails() {
       <div className="bg-white rounded-2xl shadow-sm p-8">
         <div className="flex items-center gap-3 mb-8">
           <div className="p-2 bg-indigo-100 rounded-lg">
-            <Info className="h-5 w-5 text-indigo-600" />
+            <Truck className="h-5 w-5 text-indigo-600" />
           </div>
           <h2 className="text-xl font-semibold text-gray-900">
             Informations importantes
@@ -380,6 +362,7 @@ export default function ProductDetails() {
         {/* Shipping Notes */}
         <div className="mt-8 p-4 bg-indigo-50 rounded-xl">
           <div className="flex items-start gap-3">
+            <Info className="h-5 w-5 text-indigo-600 mt-0.5" />
             <div className="text-sm text-indigo-900">
               <ul className="space-y-1 list-disc pl-4">
                 <li>Tous les envois sont effectués via des transporteurs express</li>

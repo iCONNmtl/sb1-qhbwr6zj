@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useStore } from '../store/useStore';
+import { SIZES } from '../data/sizes';
+import { PRODUCT_PRICING, getProductPricing } from '../data/shipping';
 import { collection, addDoc, doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { nanoid } from 'nanoid';
@@ -12,292 +14,59 @@ import clsx from 'clsx';
 import type { Size } from '../types/product';
 import type { UserProfile } from '../types/user';
 
-type ProductType = 'art-poster' | 'premium-mat' | 'premium-semigloss' | 'classic-mat' | 'classic-semigloss';
+const PRODUCT_TYPES = {
+  'art-poster': 'Poster d\'Art',
+  'premium-mat': 'Poster Premium Mat',
+  'premium-semigloss': 'Poster Premium Semi-Brillant'
+} as const;
 
 const SIZE_GROUPS = [
   {
     id: '8x10',
     name: 'Format 8x10',
     description: 'Format photo standard',
-    sizes: [
-      {
-        id: '8x10',
-        name: '8x10"',
-        dimensions: {
-          inches: '8x10"',
-          cm: '20x25cm'
-        },
-        recommendedSize: {
-          width: 2400,
-          height: 3000
-        },
-        cost: 5,
-        suggestedPrice: 15
-      }
-    ]
+    sizes: [SIZES.find(s => s.id === '8x10')!]
   },
   {
     id: 'rectangular',
     name: 'Formats rectangulaires larges',
     description: 'Idéal pour les affiches et posters',
     sizes: [
-      {
-        id: '8x12',
-        name: '8x12"',
-        dimensions: {
-          inches: '8x12"',
-          cm: '21x29,7cm'
-        },
-        recommendedSize: {
-          width: 2400,
-          height: 3600
-        },
-        cost: 7,
-        suggestedPrice: 18
-      },
-      {
-        id: '12x18',
-        name: '12x18"',
-        dimensions: {
-          inches: '12x18"',
-          cm: '30x45cm'
-        },
-        recommendedSize: {
-          width: 3600,
-          height: 5400
-        },
-        cost: 12,
-        suggestedPrice: 25
-      },
-      {
-        id: '24x36',
-        name: '24x36"',
-        dimensions: {
-          inches: '24x36"',
-          cm: '60x90cm'
-        },
-        recommendedSize: {
-          width: 7200,
-          height: 10800
-        },
-        cost: 25,
-        suggestedPrice: 45
-      }
+      SIZES.find(s => s.id === '8x12')!,
+      SIZES.find(s => s.id === '12x18')!,
+      SIZES.find(s => s.id === '24x36')!
     ]
   },
   {
     id: '11x14',
     name: 'Format 11x14',
     description: 'Format photo professionnel',
-    sizes: [
-      {
-        id: '11x14',
-        name: '11x14"',
-        dimensions: {
-          inches: '11x14"',
-          cm: '27x35cm'
-        },
-        recommendedSize: {
-          width: 3300,
-          height: 4200
-        },
-        cost: 8,
-        suggestedPrice: 20
-      }
-    ]
+    sizes: [SIZES.find(s => s.id === '11x14')!]
   },
   {
     id: '11x17',
     name: 'Format 11x17',
     description: 'Format affiche standard',
-    sizes: [
-      {
-        id: '11x17',
-        name: '11x17"',
-        dimensions: {
-          inches: '11x17"',
-          cm: '28x43cm'
-        },
-        recommendedSize: {
-          width: 3300,
-          height: 5100
-        },
-        cost: 10,
-        suggestedPrice: 22
-      }
-    ]
+    sizes: [SIZES.find(s => s.id === '11x17')!]
   },
   {
     id: '18x24',
     name: 'Format 18x24',
     description: 'Grand format affiche',
-    sizes: [
-      {
-        id: '18x24',
-        name: '18x24"',
-        dimensions: {
-          inches: '18x24"',
-          cm: '45x60cm'
-        },
-        recommendedSize: {
-          width: 5400,
-          height: 7200
-        },
-        cost: 18,
-        suggestedPrice: 35
-      }
-    ]
-  },
-  {
-    id: 'a-series',
-    name: 'Formats A (ISO 216)',
-    description: 'Formats standards internationaux',
-    sizes: [
-      {
-        id: 'A4',
-        name: 'A4',
-        dimensions: {
-          inches: 'A4',
-          cm: '21x29,7cm'
-        },
-        recommendedSize: {
-          width: 2480,
-          height: 3508
-        },
-        cost: 7,
-        suggestedPrice: 18
-      },
-      {
-        id: 'A3',
-        name: 'A3',
-        dimensions: {
-          inches: 'A3',
-          cm: '29,7x42cm'
-        },
-        recommendedSize: {
-          width: 3508,
-          height: 4961
-        },
-        cost: 12,
-        suggestedPrice: 25
-      },
-      {
-        id: 'A2',
-        name: 'A2',
-        dimensions: {
-          inches: 'A2',
-          cm: '42x59,4cm'
-        },
-        recommendedSize: {
-          width: 4961,
-          height: 7016
-        },
-        cost: 20,
-        suggestedPrice: 35
-      },
-      {
-        id: 'A1',
-        name: 'A1',
-        dimensions: {
-          inches: 'A1',
-          cm: '59,4x84,1cm'
-        },
-        recommendedSize: {
-          width: 7016,
-          height: 9933
-        },
-        cost: 30,
-        suggestedPrice: 50
-      },
-      {
-        id: 'A0',
-        name: 'A0',
-        dimensions: {
-          inches: 'A0',
-          cm: '84,1x118,9cm'
-        },
-        recommendedSize: {
-          width: 9933,
-          height: 14043
-        },
-        cost: 45,
-        suggestedPrice: 75
-      }
-    ]
+    sizes: [SIZES.find(s => s.id === '18x24')!]
   },
   {
     id: 'standard',
-    name: 'Autres formats standards',
-    description: 'Formats courants',
+    name: 'Formats standards',
+    description: 'Formats internationaux courants',
     sizes: [
-      {
-        id: '5x7',
-        name: '5x7"',
-        dimensions: {
-          inches: '5x7"',
-          cm: '13x18cm'
-        },
-        recommendedSize: {
-          width: 1500,
-          height: 2100
-        },
-        cost: 3,
-        suggestedPrice: 10
-      },
-      {
-        id: '20x28',
-        name: '20x28"',
-        dimensions: {
-          inches: '20x28"',
-          cm: '50x70cm'
-        },
-        recommendedSize: {
-          width: 6000,
-          height: 8400
-        },
-        cost: 20,
-        suggestedPrice: 40
-      },
-      {
-        id: '28x40',
-        name: '28x40"',
-        dimensions: {
-          inches: '28x40"',
-          cm: '70x100cm'
-        },
-        recommendedSize: {
-          width: 8400,
-          height: 12000
-        },
-        cost: 30,
-        suggestedPrice: 55
-      }
+      SIZES.find(s => s.id === 'A4')!,
+      SIZES.find(s => s.id === '5x7')!,
+      SIZES.find(s => s.id === '20x28')!,
+      SIZES.find(s => s.id === '28x40')!
     ]
   }
 ];
-
-const PRODUCT_TYPES = {
-  'art-poster': {
-    name: 'Poster d\'Art',
-    description: 'Impression artistique sur papier texturé 200g/m²'
-  },
-  'premium-mat': {
-    name: 'Poster Premium Mat',
-    description: 'Impression mate professionnelle sur papier 250g/m²'
-  },
-  'premium-semigloss': {
-    name: 'Poster Premium Semi-Brillant',
-    description: 'Impression semi-brillante sur papier photo 250g/m²'
-  },
-  'classic-mat': {
-    name: 'Poster Classique Mat',
-    description: 'Impression mate sur papier 180g/m²'
-  },
-  'classic-semigloss': {
-    name: 'Poster Classique Semi-Brillant',
-    description: 'Impression semi-brillante sur papier photo 180g/m²'
-  }
-} as const;
 
 interface SizeConfiguration {
   size: Size;
@@ -314,11 +83,7 @@ const getSimilarSizes = (sizeId: string): string[] => {
     '8x12': ['12x18', '24x36'],
     '12x18': ['8x12', '24x36'],
     '24x36': ['8x12', '12x18'],
-    'A4': ['5x7', '20x28', '28x40', 'A3'],
-    'A3': ['A4', 'A2'],
-    'A2': ['A3', 'A1'],
-    'A1': ['A2', 'A0'],
-    'A0': ['A1'],
+    'A4': ['5x7', '20x28', '28x40'],
     '5x7': ['A4', '20x28', '28x40'],
     '20x28': ['A4', '5x7', '28x40'],
     '28x40': ['A4', '5x7', '20x28']
@@ -327,12 +92,9 @@ const getSimilarSizes = (sizeId: string): string[] => {
   return similarGroups[sizeId as keyof typeof similarGroups] || [];
 };
 
-const SIZES = SIZE_GROUPS.flatMap(group => group.sizes);
-
 export default function Product() {
   const [searchParams] = useSearchParams();
-  const productType = searchParams.get('type') as ProductType || 'art-poster';
-  const product = PRODUCT_TYPES[productType];
+  const productType = searchParams.get('type') as keyof typeof PRODUCT_TYPES || 'art-poster';
   const { user } = useStore();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -366,6 +128,66 @@ export default function Product() {
 
     fetchUserProfile();
   }, [user]);
+
+  const handleSave = async () => {
+    if (!user) {
+      toast.error('Vous devez être connecté');
+      return;
+    }
+
+    if (!userProfile?.organizationName?.trim()) {
+      toast.error('Veuillez renseigner le nom de votre organisation dans les paramètres');
+      navigate('/settings');
+      return;
+    }
+
+    if (!productTitle.trim()) {
+      toast.error('Veuillez saisir un titre pour le produit');
+      return;
+    }
+
+    const selectedConfigs = sizeConfigurations.filter(config => config.selected && config.isLocked);
+    if (selectedConfigs.length === 0) {
+      toast.error('Veuillez configurer au moins une taille');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const productId = nanoid();
+      const productRef = collection(db, 'products');
+      
+      const firstDesignUrl = selectedConfigs[0].designUrl;
+      
+      await addDoc(productRef, {
+        id: productId,
+        userId: user.uid,
+        type: productType,
+        title: productTitle.trim(),
+        name: PRODUCT_TYPES[productType],
+        designUrl: firstDesignUrl,
+        variants: selectedConfigs.map(config => ({
+          sizeId: config.size.id,
+          name: PRODUCT_TYPES[productType],
+          cost: config.size.cost,
+          price: config.price,
+          sku: `${user.uid}-${productId}-${config.size.id}`,
+          designUrl: config.designUrl,
+          dimensions: config.size.dimensions
+        })),
+        createdAt: new Date().toISOString(),
+        status: 'active'
+      });
+
+      toast.success('Produit créé avec succès');
+      navigate('/my-products');
+    } catch (error) {
+      console.error('Error creating product:', error);
+      toast.error('Erreur lors de la création du produit');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleDesignSelect = (url: string) => {
     if (!currentSizeId) return;
@@ -438,7 +260,16 @@ export default function Product() {
     if (!currentSizeId) return;
 
     const currentConfig = sizeConfigurations.find(c => c.size.id === currentSizeId);
-    if (!currentConfig?.isValid || currentConfig.price < currentConfig.size.cost) {
+    if (!currentConfig?.isValid) return;
+
+    // Get minimum price across all regions
+    const minPrice = Object.keys(PRODUCT_PRICING).reduce((min, region) => {
+      const pricing = getProductPricing(productType, currentSizeId, region);
+      return Math.min(min, pricing?.price || Infinity);
+    }, Infinity);
+
+    if (currentConfig.price < minPrice) {
+      toast.error(`Le prix doit être supérieur à ${minPrice}€`);
       return;
     }
 
@@ -451,69 +282,6 @@ export default function Product() {
     setCurrentSizeId(null);
   };
 
-  const handleCreateProduct = async () => {
-    if (!user) {
-      toast.error('Vous devez être connecté');
-      return;
-    }
-
-    if (!userProfile?.organizationName?.trim()) {
-      toast.error('Veuillez renseigner le nom de votre organisation dans les paramètres');
-      navigate('/settings');
-      return;
-    }
-
-    if (!productTitle.trim()) {
-      toast.error('Veuillez saisir un titre pour le produit');
-      return;
-    }
-
-    const selectedConfigs = sizeConfigurations.filter(config => config.selected && config.isLocked);
-    if (selectedConfigs.length === 0) {
-      toast.error('Veuillez configurer au moins une taille');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const productId = nanoid();
-      const productRef = collection(db, 'products');
-      
-      const firstDesignUrl = selectedConfigs[0].designUrl;
-      
-      await addDoc(productRef, {
-        id: productId,
-        userId: user.uid,
-        type: productType,
-        title: productTitle.trim(),
-        name: product.name,
-        designUrl: firstDesignUrl,
-        variants: selectedConfigs.map(config => ({
-          sizeId: config.size.id,
-          name: product.name,
-          cost: config.size.cost,
-          price: config.price,
-          sku: `${user.uid}-${productId}-${config.size.id}`,
-          designUrl: config.designUrl,
-          dimensions: config.size.dimensions
-        })),
-        createdAt: new Date().toISOString(),
-        status: 'active'
-      });
-
-      toast.success('Produit créé avec succès');
-      navigate('/my-products');
-    } catch (error) {
-      console.error('Error creating product:', error);
-      toast.error('Erreur lors de la création du produit');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const currentConfig = currentSizeId ? sizeConfigurations.find(c => c.size.id === currentSizeId) : null;
-  const currentSize = currentConfig?.size;
-
   return (
     <div className="max-w-7xl mx-auto space-y-8">
       <div className="flex items-center justify-between">
@@ -522,23 +290,23 @@ export default function Product() {
             Créer un nouveau produit
           </h1>
           <p className="text-gray-600 mt-1">
-            {product.name}
+            {PRODUCT_TYPES[productType]}
           </p>
         </div>
         <button
-          onClick={handleCreateProduct}
-          disabled={loading || !sizeConfigurations.some(config => config.isLocked) || !productTitle.trim()}
+          onClick={handleSave}
+          disabled={loading || !sizeConfigurations.some(v => v.selected && v.isLocked) || !productTitle.trim()}
           className="flex items-center px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition disabled:opacity-50"
         >
           {loading ? (
             <>
               <Loader2 className="h-5 w-5 animate-spin mr-2" />
-              Création...
+              Enregistrement...
             </>
           ) : (
             <>
               <Save className="h-5 w-5 mr-2" />
-              Créer le produit
+              Enregistrer
             </>
           )}
         </button>
@@ -643,20 +411,20 @@ export default function Product() {
         </div>
 
         <div className="col-span-2">
-          {currentSize ? (
+          {currentSizeId ? (
             <div className="bg-white rounded-xl shadow-sm p-6">
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h2 className="text-lg font-semibold text-gray-900">
-                    Configuration de la taille {currentSize.name}
+                    Configuration de la taille {sizeConfigurations.find(c => c.size.id === currentSizeId)?.size.name}
                   </h2>
                   <p className="text-sm text-gray-500">
-                    {currentSize.dimensions.cm}
+                    {sizeConfigurations.find(c => c.size.id === currentSizeId)?.size.dimensions.cm}
                   </p>
                 </div>
                 <button
                   onClick={handleValidateSize}
-                  disabled={!currentConfig?.isValid || (currentConfig?.price || 0) < currentSize.cost}
+                  disabled={!sizeConfigurations.find(c => c.size.id === currentSizeId)?.isValid}
                   className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:opacity-50"
                 >
                   <Check className="h-5 w-5 mr-2" />
@@ -672,7 +440,7 @@ export default function Product() {
                     </h3>
                     <div className="flex items-center text-sm">
                       <Info className="h-4 w-4 text-gray-400 mr-1" />
-                      Taille recommandée: {currentSize.recommendedSize.width}×{currentSize.recommendedSize.height}px
+                      Taille recommandée: {sizeConfigurations.find(c => c.size.id === currentSizeId)?.size.recommendedSize.width}×{sizeConfigurations.find(c => c.size.id === currentSizeId)?.size.recommendedSize.height}px
                     </div>
                   </div>
 
@@ -697,8 +465,8 @@ export default function Product() {
                   <DesignSelector
                     userId={user?.uid || ''}
                     onSelect={handleDesignSelect}
-                    selectedUrl={currentConfig?.designUrl}
-                    sizes={[currentSize]}
+                    selectedUrl={sizeConfigurations.find(c => c.size.id === currentSizeId)?.designUrl}
+                    sizes={[sizeConfigurations.find(c => c.size.id === currentSizeId)!.size]}
                     onDimensionsAvailable={handleDesignDimensionsAvailable}
                   />
                 </div>
@@ -712,7 +480,7 @@ export default function Product() {
                       <div>
                         <div className="text-sm text-gray-500 mb-1">Prix d'achat</div>
                         <div className="text-2xl font-semibold text-gray-900">
-                          {currentSize.cost}€
+                          {sizeConfigurations.find(c => c.size.id === currentSizeId)?.size.cost}€
                         </div>
                       </div>
 
@@ -720,13 +488,13 @@ export default function Product() {
                         <div className="text-sm text-gray-500 mb-1">Prix de vente</div>
                         <input
                           type="number"
-                          value={currentConfig?.price || currentSize.suggestedPrice}
-                          onChange={(e) => handlePriceChange(currentSize.id, Number(e.target.value))}
-                          min={currentSize.cost}
+                          value={sizeConfigurations.find(c => c.size.id === currentSizeId)?.price || 0}
+                          onChange={(e) => currentSizeId && handlePriceChange(currentSizeId, Number(e.target.value))}
+                          min={sizeConfigurations.find(c => c.size.id === currentSizeId)?.size.cost}
                           step={1}
                           className={clsx(
                             'w-full px-3 py-2 text-2xl font-semibold border rounded-lg',
-                            (currentConfig?.price || 0) < currentSize.cost
+                            (sizeConfigurations.find(c => c.size.id === currentSizeId)?.price || 0) < (sizeConfigurations.find(c => c.size.id === currentSizeId)?.size.cost || 0)
                               ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
                               : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'
                           )}
@@ -737,14 +505,14 @@ export default function Product() {
                         <div className="text-sm text-gray-500 mb-1">Bénéfice</div>
                         <div className={clsx(
                           'text-2xl font-semibold',
-                          (currentConfig?.price || 0) < currentSize.cost ? 'text-red-600' : 'text-green-600'
+                          (sizeConfigurations.find(c => c.size.id === currentSizeId)?.price || 0) < (sizeConfigurations.find(c => c.size.id === currentSizeId)?.size.cost || 0) ? 'text-red-600' : 'text-green-600'
                         )}>
-                          +{((currentConfig?.price || 0) - currentSize.cost).toFixed(2)}€
+                          +{((sizeConfigurations.find(c => c.size.id === currentSizeId)?.price || 0) - (sizeConfigurations.find(c => c.size.id === currentSizeId)?.size.cost || 0)).toFixed(2)}€
                         </div>
                       </div>
                     </div>
 
-                    {(currentConfig?.price || 0) < currentSize.cost && (
+                    {(sizeConfigurations.find(c => c.size.id === currentSizeId)?.price || 0) < (sizeConfigurations.find(c => c.size.id === currentSizeId)?.size.cost || 0) && (
                       <div className="mt-4 p-3 bg-red-50 rounded-lg flex items-start">
                         <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 mr-2" />
                         <div className="text-sm text-red-800">
