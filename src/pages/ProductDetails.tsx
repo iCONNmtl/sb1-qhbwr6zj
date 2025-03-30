@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Settings, ArrowRight, Truck, Package, Shield, Globe2, Info, Clock } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Settings, ArrowRight, Truck, Package, Shield, Globe2, Info, Clock, DollarSign, ChevronDown } from 'lucide-react';
 import { SIZES } from '../data/sizes';
-import { CONTINENTS, PRODUCT_PRICING, getProductPricing } from '../data/shipping';
+import { CONTINENTS, PRODUCT_PRICING } from '../data/shipping';
 import clsx from 'clsx';
 
 const PRODUCTS = {
@@ -58,11 +58,35 @@ const PRODUCTS = {
 
 type ProductId = keyof typeof PRODUCTS;
 
+function calculateProfit(size: typeof SIZES[0], continentCode: string): {
+  profit: number;
+  profitPercentage: number;
+  totalPrice: number;
+} {
+  const pricing = PRODUCT_PRICING['art-poster'].sizes[size.id];
+  const continentPricing = pricing[continentCode];
+  
+  // Calculate total price including shipping
+  const totalPrice = continentPricing.price + continentPricing.shipping.basePrice;
+  
+  // Calculate profit (selling price - cost - shipping)
+  const profit = totalPrice - size.cost - continentPricing.shipping.basePrice;
+  
+  // Calculate profit percentage
+  const profitPercentage = (profit / totalPrice) * 100;
+  
+  return {
+    profit,
+    profitPercentage,
+    totalPrice
+  };
+}
+
 export default function ProductDetails() {
   const { id } = useParams<{ id: string }>();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [selectedRegion, setSelectedRegion] = useState('europe');
-  const continent = CONTINENTS[selectedRegion];
+  const [showRegionDropdown, setShowRegionDropdown] = useState(false);
 
   if (!id || !PRODUCTS[id as ProductId]) {
     return (
@@ -76,6 +100,7 @@ export default function ProductDetails() {
   }
 
   const product = PRODUCTS[id as ProductId];
+  const continent = CONTINENTS[selectedRegion];
 
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % product.images.length);
@@ -84,17 +109,6 @@ export default function ProductDetails() {
   const prevImage = () => {
     setCurrentImageIndex((prev) => (prev - 1 + product.images.length) % product.images.length);
   };
-
-  // Calculate pricing for each size
-  const sizePricing = SIZES.map(size => {
-    const pricing = getProductPricing(id || '', size.id, selectedRegion);
-    return {
-      size,
-      pricing,
-      profit: pricing ? pricing.total - size.cost - pricing.shipping.basePrice : 0,
-      profitPercentage: pricing ? ((pricing.total - size.cost - pricing.shipping.basePrice) / pricing.total) * 100 : 0
-    };
-  });
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-12">
@@ -116,10 +130,10 @@ export default function ProductDetails() {
         </Link>
       </div>
 
-      {/* Product Overview Block - Slider and Features side by side */}
+      {/* Product Overview Block */}
       <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
         <div className="grid md:grid-cols-2 gap-8 p-8">
-          {/* Left side - Image Slider */}
+          {/* Image Slider */}
           <div className="relative aspect-square rounded-xl overflow-hidden">
             <img
               src={product.images[currentImageIndex]}
@@ -156,7 +170,7 @@ export default function ProductDetails() {
             </div>
           </div>
 
-          {/* Right side - Product Info & Features */}
+          {/* Product Info */}
           <div className="space-y-8">
             <div>
               <div className="flex items-center justify-between mb-4">
@@ -189,7 +203,7 @@ export default function ProductDetails() {
         </div>
       </div>
 
-      {/* Region and Sizes Block - Side by side */}
+      {/* Region and Pricing Block */}
       <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
         <div className="p-8 border-b border-gray-100">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">
@@ -198,178 +212,202 @@ export default function ProductDetails() {
           <p className="text-gray-600">
             Nos prix sont calculés automatiquement lors de la réception d'une commande en fonction du pays de livraison. 
             Grâce à notre réseau d'imprimeries partenaires réparties dans le monde entier, nous imprimons vos affiches au plus près 
-            de vos clients. Cette approche nous permet de minimiser les frais et délais de livraison, tout en réduisant significativement 
-            notre empreinte carbone.
+            de vos clients.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 p-8">
-          {/* Left side - Region Selection */}
-          <div>
-            <div className="mb-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                Sélectionnez votre région
-              </h2>
-              <p className="text-gray-600">
-                Choisissez votre zone géographique pour voir les prix et délais de livraison spécifiques à votre région. 
-                Nos centres d'impression locaux garantissent des délais optimisés et des frais de port réduits.
-              </p>
-            </div>
+        <div className="p-8">
+          {/* Region Dropdown */}
+          <div className="relative mb-12">
+            <button
+              onClick={() => setShowRegionDropdown(!showRegionDropdown)}
+              className="w-full flex items-center justify-between p-6 bg-white rounded-xl border-2 border-gray-200 hover:border-gray-300 transition-colors"
+            >
+              <div className="flex items-center gap-4">
+                <div className="flex items-center">
+                  {continent.countries.slice(0, 3).map(country => (
+                    <span 
+                      key={country.name} 
+                      className="text-2xl first:-ml-0 -ml-2" 
+                      role="img" 
+                      aria-label={country.name}
+                    >
+                      {country.flag}
+                    </span>
+                  ))}
+                  {continent.countries.length > 3 && (
+                    <span className="text-sm font-medium text-gray-500 ml-2">
+                      +{continent.countries.length - 3}
+                    </span>
+                  )}
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {continent.name}
+                  </h3>
+                  <div className="text-sm text-gray-500">
+                    {selectedRegion === 'europe' ? '2-3 jours ouvrés' :
+                     selectedRegion === 'northAmerica' ? '3-5 jours ouvrés' :
+                     selectedRegion === 'asia' ? '4-7 jours ouvrés' :
+                     selectedRegion === 'oceania' ? '5-8 jours ouvrés' :
+                     '4-7 jours ouvrés'}
+                  </div>
+                </div>
+              </div>
+              <ChevronDown className={clsx(
+                "h-5 w-5 text-gray-400 transition-transform",
+                showRegionDropdown && "transform rotate-180"
+              )} />
+            </button>
 
-            <div className="grid gap-4">
-              {Object.entries(CONTINENTS).map(([code, continent]) => {
-                const displayedCountries = continent.countries.slice(0, 3);
-                const remainingCount = continent.countries.length - displayedCountries.length;
-                
-                return (
+            {/* Dropdown Menu */}
+            {showRegionDropdown && (
+              <div className="absolute z-20 w-full mt-2 bg-white rounded-xl border border-gray-200 shadow-lg divide-y divide-gray-100">
+                {Object.entries(CONTINENTS).map(([code, region]) => (
                   <button
                     key={code}
-                    onClick={() => setSelectedRegion(code)}
+                    onClick={() => {
+                      setSelectedRegion(code);
+                      setShowRegionDropdown(false);
+                    }}
                     className={clsx(
-                      'p-6 rounded-xl border-2 transition-all duration-200 w-full',
-                      selectedRegion === code
-                        ? 'border-indigo-600 bg-indigo-50'
-                        : 'border-gray-200 hover:border-gray-300'
+                      'w-full flex items-center gap-4 p-4 hover:bg-gray-50 transition-colors',
+                      selectedRegion === code && 'bg-indigo-50'
                     )}
                   >
-                    {/* Header with flags and region name */}
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <div className="flex items-center">
-                          {displayedCountries.map(country => (
-                            <span 
-                              key={country.name} 
-                              className="text-2xl first:-ml-0 -ml-2" 
-                              role="img" 
-                              aria-label={country.name}
-                            >
-                              {country.flag}
-                            </span>
-                          ))}
-                          {remainingCount > 0 && (
-                            <span className="text-sm font-medium text-gray-500 ml-2">
-                              +{remainingCount}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        {continent.name}
-                      </h3>
+                    <div className="flex items-center">
+                      {region.countries.slice(0, 3).map(country => (
+                        <span 
+                          key={country.name} 
+                          className="text-2xl first:-ml-0 -ml-2" 
+                          role="img" 
+                          aria-label={country.name}
+                        >
+                          {country.flag}
+                        </span>
+                      ))}
+                      {region.countries.length > 3 && (
+                        <span className="text-sm font-medium text-gray-500 ml-2">
+                          +{region.countries.length - 3}
+                        </span>
+                      )}
                     </div>
-
-                    {/* Shipping costs and delivery info */}
-                    <div className="space-y-4">
-                      {/* Shipping costs */}
-                      <div className="bg-white rounded-lg p-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="text-sm text-gray-600">Frais de port</div>
-                          <div className="text-lg font-semibold text-gray-900">
-                            {continent.shipping.basePrice}€
-                            <span className="text-sm text-gray-500 font-normal ml-1">/ article</span>
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between text-sm">
-                          <div className="text-gray-600">Article supplémentaire</div>
-                          <div className="font-medium text-gray-900">
-                            +{continent.shipping.additionalItemPrice}€
-                          </div>
-                        </div>
+                    <div>
+                      <div className="font-medium text-gray-900">
+                        {region.name}
                       </div>
-
-                      {/* Delivery time */}
-                      <div className="flex items-center justify-between text-sm">
-                        <div className="flex items-center gap-2 text-gray-600">
-                          <Clock className="h-4 w-4" />
-                          <span>Délai de livraison estimé</span>
-                        </div>
-                        <div className="font-medium text-gray-900">
-                          {code === 'europe' ? '2-3 jours ouvrés' :
-                           code === 'northAmerica' ? '3-5 jours ouvrés' :
-                           code === 'asia' ? '4-7 jours ouvrés' :
-                           code === 'oceania' ? '5-8 jours ouvrés' :
-                           '4-7 jours ouvrés'}
-                        </div>
-                      </div>
-
-                      {/* Local printing info */}
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <Truck className="h-4 w-4" />
-                        <span>Expédition depuis nos centres d'impression locaux</span>
+                      <div className="text-sm text-gray-500">
+                        {code === 'europe' ? '2-3 jours ouvrés' :
+                         code === 'northAmerica' ? '3-5 jours ouvrés' :
+                         code === 'asia' ? '4-7 jours ouvrés' :
+                         code === 'oceania' ? '5-8 jours ouvrés' :
+                         '4-7 jours ouvrés'}
                       </div>
                     </div>
                   </button>
-                );
-              })}
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Shipping Info */}
+          <div className="grid grid-cols-3 gap-6 mb-12">
+            <div className="bg-white rounded-xl p-6 border border-gray-100">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <Truck className="h-5 w-5 text-blue-600" />
+                </div>
+                <div>
+                  <div className="font-medium text-gray-900">Frais de port</div>
+                  <div className="text-lg font-semibold text-gray-900">
+                    {continent.shipping.basePrice}€
+                    <span className="text-sm text-gray-500 font-normal ml-1">/ article</span>
+                  </div>
+                </div>
+              </div>
+              <div className="text-sm text-gray-600">
+                +{continent.shipping.additionalItemPrice}€ par article supplémentaire
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl p-6 border border-gray-100">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-green-100 rounded-lg">
+                  <Clock className="h-5 w-5 text-green-600" />
+                </div>
+                <div>
+                  <div className="font-medium text-gray-900">Délai de livraison</div>
+                  <div className="text-lg font-semibold text-gray-900">
+                    {selectedRegion === 'europe' ? '2-3 jours ouvrés' :
+                     selectedRegion === 'northAmerica' ? '3-5 jours ouvrés' :
+                     selectedRegion === 'asia' ? '4-7 jours ouvrés' :
+                     selectedRegion === 'oceania' ? '5-8 jours ouvrés' :
+                     '4-7 jours ouvrés'}
+                  </div>
+                </div>
+              </div>
+              <div className="text-sm text-gray-600">
+                Expédition depuis nos centres locaux
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl p-6 border border-gray-100">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-purple-100 rounded-lg">
+                  <Package className="h-5 w-5 text-purple-600" />
+                </div>
+                <div>
+                  <div className="font-medium text-gray-900">Emballage sécurisé</div>
+                  <div className="text-lg font-semibold text-gray-900">
+                    Protection optimale
+                  </div>
+                </div>
+              </div>
+              <div className="text-sm text-gray-600">
+                Tube rigide et emballage renforcé
+              </div>
             </div>
           </div>
 
-          {/* Right side - Sizes & Pricing */}
+          {/* Sizes & Pricing */}
           <div>
-            <div className="mb-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                Tailles disponibles pour {CONTINENTS[selectedRegion].name}
-              </h2>
-              <p className="text-gray-600">
-                Découvrez nos différents formats et leurs prix optimisés pour votre région. Les prix incluent 
-                l'impression locale et sont calculés pour maximiser votre marge tout en restant compétitifs 
-                sur votre marché.
-              </p>
-            </div>
-
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Tailles disponibles pour {continent.name}
+            </h3>
             <div className="grid gap-4">
-              {sizePricing.map(({ size, pricing, profit, profitPercentage }) => (
-                <div key={size.id} className="bg-gray-50 rounded-xl p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <div>
-                      <div className="font-medium text-gray-900">{size.dimensions.inches}</div>
-                      <div className="text-sm text-gray-500">{size.dimensions.cm}</div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-medium text-gray-900">{pricing?.total}€</div>
-                      <div className="text-sm text-green-600">
-                        +{profit}€ ({Math.round(profitPercentage)}% de marge)
+              {SIZES.map((size) => {
+                const pricing = PRODUCT_PRICING['art-poster'].sizes[size.id][selectedRegion];
+                const totalPrice = pricing.price + pricing.shipping.basePrice;
+                const profit = totalPrice - size.cost - pricing.shipping.basePrice;
+                
+                return (
+                  <div key={size.id} className="bg-gray-50 rounded-xl p-6">
+                    <div className="grid grid-cols-4 gap-6">
+                      <div>
+                        <div className="font-medium text-gray-900">{size.dimensions.inches}</div>
+                        <div className="text-sm text-gray-500">{size.dimensions.cm}</div>
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-500 mb-1">Prix d'achat</div>
+                        <div className="font-medium text-gray-900">{size.cost}€</div>
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-500 mb-1">Frais de port</div>
+                        <div className="font-medium text-gray-900">{pricing.shipping.basePrice}€</div>
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-500 mb-1">Prix de vente estimé</div>
+                        <div className="font-medium text-gray-900">
+                          {pricing.price}€
+                          <span className="ml-2 text-sm text-green-600">
+                            (+{profit.toFixed(2)}€)
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <div className="text-gray-500">
-                      Coût: {size.cost}€ + {pricing?.shipping.basePrice}€ (livraison)
-                    </div>
-                    <div className="flex items-center text-gray-500">
-                      <Info className="h-4 w-4 mr-1" />
-                      Prix recommandé: {size.suggestedPrice}€
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Shipping Information */}
-      <div className="bg-white rounded-2xl shadow-sm p-8">
-        <div className="flex items-center gap-3 mb-8">
-          <div className="p-2 bg-indigo-100 rounded-lg">
-            <Truck className="h-5 w-5 text-indigo-600" />
-          </div>
-          <h2 className="text-xl font-semibold text-gray-900">
-            Informations importantes
-          </h2>
-        </div>
-
-        {/* Shipping Notes */}
-        <div className="mt-8 p-4 bg-indigo-50 rounded-xl">
-          <div className="flex items-start gap-3">
-            <Info className="h-5 w-5 text-indigo-600 mt-0.5" />
-            <div className="text-sm text-indigo-900">
-              <ul className="space-y-1 list-disc pl-4">
-                <li>Tous les envois sont effectués via des transporteurs express</li>
-                <li>Suivi en ligne disponible pour toutes les commandes</li>
-                <li>Assurance incluse jusqu'à 100€ par colis</li>
-                <li>Emballage sécurisé en tube rigide pour une protection optimale</li>
-              </ul>
+                );
+              })}
             </div>
           </div>
         </div>
