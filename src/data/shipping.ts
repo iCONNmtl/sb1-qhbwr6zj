@@ -526,298 +526,406 @@ export const PRODUCT_PRICING: Record<string, {
       // Format 8x10
       '8x10': {
         europe: {
-          price: 39.90,
-          shipping: { basePrice: 5.90, additionalItemPrice: 2.90 }
+          price: 4.70,
+          shipping: { basePrice: 4.60, additionalItemPrice: 2.90 }
         },
         northAmerica: {
-          price: 44.90,
-          shipping: { basePrice: 15.90, additionalItemPrice: 5.90 }
+          price: 5.70,
+          shipping: { basePrice: 4.40, additionalItemPrice: 5.90 }
         },
         southAmerica: {
-          price: 44.90,
-          shipping: { basePrice: 19.90, additionalItemPrice: 7.90 }
+          price: 8.70,
+          shipping: { basePrice: 9.50, additionalItemPrice: 7.90 }
         },
         asia: {
-          price: 49.90,
-          shipping: { basePrice: 17.90, additionalItemPrice: 6.90 }
+          price: 8.60,
+          shipping: { basePrice: 8.20, additionalItemPrice: 6.90 }
         },
         oceania: {
-          price: 49.90,
-          shipping: { basePrice: 21.90, additionalItemPrice: 8.90 }
+          price: 8.20,
+          shipping: { basePrice: 5.30, additionalItemPrice: 8.90 }
         },
         africa: {
-          price: 44.90,
-          shipping: { basePrice: 23.90, additionalItemPrice: 9.90 }
+          price: 9.20,
+          shipping: { basePrice: 12.40, additionalItemPrice: 9.90 }
         }
       },
       // Format 8x12
       '8x12': {
         europe: {
-          price: 44.90,
-          shipping: { basePrice: 5.90, additionalItemPrice: 2.90 }
+          price: 3.70,
+          shipping: { basePrice: 4.60, additionalItemPrice: 2.90 }
         },
         northAmerica: {
-          price: 49.90,
-          shipping: { basePrice: 15.90, additionalItemPrice: 5.90 }
+          price: 7.10,
+          shipping: { basePrice: 4.40, additionalItemPrice: 5.90 }
         },
         southAmerica: {
-          price: 49.90,
-          shipping: { basePrice: 19.90, additionalItemPrice: 7.90 }
+          price: 8.70,
+          shipping: { basePrice: 9.50, additionalItemPrice: 7.90 }
         },
         asia: {
-          price: 54.90,
-          shipping: { basePrice: 17.90, additionalItemPrice: 6.90 }
+          price: 8.60,
+          shipping: { basePrice: 8.20, additionalItemPrice: 6.90 }
         },
         oceania: {
-          price: 54.90,
-          shipping: { basePrice: 21.90, additionalItemPrice: 8.90 }
+          price: 8.20,
+          shipping: { basePrice: 5.30, additionalItemPrice: 8.90 }
         },
         africa: {
-          price: 49.90,
-          shipping: { basePrice: 23.90, additionalItemPrice: 9.90 }
+          price: 9.20,
+          shipping: { basePrice: 12.40, additionalItemPrice: 9.90 }
         }
       },
       // Format 12x18
       '12x18': {
         europe: {
-          price: 49.90,
-          shipping: { basePrice: 6.90, additionalItemPrice: 3.90 }
+          price: 8,
+          shipping: { basePrice: 4.60, additionalItemPrice: 3.90 }
         },
         northAmerica: {
-          price: 54.90,
-          shipping: { basePrice: 16.90, additionalItemPrice: 6.90 }
+          price: 9.30,
+          shipping: { basePrice: 4.40, additionalItemPrice: 6.90 }
         },
         southAmerica: {
-          price: 54.90,
-          shipping: { basePrice: 20.90, additionalItemPrice: 8.90 }
+          price: 12.10,
+          shipping: { basePrice: 9.50, additionalItemPrice: 8.90 }
         },
         asia: {
-          price: 59.90,
-          shipping: { basePrice: 18.90, additionalItemPrice: 7.90 }
+          price: 12.10,
+          shipping: { basePrice: 8.20, additionalItemPrice: 7.90 }
         },
         oceania: {
-          price: 59.90,
-          shipping: { basePrice: 22.90, additionalItemPrice: 9.90 }
+          price: 10.90,
+          shipping: { basePrice: 5.30, additionalItemPrice: 9.90 }
         },
         africa: {
-          price: 54.90,
-          shipping: { basePrice: 24.90, additionalItemPrice: 10.90 }
+          price: 12.80,
+          shipping: { basePrice: 12.40, additionalItemPrice: 10.90 }
         }
       },
       // Format 24x36
       '24x36': {
         europe: {
-          price: 69.90,
-          shipping: { basePrice: 8.90, additionalItemPrice: 4.90 }
+          price: 12.10,
+          shipping: { basePrice: 5.40, additionalItemPrice: 4.90 }
         },
         northAmerica: {
-          price: 74.90,
-          shipping: { basePrice: 18.90, additionalItemPrice: 7.90 }
+          price: 13.20,
+          shipping: { basePrice: 5, additionalItemPrice: 7.90 }
         },
         southAmerica: {
-          price: 74.90,
-          shipping: { basePrice: 22.90, additionalItemPrice: 9.90 }
+          price: 19.80,
+          shipping: { basePrice: 11.50, additionalItemPrice: 9.90 }
         },
         asia: {
-          price: 79.90,
-          shipping: { basePrice: 20.90, additionalItemPrice: 8.90 }
+          price: 19.80,
+          shipping: { basePrice: 9.50, additionalItemPrice: 8.90 }
         },
         oceania: {
-          price: 79.90,
-          shipping: { basePrice: 24.90, additionalItemPrice: 10.90 }
+          price: 17.90,
+          shipping: { basePrice: 6.20, additionalItemPrice: 10.90 }
         },
         africa: {
-          price: 74.90,
-          shipping: { basePrice: 26.90, additionalItemPrice: 11.90 }
+          price: 21,
+          shipping: { basePrice: 14.60, additionalItemPrice: 11.90 }
         }
       },
       // Format 11x14
       '11x14': {
         europe: {
-          price: 44.90,
-          shipping: { basePrice: 5.90, additionalItemPrice: 2.90 }
+          price: 4.70,
+          shipping: { basePrice: 4.60, additionalItemPrice: 2.90 }
         },
         northAmerica: {
-          price: 49.90,
-          shipping: { basePrice: 15.90, additionalItemPrice: 5.90 }
+          price: 9.90,
+          shipping: { basePrice: 4.40, additionalItemPrice: 5.90 }
         },
         southAmerica: {
-          price: 49.90,
-          shipping: { basePrice: 19.90, additionalItemPrice: 7.90 }
+          price: 12.10,
+          shipping: { basePrice: 9.50, additionalItemPrice: 7.90 }
         },
         asia: {
-          price: 54.90,
-          shipping: { basePrice: 17.90, additionalItemPrice: 6.90 }
+          price: 12.10,
+          shipping: { basePrice: 8.20, additionalItemPrice: 6.90 }
         },
         oceania: {
-          price: 54.90,
-          shipping: { basePrice: 21.90, additionalItemPrice: 8.90 }
+          price: 9.90,
+          shipping: { basePrice: 5.30, additionalItemPrice: 8.90 }
         },
         africa: {
-          price: 49.90,
-          shipping: { basePrice: 23.90, additionalItemPrice: 9.90 }
+          price: 12.80,
+          shipping: { basePrice: 12.40, additionalItemPrice: 9.90 }
         }
       },
       // Format 11x17
       '11x17': {
         europe: {
-          price: 46.90,
-          shipping: { basePrice: 5.90, additionalItemPrice: 2.90 }
+          price: 9.50,
+          shipping: { basePrice: 4.60, additionalItemPrice: 2.90 }
         },
         northAmerica: {
-          price: 51.90,
-          shipping: { basePrice: 15.90, additionalItemPrice: 5.90 }
+          price: 9.90,
+          shipping: { basePrice: 4.40, additionalItemPrice: 5.90 }
         },
         southAmerica: {
-          price: 51.90,
-          shipping: { basePrice: 19.90, additionalItemPrice: 7.90 }
+          price: 12.10,
+          shipping: { basePrice: 9.50, additionalItemPrice: 7.90 }
         },
         asia: {
-          price: 56.90,
-          shipping: { basePrice: 17.90, additionalItemPrice: 6.90 }
+          price: 12.10,
+          shipping: { basePrice: 8.20, additionalItemPrice: 6.90 }
         },
         oceania: {
-          price: 56.90,
-          shipping: { basePrice: 21.90, additionalItemPrice: 8.90 }
+          price: 11.50,
+          shipping: { basePrice: 5.30, additionalItemPrice: 8.90 }
         },
         africa: {
-          price: 51.90,
-          shipping: { basePrice: 23.90, additionalItemPrice: 9.90 }
+          price: 12.80,
+          shipping: { basePrice: 12.40, additionalItemPrice: 9.90 }
         }
       },
       // Format 18x24
       '18x24': {
         europe: {
-          price: 59.90,
-          shipping: { basePrice: 7.90, additionalItemPrice: 3.90 }
+          price: 7.80,
+          shipping: { basePrice: 4.60, additionalItemPrice: 3.90 }
         },
         northAmerica: {
-          price: 64.90,
-          shipping: { basePrice: 17.90, additionalItemPrice: 6.90 }
+          price: 8.70,
+          shipping: { basePrice: 4.40, additionalItemPrice: 6.90 }
         },
         southAmerica: {
-          price: 64.90,
-          shipping: { basePrice: 21.90, additionalItemPrice: 8.90 }
+          price: 14.20,
+          shipping: { basePrice: 9.50, additionalItemPrice: 8.90 }
         },
         asia: {
-          price: 69.90,
-          shipping: { basePrice: 19.90, additionalItemPrice: 7.90 }
+          price: 14.20,
+          shipping: { basePrice: 8.20, additionalItemPrice: 7.90 }
         },
         oceania: {
-          price: 69.90,
-          shipping: { basePrice: 23.90, additionalItemPrice: 9.90 }
+          price: 12.80,
+          shipping: { basePrice: 5.30, additionalItemPrice: 9.90 }
         },
         africa: {
-          price: 64.90,
-          shipping: { basePrice: 25.90, additionalItemPrice: 10.90 }
+          price: 15.10,
+          shipping: { basePrice: 12.40, additionalItemPrice: 10.90 }
         }
       },
       // Format A4
       'A4': {
         europe: {
-          price: 44.90,
-          shipping: { basePrice: 5.90, additionalItemPrice: 2.90 }
+          price: 3.70,
+          shipping: { basePrice: 4.60, additionalItemPrice: 2.90 }
         },
         northAmerica: {
-          price: 49.90,
-          shipping: { basePrice: 15.90, additionalItemPrice: 5.90 }
+          price: 7.10,
+          shipping: { basePrice: 4.40, additionalItemPrice: 5.90 }
         },
         southAmerica: {
-          price: 49.90,
-          shipping: { basePrice: 19.90, additionalItemPrice: 7.90 }
+          price: 8.70,
+          shipping: { basePrice: 9.50, additionalItemPrice: 7.90 }
         },
         asia: {
-          price: 54.90,
-          shipping: { basePrice: 17.90, additionalItemPrice: 6.90 }
+          price: 8.60,
+          shipping: { basePrice: 8.20, additionalItemPrice: 6.90 }
         },
         oceania: {
-          price: 54.90,
-          shipping: { basePrice: 21.90, additionalItemPrice: 8.90 }
+          price: 8.20,
+          shipping: { basePrice: 5.30, additionalItemPrice: 8.90 }
         },
         africa: {
-          price: 49.90,
-          shipping: { basePrice: 23.90, additionalItemPrice: 9.90 }
+          price: 9.20,
+          shipping: { basePrice: 12.40, additionalItemPrice: 9.90 }
+        }
+      },
+      // Format A3
+      'A3': {
+        europe: {
+          price: 9.50,
+          shipping: { basePrice: 4.60, additionalItemPrice: 2.90 }
+        },
+        northAmerica: {
+          price: 9.90,
+          shipping: { basePrice: 4.40, additionalItemPrice: 5.90 }
+        },
+        southAmerica: {
+          price: 12.10,
+          shipping: { basePrice: 9.50, additionalItemPrice: 7.90 }
+        },
+        asia: {
+          price: 12.10,
+          shipping: { basePrice: 8.20, additionalItemPrice: 6.90 }
+        },
+        oceania: {
+          price: 11.50,
+          shipping: { basePrice: 5.30, additionalItemPrice: 8.90 }
+        },
+        africa: {
+          price: 12.80,
+          shipping: { basePrice: 12.40, additionalItemPrice: 9.90 }
+        }
+      },
+      // Format A2
+      'A2': {
+        europe: {
+          price: 11.20,
+          shipping: { basePrice: 4.60, additionalItemPrice: 2.90 }
+        },
+        northAmerica: {
+          price: 11.90,
+          shipping: { basePrice: 4.40, additionalItemPrice: 5.90 }
+        },
+        southAmerica: {
+          price: 13.20,
+          shipping: { basePrice: 9.50, additionalItemPrice: 7.90 }
+        },
+        asia: {
+          price: 14.20,
+          shipping: { basePrice: 8.20, additionalItemPrice: 6.90 }
+        },
+        oceania: {
+          price: 13.50,
+          shipping: { basePrice: 5.30, additionalItemPrice: 8.90 }
+        },
+        africa: {
+          price: 15.10,
+          shipping: { basePrice: 12.40, additionalItemPrice: 9.90 }
+        }
+      },
+      // Format A1
+      'A1': {
+        europe: {
+          price: 15.60,
+          shipping: { basePrice: 5.40, additionalItemPrice: 2.90 }
+        },
+        northAmerica: {
+          price: 16.50,
+          shipping: { basePrice: 5, additionalItemPrice: 5.90 }
+        },
+        southAmerica: {
+          price: 19.80,
+          shipping: { basePrice: 11.50, additionalItemPrice: 7.90 }
+        },
+        asia: {
+          price: 19.80,
+          shipping: { basePrice: 9.50, additionalItemPrice: 6.90 }
+        },
+        oceania: {
+          price: 18.80,
+          shipping: { basePrice: 6.20, additionalItemPrice: 8.90 }
+        },
+        africa: {
+          price: 21,
+          shipping: { basePrice: 14.60, additionalItemPrice: 9.90 }
+        }
+      },
+      // Format A0
+      'A0': {
+        europe: {
+          price: 15.60,
+          shipping: { basePrice: 5.40, additionalItemPrice: 2.90 }
+        },
+        northAmerica: {
+          price: 17.20,
+          shipping: { basePrice: 5, additionalItemPrice: 5.90 }
+        },
+        southAmerica: {
+          price: 19.80,
+          shipping: { basePrice: 11.50, additionalItemPrice: 7.90 }
+        },
+        asia: {
+          price: 19.80,
+          shipping: { basePrice: 9.50, additionalItemPrice: 6.90 }
+        },
+        oceania: {
+          price: 18.80,
+          shipping: { basePrice: 6.20, additionalItemPrice: 8.90 }
+        },
+        africa: {
+          price: 21,
+          shipping: { basePrice: 14.60, additionalItemPrice: 9.90 }
         }
       },
       // Format 5x7
       '5x7': {
         europe: {
-          price: 34.90,
-          shipping: { basePrice: 4.90, additionalItemPrice: 1.90 }
+          price: 4.30,
+          shipping: { basePrice: 4.60, additionalItemPrice: 1.90 }
         },
         northAmerica: {
-          price: 39.90,
-          shipping: { basePrice: 14.90, additionalItemPrice: 4.90 }
+          price: 7.10,
+          shipping: { basePrice: 4.40, additionalItemPrice: 4.90 }
         },
         southAmerica: {
-          price: 39.90,
-          shipping: { basePrice: 18.90, additionalItemPrice: 6.90 }
+          price: 8.70,
+          shipping: { basePrice: 9.50, additionalItemPrice: 6.90 }
         },
         asia: {
-          price: 44.90,
-          shipping: { basePrice: 16.90, additionalItemPrice: 5.90 }
+          price: 8.60,
+          shipping: { basePrice: 8.20, additionalItemPrice: 5.90 }
         },
         oceania: {
-          price: 44.90,
-          shipping: { basePrice: 20.90, additionalItemPrice: 7.90 }
+          price: 8.20,
+          shipping: { basePrice: 5.30, additionalItemPrice: 7.90 }
         },
         africa: {
-          price: 39.90,
-          shipping: { basePrice: 22.90, additionalItemPrice: 8.90 }
+          price: 9.20,
+          shipping: { basePrice: 12.40, additionalItemPrice: 8.90 }
         }
       },
       // Format 20x28
       '20x28': {
         europe: {
-          price: 64.90,
-          shipping: { basePrice: 8.90, additionalItemPrice: 4.90 }
+          price: 9.50,
+          shipping: { basePrice: 4.60, additionalItemPrice: 4.90 }
         },
         northAmerica: {
-          price: 69.90,
-          shipping: { basePrice: 18.90, additionalItemPrice: 7.90 }
+          price: 12.60,
+          shipping: { basePrice: 4.40, additionalItemPrice: 7.90 }
         },
         southAmerica: {
-          price: 69.90,
-          shipping: { basePrice: 22.90, additionalItemPrice: 9.90 }
+          price: 15.10,
+          shipping: { basePrice: 9.50, additionalItemPrice: 9.90 }
         },
         asia: {
-          price: 74.90,
-          shipping: { basePrice: 20.90, additionalItemPrice: 8.90 }
+          price: 15.10,
+          shipping: { basePrice: 8.20, additionalItemPrice: 8.90 }
         },
         oceania: {
-          price: 74.90,
-          shipping: { basePrice: 24.90, additionalItemPrice: 10.90 }
+          price: 13.30,
+          shipping: { basePrice: 5.30, additionalItemPrice: 10.90 }
         },
         africa: {
-          price: 69.90,
-          shipping: { basePrice: 26.90, additionalItemPrice: 11.90 }
+          price: 16,
+          shipping: { basePrice: 12.40, additionalItemPrice: 11.90 }
         }
       },
       // Format 28x40
       '28x40': {
         europe: {
-          price: 79.90,
-          shipping: { basePrice: 9.90, additionalItemPrice: 5.90 }
+          price: 15.60,
+          shipping: { basePrice: 5.40, additionalItemPrice: 5.90 }
         },
         northAmerica: {
-          price: 84.90,
-          shipping: { basePrice: 19.90, additionalItemPrice: 8.90 }
+          price: 16.50,
+          shipping: { basePrice: 5, additionalItemPrice: 8.90 }
         },
         southAmerica: {
-          price: 84.90,
-          shipping: { basePrice: 23.90, additionalItemPrice: 10.90 }
+          price: 19.80,
+          shipping: { basePrice: 11.50, additionalItemPrice: 10.90 }
         },
         asia: {
-          price: 89.90,
-          shipping: { basePrice: 21.90, additionalItemPrice: 9.90 }
+          price: 19.80,
+          shipping: { basePrice: 9.50, additionalItemPrice: 9.90 }
         },
         oceania: {
-          price: 89.90,
-          shipping: { basePrice: 25.90, additionalItemPrice: 11.90 }
+          price: 18.80,
+          shipping: { basePrice: 6.20, additionalItemPrice: 11.90 }
         },
         africa: {
-          price: 84.90,
-          shipping: { basePrice: 27.90, additionalItemPrice: 12.90 }
+          price: 21,
+          shipping: { basePrice: 14.60, additionalItemPrice: 12.90 }
         }
       }
     }
