@@ -186,23 +186,16 @@ function PriceComparison() {
                     const pricing = product.sizes[size.id]?.[selectedRegion];
                     if (!pricing) return <td key={productId} className="py-4 px-3 sm:px-4 text-center">-</td>;
 
-                    const totalPrice = pricing.price + pricing.shipping.basePrice;
-                    const profit = totalPrice - size.cost - pricing.shipping.basePrice;
-                    const profitPercentage = (profit / totalPrice) * 100;
-
                     return (
                       <td key={productId} className="py-4 px-3 sm:px-4">
                         <div className="text-center space-y-2">
                           <div className="text-lg font-semibold text-gray-900">
-                            {totalPrice.toFixed(2)}€
+                            {pricing.price.toFixed(2)}€
                           </div>
                           <div className="flex flex-col items-center gap-1 text-sm">
                             <div className="flex items-center gap-1 text-gray-500">
                               <Truck className="h-4 w-4" />
                               <span>+{pricing.shipping.basePrice.toFixed(2)}€</span>
-                            </div>
-                            <div className="text-green-600 font-medium">
-                              +{profit.toFixed(2)}€ ({Math.round(profitPercentage)}%)
                             </div>
                           </div>
                         </div>
