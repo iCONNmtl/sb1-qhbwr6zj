@@ -47,9 +47,6 @@ export default function SizeMetrics({ sizeMetrics }: SizeMetricsProps) {
         {/* Revenue Chart */}
         <div className="bg-white rounded-xl p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-indigo-100 rounded-lg">
-              <DollarSign className="h-5 w-5 text-indigo-600" />
-            </div>
             <h4 className="font-medium text-gray-900">Chiffre d'affaires</h4>
           </div>
           <div className="h-[200px]">
@@ -68,9 +65,6 @@ export default function SizeMetrics({ sizeMetrics }: SizeMetricsProps) {
         {/* Profit Chart */}
         <div className="bg-white rounded-xl p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <TrendingUp className="h-5 w-5 text-green-600" />
-            </div>
             <h4 className="font-medium text-gray-900">Bénéfices</h4>
           </div>
           <div className="h-[200px]">
@@ -89,9 +83,6 @@ export default function SizeMetrics({ sizeMetrics }: SizeMetricsProps) {
         {/* Items Chart */}
         <div className="bg-white rounded-xl p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <Package className="h-5 w-5 text-purple-600" />
-            </div>
             <h4 className="font-medium text-gray-900">Affiches vendues</h4>
           </div>
           <div className="h-[200px]">
