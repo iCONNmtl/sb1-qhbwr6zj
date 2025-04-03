@@ -403,31 +403,6 @@ export default function Products() {
        <div className="px-4 sm:px-0">
         <PriceComparison />
       </div>
-
-        {/* Shipping Features */}
-        <div className="grid md:grid-cols-3 gap-8 mt-12">
-          <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6">
-            <Truck className="h-8 w-8 mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Expédition rapide</h3>
-            <p className="text-white/80">
-              Vos commandes sont expédiées sous 24h pour une livraison express
-            </p>
-          </div>
-          <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6">
-            <Package className="h-8 w-8 mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Emballage sécurisé</h3>
-            <p className="text-white/80">
-              Tubes rigides et emballages renforcés pour une protection optimale
-            </p>
-          </div>
-          <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6">
-            <Shield className="h-8 w-8 mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Assurance incluse</h3>
-            <p className="text-white/80">
-              Toutes les commandes sont assurées et réexpédiés sans frais
-            </p>
-          </div>
-        </div>
       </div>
 
        {/* FAQ Section */}
