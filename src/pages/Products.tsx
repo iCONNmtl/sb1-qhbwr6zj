@@ -11,7 +11,7 @@ const PRODUCTS = [
     name: 'Poster d\'Art',
     description: 'Impression artistique sur papier texturé 200g/m²',
     image: 'https://d2v7vpg8oce97p.cloudfront.net/Branding/Art.webp',
-    startingPrice: 12,
+    startingPrice: 3.90,
     rating: 4.8,
     reviewCount: 127,
     features: [
@@ -26,7 +26,7 @@ const PRODUCTS = [
     name: 'Poster Premium Mat',
     description: 'Impression mate professionnelle sur papier 250g/m²',
     image: 'https://d2v7vpg8oce97p.cloudfront.net/Branding/Mat.webp',
-    startingPrice: 15,
+    startingPrice: 3.70,
     rating: 4.9,
     reviewCount: 243,
     features: [
@@ -41,7 +41,7 @@ const PRODUCTS = [
     name: 'Poster Premium Semi-Brillant',
     image: 'https://d2v7vpg8oce97p.cloudfront.net/Branding/Glossy.webp',
     description: 'Impression semi-brillante sur papier photo 250g/m²',
-    startingPrice: 15,
+    startingPrice: 3.50,
     rating: 4.7,
     reviewCount: 189,
     features: [
@@ -388,13 +388,13 @@ export default function Products() {
       </div>
 
       {/* Worldwide Shipping Section */}
-      <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl p-8 sm:p-12 text-white">
+      <div className="rounded-2xl p-8 sm:p-12">
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-2 mb-4">
             <Globe2 className="h-8 w-8" />
             <h2 className="text-2xl sm:text-3xl font-bold">Expédition dans le monde entier</h2>
           </div>
-          <p className="text-xl text-white/90 max-w-2xl mx-auto">
+          <p className="text-xl max-w-2xl mx-auto">
           Des imprimeries partenaires sur chaque continent pour une logistique optimisée et des délais de livraison rapides pour satisfaire vos clients
           </p>
         </div>
