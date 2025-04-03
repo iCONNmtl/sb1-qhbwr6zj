@@ -60,6 +60,7 @@ export default function CustomMockupInstructions() {
               {[
                 'Cliquez sur "Uploader mon PSD"',
                 'Un dossier Google Drive sera créé pour vous',
+                'Renommez votre PSD : Mockup.psd',
                 'Déposez votre PSD dans le dossier partagé',
                 'Cliquez sur "Créer mon mockup"'
               ].map((step, index) => (
