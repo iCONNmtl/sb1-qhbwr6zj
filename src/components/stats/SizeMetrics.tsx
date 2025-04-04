@@ -120,7 +120,7 @@ export default function SizeMetrics({ sizeMetrics }: SizeMetricsProps) {
       </div>
 
       {/* Metrics Details */}
-      <div className="bg-white rounded-xl shadow-sm p-6">
+      <div className="bg-white rounded-xl">
         <div className="space-y-6">
           {sizeMetrics.map((size) => {
             const sizeConfig = SIZES.find(s => s.id === size.size);

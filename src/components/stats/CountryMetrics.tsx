@@ -51,7 +51,7 @@ export default function CountryMetrics({ countryMetrics }: CountryMetricsProps) 
       {/* Charts Grid */}
       <div className="grid grid-cols-3 gap-8">
         {/* Revenue Chart */}
-        <div className="bg-white rounded-xl p-6 shadow-sm">
+        <div className="bg-gray-50 rounded-xl p-6">
           <div className="flex items-center gap-3 mb-4">
             <h4 className="font-medium text-gray-900">Chiffre d'affaires</h4>
           </div>
@@ -69,7 +69,7 @@ export default function CountryMetrics({ countryMetrics }: CountryMetricsProps) 
         </div>
 
         {/* Profit Chart */}
-        <div className="bg-white rounded-xl p-6 shadow-sm">
+        <div className="bg-gray-50 rounded-xl p-6">
           <div className="flex items-center gap-3 mb-4">
             <h4 className="font-medium text-gray-900">Bénéfices</h4>
           </div>
@@ -87,7 +87,7 @@ export default function CountryMetrics({ countryMetrics }: CountryMetricsProps) 
         </div>
 
         {/* Items Chart */}
-        <div className="bg-white rounded-xl p-6 shadow-sm">
+        <div className="bg-gray-50 rounded-xl p-6">
           <div className="flex items-center gap-3 mb-4">
             <h4 className="font-medium text-gray-900">Affiches vendues</h4>
           </div>
@@ -106,7 +106,7 @@ export default function CountryMetrics({ countryMetrics }: CountryMetricsProps) 
       </div>
 
       {/* Centralized Legend */}
-      <div className="bg-white rounded-xl p-4 shadow-sm">
+      <div className="bg-gray-50 rounded-xl p-4">
         <ul className="flex flex-wrap justify-center gap-6">
           {countryMetrics.map((country, index) => (
             <li key={country.country} className="flex items-center gap-2">
@@ -124,7 +124,7 @@ export default function CountryMetrics({ countryMetrics }: CountryMetricsProps) 
       </div>
 
       {/* Metrics Details */}
-      <div className="bg-white rounded-xl shadow-sm p-6">
+      <div className="bg-white rounded-xl">
         <div className="space-y-6">
           {countryMetrics.map((country, index) => (
             <div 

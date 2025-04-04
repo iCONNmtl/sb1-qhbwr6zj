@@ -115,7 +115,7 @@ export default function PlatformMetrics({ platformMetrics }: PlatformMetricsProp
       </div>
 
       {/* Metrics Details */}
-      <div className="bg-white rounded-xl p-6">
+      <div className="bg-white rounded-xl">
         <div className="space-y-6">
           {platformMetrics.map((platform) => {
             const platformConfig = PLATFORMS.find(p => p.id === platform.platform);
