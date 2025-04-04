@@ -4,8 +4,8 @@ export const COLORS = {
     cost: '#EF4444',   // Red
     items: '#8B5CF6',  // Purple
     averageOrder: '#F59E0B', // Amber
-    shopify: '#96F2D7',
-    etsy: '#FCD34D',
+    shopify: '#96bf47',
+    etsy: '#f1641e',
     '8x10': '#F472B6',
     '8x12': '#60A5FA',
     '12x18': '#34D399',
