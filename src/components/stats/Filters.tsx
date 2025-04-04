@@ -94,11 +94,7 @@ export default function Filters({
     <div className="bg-white rounded-xl shadow-sm p-6">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-indigo-100 rounded-lg">
-            <Filter className="h-5 w-5 text-indigo-600" />
-          </div>
           <div>
-            <h3 className="font-medium text-gray-900">Filtres</h3>
             {hasActiveFilters && (
               <p className="text-sm text-gray-500 mt-1">
                 {[
