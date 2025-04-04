@@ -49,9 +49,6 @@ export default function Settings() {
 
   const isAdmin = user?.uid === 'Juvh6BgsXhYsi3loKegWfzRIphG2';
 
-  // Si l'utilisateur est admin, ajouter l'onglet plateformes
-  const allTabs = isAdmin ? [...TABS, { id: 'platforms' as const, label: 'Plateformes', icon: ShoppingBag }] : TABS;
-
   useEffect(() => {
     if (!user) return;
 

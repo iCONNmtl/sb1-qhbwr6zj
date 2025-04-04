@@ -24,7 +24,7 @@ export default function CountryMetrics({ countryMetrics }: CountryMetricsProps) 
   // Generate colors for countries
   const countryColors = countryMetrics.map((_, index) => {
     const hue = (index * 360) / countryMetrics.length;
-    return `hsl(${hue}, 70%, 50%)`;
+    return `hsl(${hue}, 50%, 75%)`;
   });
 
   // Prepare data for pie charts
