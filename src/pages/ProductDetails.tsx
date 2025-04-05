@@ -378,7 +378,7 @@ export default function ProductDetails() {
               {SIZES.map((size) => {
                 const pricing = PRODUCT_PRICING['art-poster'].sizes[size.id][selectedRegion];
                 const totalPrice = pricing.price + pricing.shipping.basePrice;
-                const profit = totalPrice - size.cost - pricing.shipping.basePrice;
+                const profit = size.suggestedPrice - totalPrice;
                 
                 return (
                   <div key={size.id} className="bg-gray-50 rounded-xl p-6">
@@ -389,7 +389,7 @@ export default function ProductDetails() {
                       </div>
                       <div>
                         <div className="text-sm text-gray-500 mb-1">Prix d'achat</div>
-                        <div className="font-medium text-gray-900">{size.cost}€</div>
+                        <div className="font-medium text-gray-900">{pricing.price}€</div>
                       </div>
                       <div>
                         <div className="text-sm text-gray-500 mb-1">Frais de port</div>
@@ -398,7 +398,7 @@ export default function ProductDetails() {
                       <div>
                         <div className="text-sm text-gray-500 mb-1">Prix de vente estimé</div>
                         <div className="font-medium text-gray-900">
-                          {pricing.price}€
+                        {size.suggestedPrice}€
                           <span className="ml-2 text-sm text-green-600">
                             (+{profit.toFixed(2)}€)
                           </span>
@@ -414,7 +414,7 @@ export default function ProductDetails() {
       </div>
 
       {/* CTA */}
-      <div className="bg-gray-900 rounded-2xl p-12 text-center">
+      <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl p-12 text-center">
         <h2 className="text-3xl font-bold text-white mb-8">
           Prêt à créer votre produit ?
         </h2>
