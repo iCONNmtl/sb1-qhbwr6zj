@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Zap, Calendar } from 'lucide-react';
+import { Zap, Calendar, Store } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { BackgroundBeamsWithCollision } from '../components/ui/background-beams-with-collision';
 import TrustedCompanies from '../components/home/TrustedCompanies';
@@ -83,19 +83,19 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row gap-4">
               {user ? (
                 <Link
-                  to="/generator"
+                  to="/products"
                   className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 text-lg gradient-bg text-white rounded-xl hover:opacity-90 transition-all duration-200"
                 >
-                  <Zap className="h-5 w-5 mr-2" />
-                  Générer vos mockups
+                  <Store className="h-5 w-5 mr-2" />
+                  Créer vos produits
                 </Link>
               ) : (
                 <>
                   <Link
-                    to="/generator"
+                    to="/products"
                     className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 text-lg gradient-bg text-white rounded-xl hover:opacity-90 transition-all duration-200"
                   >
-                    <Zap className="h-5 w-5 mr-2" />
+                    <Store className="h-5 w-5 mr-2" />
                     Commencer gratuitement
                   </Link>
                   <a

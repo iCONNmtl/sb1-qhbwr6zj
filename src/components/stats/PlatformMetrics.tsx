@@ -1,7 +1,7 @@
 import React from 'react';
 import { COLORS, PLATFORMS } from './constants';
 import PieChartWithTooltip from './PieChartWithTooltip';
-import { Package, TrendingUp, DollarSign } from 'lucide-react';
+import { Package, TrendingUp, DollarSign, Store } from 'lucide-react';
 import type { OrderPlatform } from '../../types/order';
 
 interface PlatformMetricsProps {
@@ -128,7 +128,7 @@ export default function PlatformMetrics({ platformMetrics }: PlatformMetricsProp
                 {/* Platform Info */}
                 <div className="flex items-center gap-3 w-48">
                   <div className="p-2 rounded-lg" style={{ backgroundColor: `${platformConfig?.color}20` }}>
-                    <Package className="h-5 w-5" style={{ color: platformConfig?.color }} />
+                    <Store className="h-5 w-5" style={{ color: platformConfig?.color }} />
                   </div>
                   <span className="font-medium text-gray-900">
                     {platformConfig?.label || platform.platform}
