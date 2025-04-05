@@ -61,6 +61,10 @@ const SIZE_GROUPS = [
     description: 'Formats internationaux courants',
     sizes: [
       SIZES.find(s => s.id === 'A4')!,
+      SIZES.find(s => s.id === 'A3')!,
+      SIZES.find(s => s.id === 'A2')!,
+      SIZES.find(s => s.id === 'A1')!,
+      SIZES.find(s => s.id === 'A0')!,
       SIZES.find(s => s.id === '5x7')!,
       SIZES.find(s => s.id === '20x28')!,
       SIZES.find(s => s.id === '28x40')!
