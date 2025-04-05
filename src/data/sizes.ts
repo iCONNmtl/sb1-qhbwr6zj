@@ -114,6 +114,62 @@ export const SIZES: Size[] = [
     suggestedPrice: 18
   },
   {
+    id: 'A3',
+    name: 'A3',
+    dimensions: {
+      inches: 'A3',
+      cm: '29,7x42cm'
+    },
+    recommendedSize: {
+      width: 3508,
+      height: 4961
+    },
+    cost: 7,
+    suggestedPrice: 18
+  },
+  {
+    id: 'A2',
+    name: 'A2',
+    dimensions: {
+      inches: 'A2',
+      cm: '42x59,4cm'
+    },
+    recommendedSize: {
+      width: 4961,
+      height: 7016
+    },
+    cost: 7,
+    suggestedPrice: 18
+  },
+  {
+    id: 'A1',
+    name: 'A1',
+    dimensions: {
+      inches: 'A1',
+      cm: '59,4x84,1cm'
+    },
+    recommendedSize: {
+      width: 7016,
+      height: 9933
+    },
+    cost: 7,
+    suggestedPrice: 18
+  },
+  {
+    id: 'A0',
+    name: 'A0',
+    dimensions: {
+      inches: 'A0',
+      cm: '84,1x118,9cm'
+    },
+    recommendedSize: {
+      width: 9933,
+      height: 14043
+    },
+    cost: 7,
+    suggestedPrice: 18
+  },
+  {
     id: '5x7',
     name: '5x7"',
     dimensions: {
