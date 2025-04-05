@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useStore } from '../../store/useStore';
-import { Instagram, Linkedin, Facebook, Twitter } from 'lucide-react';
+import { Instagram, Linkedin, Facebook, Twitter, Pinterest } from 'lucide-react';
 import Logo from '../common/Logo';
 import clsx from 'clsx';
 
@@ -10,15 +10,14 @@ const FOOTER_LINKS = [
     title: 'Produit',
     links: [
       { to: '/mockups', label: 'Librairie' },
-      { to: '/pricing', label: 'Tarifs' },
-      { to: '/training', label: 'Formations' },
       { to: '/products', label: 'Catalogue' }
     ]
   },
   {
     title: 'Ressources',
     links: [
-      { to: '/training', label: 'Centre d\'aide' },
+      { to: '/training', label: 'Cours' },
+      { to: '/pricing', label: 'Tarifs' },
       { href: 'https://status.mockuppro.com', label: 'Status' },
       { href: 'https://blog.mockuppro.com', label: 'Blog' }
     ]
@@ -37,22 +36,22 @@ const FOOTER_LINKS = [
 const SOCIAL_LINKS = [
   {
     name: 'Instagram',
-    url: 'https://instagram.com/mockuppro',
+    url: 'https://instagram.com/pixmock',
     icon: Instagram
   },
   {
     name: 'LinkedIn',
-    url: 'https://linkedin.com/company/mockuppro',
+    url: 'https://linkedin.com/company/pixmock',
     icon: Linkedin
   },
   {
     name: 'Facebook',
-    url: 'https://facebook.com/mockuppro',
+    url: 'https://facebook.com/pixmock',
     icon: Facebook
   },
   {
     name: 'Twitter',
-    url: 'https://twitter.com/mockuppro',
+    url: 'https://twitter.com/pixmock',
     icon: Twitter
   }
 ];
@@ -72,7 +71,7 @@ export default function Footer() {
           <div className="md:col-span-4 lg:col-span-5">
             <Logo size="lg" />
             <p className="mt-4 text-base text-gray-600 max-w-md">
-              Créez des mockups professionnels en quelques secondes. La plateforme tout-en-un pour vos présentations de designs.
+            La plateforme de print on demand pour créer et gérer votre business d'affiches de A à Z.
             </p>
           </div>
 

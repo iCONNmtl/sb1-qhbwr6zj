@@ -377,8 +377,7 @@ export default function ProductDetails() {
             <div className="grid gap-4">
               {SIZES.map((size) => {
                 const pricing = PRODUCT_PRICING['art-poster'].sizes[size.id][selectedRegion];
-                const totalPrice = pricing.price + pricing.shipping.basePrice;
-                const profit = size.suggestedPrice - totalPrice;
+                const profit = size.suggestedPrice - pricing.price;
                 
                 return (
                   <div key={size.id} className="bg-gray-50 rounded-xl p-6">
