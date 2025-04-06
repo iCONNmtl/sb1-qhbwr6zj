@@ -94,21 +94,6 @@ export default function ExportFormatSelector({ format, onChange }: ExportFormatS
                   </div>
                 </div>
 
-                {/* Features */}
-                <ul className="space-y-2">
-                  {exportFormat.features.map((feature, index) => (
-                    <li key={index} className="flex items-center text-sm text-gray-600">
-                      <svg className={clsx(
-                        'h-4 w-4 mr-2 flex-shrink-0',
-                        isSelected ? 'text-indigo-600' : 'text-gray-400'
-                      )} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-
                 {/* Selected Indicator */}
                 {isSelected && (
                   <div className="absolute top-4 right-4 w-4 h-4 bg-indigo-600 rounded-full flex items-center justify-center">

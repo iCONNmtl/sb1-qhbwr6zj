@@ -232,7 +232,7 @@ export default function MockupGenerator() {
             <div className="relative flex-1 md:flex-none">
               <button
                 onClick={() => setShowSizeDropdown(!showSizeDropdown)}
-                className="w-full md:w-auto flex items-center px-4 py-2 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors"
+                className="w-full md:w-auto flex items-center px-4 py-2 border border-indigo-600 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors"
               >
                 <Ruler className="h-5 w-5 mr-2" />
                 <span className="flex-1 text-left">

@@ -21,7 +21,7 @@ export default function AnnouncementBanner({ onClose }: AnnouncementBannerProps)
         <div className="max-w-7xl mx-auto py-3 px-4 relative">
           <div className="flex items-center justify-center gap-4">
             <span className="text-white/90">
-              Réservez votre appel gratuit de 30 minutes
+              Rejoignez notre groupe discord
             </span>
             <a
               href="https://calendly.com/contact-pixmock/30min"
@@ -29,7 +29,7 @@ export default function AnnouncementBanner({ onClose }: AnnouncementBannerProps)
               rel="noopener noreferrer"
               className="px-4 py-1 bg-white text-indigo-600 rounded-full hover:bg-indigo-50 transition-colors flex-shrink-0"
             >
-              Réserver un appel
+              Rejoindre le groupe
             </a>
           </div>
           <button
