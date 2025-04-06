@@ -160,35 +160,6 @@ export default function Training() {
         <span className="text-gray-900">Formations</span>
       </div>
 
-      {/* Hero Section */}
-      <div className="text-center space-y-6">
-        <div className="inline-flex items-center px-4 py-2 bg-indigo-100 text-indigo-800 rounded-full">
-          <Crown className="h-5 w-5 mr-2" />
-          <span className="font-medium">Formations exclusives</span>
-        </div>
-        
-        {/* Learning Path */}
-        <div className="relative mt-16 px-4">
-          <div className="absolute top-1/2 left-4 right-4 h-0.5 bg-gradient-to-r from-transparent via-indigo-500 to-transparent hidden md:block" />
-          <div className="relative grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
-            {LEARNING_PATH.map((step, index) => {
-              const Icon = step.icon;
-              return (
-                <div key={index} className="bg-white rounded-xl p-6 shadow-sm relative">
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <div className="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-sm font-medium">
-                      {index + 1}
-                    </div>
-                  </div>
-                  <h3 className="font-semibold text-gray-900 mb-2">{step.title}</h3>
-                  <p className="text-sm text-gray-600">{step.description}</p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
       {/* Training Categories */}
       {trainings.length > 0 && (
         <div className="px-4">

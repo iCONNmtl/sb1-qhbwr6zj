@@ -388,7 +388,7 @@ export default function Products() {
       </div>
 
       {/* Worldwide Shipping Section */}
-      <div className="rounded-2xl p-8 sm:p-12">
+      <div className="rounded-2xl px-4 sm:px-0">
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-2 mb-4">
             <Globe2 className="h-8 w-8" />

@@ -97,48 +97,6 @@ const SIZE_GROUPS = [
     name: '28x40"',
     description: '70x100cm',
     similar: ['A4', '5x7', '20x28']
-  },
-  {
-    id: '16:9',
-    name: 'Paysage 16:9',
-    description: 'Format écran large',
-    similar: ['3:2', '4:3']
-  },
-  {
-    id: '3:2',
-    name: 'Paysage 3:2',
-    description: 'Format photo standard',
-    similar: ['16:9', '4:3']
-  },
-  {
-    id: '4:3',
-    name: 'Paysage 4:3',
-    description: 'Format classique',
-    similar: ['16:9', '3:2']
-  },
-  {
-    id: '1:1',
-    name: 'Carré 1:1',
-    description: 'Format carré',
-    similar: []
-  },
-  {
-    id: '9:16',
-    name: 'Portrait 16:9',
-    description: 'Format vertical écran',
-    similar: ['2:3', '3:4']
-  },
-  {
-    id: '2:3',
-    name: 'Portrait 3:2',
-    description: 'Format photo vertical',
-    similar: ['9:16', '3:4']
-  },
-  {
-    id: '3:4',
-    name: 'Portrait 4:3',
-    description: 'Format classique vertical',
-    similar: ['9:16', '2:3']
   }
 ];
 
@@ -288,7 +246,7 @@ export default function MockupGenerator() {
 
               {/* Size Dropdown */}
               {showSizeDropdown && (
-                <div className="absolute z-50 mt-2 w-full md:w-72 bg-white rounded-xl shadow-lg border border-gray-200 py-2">
+                <div className="absolute z-50 mt-2 w-full md:w-72 border border-indigo-600 bg-white rounded-xl shadow-lg border border-gray-200 py-2">
                   <button
                     onClick={() => handleSizeChange('all')}
                     className={clsx(
@@ -339,7 +297,7 @@ export default function MockupGenerator() {
 
             <Link
               to="/custom-mockup"
-              className="flex items-center px-4 py-2 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors whitespace-nowrap"
+              className="flex items-center px-4 py-2 text-indigo-600 bg-indigo-50 border border-indigo-600 hover:bg-indigo-100 rounded-lg transition-colors whitespace-nowrap"
             >
               <Plus className="h-5 w-5 mr-2" />
               <span>Ajouter votre mockup</span>
