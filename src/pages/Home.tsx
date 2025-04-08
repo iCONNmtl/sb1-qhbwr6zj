@@ -133,7 +133,9 @@ export default function Home() {
        <FeatureBlocks />
 
       {/* Testimonials */}
+      <div className="px-4 md:px-0 py-20">
         <Testimonials />
+      </div>
 
       {/* FAQ */}
       <div className=" pb-20">
@@ -141,7 +143,7 @@ export default function Home() {
       </div>
 
       {!user && (
-        <div className="pb-20">
+        <div className="px-4 md:px-0 pb-20">
           <CTASection />
         </div>
       )}
