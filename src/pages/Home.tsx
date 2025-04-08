@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Zap, Calendar, Store } from 'lucide-react';
+import { Zap, Calendar } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { BackgroundBeamsWithCollision } from '../components/ui/background-beams-with-collision';
 import TrustedCompanies from '../components/home/TrustedCompanies';
@@ -10,6 +10,8 @@ import Testimonials from '../components/home/Testimonials';
 import FAQ from '../components/home/FAQ';
 import CTASection from '../components/home/CTASection';
 import BeforeAfterSection from '../components/home/BeforeAfterSection';
+import SolutionSteps from '../components/home/SolutionSteps';
+import FeatureBlocks from '../components/home/FeatureBlocks';
 import { AnimatedTooltip } from '../components/ui/animated-tooltip';
 
 const USERS = [
@@ -127,27 +129,19 @@ export default function Home() {
         </div>
       </BackgroundBeamsWithCollision>
 
-      {/* Before/After Section */}
-      <BeforeAfterSection />
-
-      {/* Features */}
-      <Features />
-
-       {/* ROI Section */}
-       <ROISection />
+       {/* Feature Blocks */}
+       <FeatureBlocks />
 
       {/* Testimonials */}
-      <div className="px-4 md:px-0 py-20">
         <Testimonials />
-      </div>
 
       {/* FAQ */}
-      <div className="px-4 md:px-0 pt-8 pb-20">
+      <div className=" pb-20">
         <FAQ />
       </div>
 
       {!user && (
-        <div className="px-4 md:px-0 pb-20">
+        <div className="pb-20">
           <CTASection />
         </div>
       )}
