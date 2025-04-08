@@ -19,7 +19,6 @@ const PRODUCTS = {
     features: [
       'Papier texturé premium',
       'Couleurs vibrantes',
-      'Idéal pour les œuvres d\'art',
       'Finition mate élégante'
     ]
   },
@@ -36,8 +35,7 @@ const PRODUCTS = {
     features: [
       'Papier premium 250g/m²',
       'Finition mate anti-reflets',
-      'Rendu professionnel',
-      'Qualité galerie d\'art'
+      'Rendu professionnel'
     ]
   },
   'premium-semigloss': {
@@ -52,7 +50,6 @@ const PRODUCTS = {
     ],
     features: [
       'Papier photo premium',
-      'Couleurs éclatantes',
       'Finition semi-brillante',
       'Idéal pour la photo'
     ]
