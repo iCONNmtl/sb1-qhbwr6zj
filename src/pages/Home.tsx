@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Zap, Calendar } from 'lucide-react';
+import { Zap, Calendar, Store } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { BackgroundBeamsWithCollision } from '../components/ui/background-beams-with-collision';
 import TrustedCompanies from '../components/home/TrustedCompanies';
@@ -133,17 +133,15 @@ export default function Home() {
        <FeatureBlocks />
 
       {/* Testimonials */}
-      <div className="px-4 md:px-0 py-20">
         <Testimonials />
-      </div>
 
       {/* FAQ */}
-      <div className=" pb-20">
+      <div className="pb-20">
         <FAQ />
       </div>
 
       {!user && (
-        <div className="px-4 md:px-0 pb-20">
+        <div className="pb-20">
           <CTASection />
         </div>
       )}
