@@ -199,7 +199,7 @@ export default function TextEditor({
             {layers.length > 0 && (
               <button
                 onClick={handleSaveTemplate}
-                className="flex items-center px-4 py-2 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition"
+                className="flex items-center px-4 py-2 text-indigo-600 bg-indigo-50 border border-indigo-600 hover:bg-indigo-100 rounded-lg transition"
               >
                 <Save className="h-5 w-5 mr-2" />
                 Sauvegarder

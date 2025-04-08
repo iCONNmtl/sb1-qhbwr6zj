@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { Package, Clock, CheckCircle, XCircle, AlertTriangle, Truck, CreditCard, Loader2, DollarSign, MapPin, Box, ChevronUp, ChevronDown, Eye, FileText, BarChart2 } from 'lucide-react';
+import { Package, Clock, CheckCircle, XCircle, AlertTriangle, Truck, CreditCard, Loader2, DollarSign, MapPin, Box, ChevronUp, ChevronDown, Eye, FileText, BarChart2, Plus } from 'lucide-react';
 import CreditPaymentDialog from '../components/orders/CreditPaymentDialog';
+import CreateOrderDialog from '../components/orders/CreateOrderDialog';
 import OrderStats from './OrderStats';
 import Pagination from '../components/Pagination';
 import { usePagination } from '../hooks/usePagination';
@@ -94,6 +95,7 @@ export default function Orders() {
     orderId: string;
     purchasePrice: number;
   } | null>(null);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [autoPayEnabled, setAutoPayEnabled] = useState(false);
   const [savingAutoPaySetting, setSavingAutoPaySetting] = useState(false);
@@ -177,6 +179,11 @@ export default function Orders() {
 
   const handlePaymentSuccess = (orderId: string) => {
     setPaymentDialog(null);
+  };
+
+  const handleOrderCreated = () => {
+    setShowCreateDialog(false);
+    toast.success('Commande créée avec succès');
   };
 
   if (loading) {
@@ -365,6 +372,20 @@ export default function Orders() {
                     />
                   </button>
                 </div>
+              </div>
+
+              {/* Create Order Button */}
+              <div className="flex justify-between items-center">
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Commandes
+                </h2>
+                <button
+                  onClick={() => setShowCreateDialog(true)}
+                  className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+                >
+                  <Plus className="h-5 w-5 mr-2" />
+                  Créer une commande
+                </button>
               </div>
 
               {/* Orders List */}
@@ -711,6 +732,15 @@ export default function Orders() {
           availableCredits={userProfile.subscription.credits}
           onClose={() => setPaymentDialog(null)}
           onSuccess={() => handlePaymentSuccess(paymentDialog.orderId)}
+        />
+      )}
+
+      {/* Create Order Dialog */}
+      {showCreateDialog && user && (
+        <CreateOrderDialog
+          userId={user.uid}
+          onClose={() => setShowCreateDialog(false)}
+          onSuccess={handleOrderCreated}
         />
       )}
     </div>

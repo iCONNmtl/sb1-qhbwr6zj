@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Image, Instagram, ArrowDown, Move, Layout } from 'lucide-react';
+import { Image, Instagram, ArrowDown, Move, Layout, BookmarkIcon } from 'lucide-react';
 import clsx from 'clsx';
 import ImageLoader from '../ImageLoader';
 import MockupPreviewSlider from './MockupPreviewSlider';
@@ -28,7 +28,7 @@ const FORMATS = [
   {
     id: 'original' as const,
     name: 'Original',
-    icon: Layout,
+    icon: Image,
     description: 'Format original du mockup',
     aspectRatio: 1
   },
@@ -43,7 +43,7 @@ const FORMATS = [
   {
     id: 'pinterest' as const,
     name: 'Pinterest',
-    icon: Instagram,
+    icon: BookmarkIcon,
     description: 'Format optimal pour Pinterest',
     aspectRatio: 2/3,
     dimensions: '1000×1500px'
