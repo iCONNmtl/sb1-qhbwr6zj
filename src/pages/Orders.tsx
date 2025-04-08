@@ -219,7 +219,8 @@ export default function Orders() {
         <div className="p-6">
           {activeTab === 'instructions' && (
             <div className="space-y-8">
-              <div className="grid md:grid-cols-3 gap-8">
+              {/* Vertical layout for instruction blocks */}
+              <div className="space-y-8">
                 {SETUP_STEPS.map((section, index) => {
                   const Icon = section.icon;
                   return (
@@ -227,83 +228,103 @@ export default function Orders() {
                       key={index} 
                       className="relative bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
                     >
-                      <div className="absolute -top-4 left-6">
-                        <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg shadow-sm">
-                          <Icon className="h-5 w-5 text-white" />
+                      <div className="flex items-start gap-4">
+                        <div className="p-3 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg shadow-sm flex-shrink-0">
+                          <Icon className="h-6 w-6 text-white" />
                         </div>
-                      </div>
-                      
-                      <div className="mt-4">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                          {section.title}
-                        </h3>
-                        <p className="text-sm text-gray-600 mb-4">
-                          {section.description}
-                        </p>
                         
-                        {'steps' in section && (
-                          <div className="space-y-4">
-                            {section.steps.map((step, stepIndex) => (
-                              <div key={stepIndex} className="flex items-start gap-3">
-                                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm font-medium">
-                                  {stepIndex + 1}
-                                </div>
-                                <div>
-                                  <div className="font-medium text-gray-900">{step.title}</div>
-                                  <p className="text-sm text-gray-600 mt-0.5">{step.description}</p>
-                                  {step.highlight && (
-                                    <div className="mt-2 p-2 bg-indigo-50 border border-indigo-100 rounded-lg">
-                                      <code className="text-sm text-indigo-600 font-mono break-all">
-                                        {step.highlight}
-                                      </code>
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                        
-                        {'platforms' in section && (
-                          <div className="space-y-3">
-                            {section.platforms.map((platform, platformIndex) => (
-                              <div 
-                                key={platformIndex} 
-                                className={clsx(
-                                  "p-3 rounded-lg border",
-                                  platform.color
-                                )}
-                              >
-                                <div className="font-medium mb-1">{platform.name}</div>
-                                <div className="text-sm opacity-80 font-mono">
-                                  {platform.email}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                        
-                        {'features' in section && (
-                          <div className="space-y-4">
-                            {section.features.map((feature, featureIndex) => (
-                              <div key={featureIndex} className="flex items-start gap-3">
-                                <div className="w-1.5 h-1.5 rounded-full bg-indigo-600 mt-2" />
-                                <div>
-                                  <div className="font-medium text-gray-900">
-                                    {feature.title}
+                        <div className="flex-1">
+                          <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                            {section.title}
+                          </h3>
+                          <p className="text-gray-600 mb-4">
+                            {section.description}
+                          </p>
+                          
+                          {'steps' in section && (
+                            <div className="space-y-4">
+                              {section.steps.map((step, stepIndex) => (
+                                <div key={stepIndex} className="flex items-start gap-3">
+                                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm font-medium">
+                                    {stepIndex + 1}
                                   </div>
-                                  <p className="text-sm text-gray-600 mt-0.5">
-                                    {feature.description}
-                                  </p>
+                                  <div>
+                                    <div className="font-medium text-gray-900">{step.title}</div>
+                                    <p className="text-sm text-gray-600 mt-0.5">{step.description}</p>
+                                    {step.highlight && (
+                                      <div className="mt-2 p-2 bg-indigo-50 border border-indigo-100 rounded-lg">
+                                        <code className="text-sm text-indigo-600 font-mono break-all">
+                                          {step.highlight}
+                                        </code>
+                                      </div>
+                                    )}
+                                  </div>
                                 </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
+                              ))}
+                            </div>
+                          )}
+                          
+                          {'platforms' in section && (
+                            <div className="space-y-3">
+                              {section.platforms.map((platform, platformIndex) => (
+                                <div 
+                                  key={platformIndex} 
+                                  className={clsx(
+                                    "p-3 rounded-lg border",
+                                    platform.color
+                                  )}
+                                >
+                                  <div className="font-medium mb-1">{platform.name}</div>
+                                  <div className="text-sm opacity-80 font-mono">
+                                    {platform.email}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          
+                          {'features' in section && (
+                            <div className="space-y-4">
+                              {section.features.map((feature, featureIndex) => (
+                                <div key={featureIndex} className="flex items-start gap-3">
+                                  <div className="w-1.5 h-1.5 rounded-full bg-indigo-600 mt-2" />
+                                  <div>
+                                    <div className="font-medium text-gray-900">
+                                      {feature.title}
+                                    </div>
+                                    <p className="text-sm text-gray-600 mt-0.5">
+                                      {feature.description}
+                                    </p>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   );
                 })}
+              </div>
+
+              {/* Demo Video Section */}
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  Démonstration vidéo
+                </h3>
+                <p className="text-gray-600 mb-6">
+                  Regardez cette vidéo pour voir comment fonctionne l'importation automatique des commandes
+                </p>
+                <div className="aspect-video rounded-xl overflow-hidden bg-gray-100">
+                  <iframe 
+                    className="w-full h-full"
+                    src="https://www.youtube.com/embed/dQw4w9WgXcQ" 
+                    title="Démonstration d'importation de commandes"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  ></iframe>
+                </div>
               </div>
             </div>
           )}

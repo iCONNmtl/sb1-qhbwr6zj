@@ -24,7 +24,7 @@ export default function Signup() {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
       
-      // Create user profile with Basic plan
+      // Create user profile with Basic plan and 25 credits
       const userProfile: UserProfile = {
         email: user.email!,
         subscription: {
@@ -39,7 +39,7 @@ export default function Signup() {
       await setDoc(doc(db, 'users', user.uid), userProfile);
       setUser(user);
       toast.success('Compte créé avec succès');
-      navigate('/dashboard');
+      navigate('/');
     } catch (error: any) {
       if (error.code === 'auth/email-already-in-use') {
         toast.error('Cette adresse email est déjà utilisée');

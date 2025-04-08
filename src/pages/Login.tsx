@@ -15,10 +15,10 @@ export default function Login() {
   const navigate = useNavigate();
   const { user, setUser } = useStore();
 
-  // Rediriger vers le générateur si déjà connecté
+  // Rediriger vers l'accueil si déjà connecté
   useEffect(() => {
     if (user) {
-      navigate('/generator');
+      navigate('/');
     }
   }, [user, navigate]);
 
@@ -30,7 +30,7 @@ export default function Login() {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       setUser(userCredential.user);
       toast.success('Connexion réussie');
-      navigate('/generator');
+      navigate('/');
     } catch (error) {
       toast.error('Identifiants incorrects');
     } finally {

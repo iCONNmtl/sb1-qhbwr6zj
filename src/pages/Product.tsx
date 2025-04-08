@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { SIZES } from '../data/sizes';
-import { PRODUCT_PRICING, getProductPricing } from '../data/shipping';
+import { PRODUCT_PRICING, getProductPricing, CONTINENTS } from '../data/shipping';
 import { collection, addDoc, doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { nanoid } from 'nanoid';
-import { Save, Loader2, Check, ChevronRight, AlertCircle, Image, DollarSign, Info } from 'lucide-react';
+import { Save, Loader2, Check, ChevronRight, AlertCircle, Image, DollarSign, Info, Globe2 } from 'lucide-react';
 import DesignSelector from '../components/DesignSelector';
 import { checkDesignCompatibility } from '../utils/designCompatibility';
 import toast from 'react-hot-toast';
@@ -98,6 +98,29 @@ const getSimilarSizes = (sizeId: string): string[] => {
   } as const;
 
   return similarGroups[sizeId as keyof typeof similarGroups] || [];
+};
+
+// Get recommended regions for a size
+const getRecommendedRegions = (sizeId: string): string[] => {
+  const recommendations = {
+    '8x10': ['europe', 'northAmerica'],
+    '8x12': ['europe', 'northAmerica'],
+    '12x18': ['europe', 'northAmerica', 'asia'],
+    '24x36': ['europe', 'northAmerica'],
+    '11x14': ['northAmerica'],
+    '11x17': ['northAmerica'],
+    '18x24': ['europe'],
+    'A4': ['europe', 'asia'],
+    'A3': ['europe', 'asia'],
+    'A2': ['europe', 'asia'],
+    'A1': ['europe', 'asia'],
+    'A0': ['europe', 'asia'],
+    '5x7': ['europe', 'northAmerica', 'asia'],
+    '20x28': ['europe'],
+    '28x40': ['europe']
+  } as const;
+
+  return recommendations[sizeId as keyof typeof recommendations] || ['europe'];
 };
 
 export default function Product() {
@@ -290,6 +313,34 @@ export default function Product() {
     setCurrentSizeId(null);
   };
 
+  // Get global estimated selling price for a size
+  const getEstimatedSellingPrice = (sizeId: string) => {
+    const size = SIZES.find(s => s.id === sizeId);
+    if (!size) return null;
+    
+    // Calculate average price across regions
+    let totalPrice = 0;
+    let count = 0;
+    
+    Object.keys(CONTINENTS).forEach(region => {
+      const pricing = getProductPricing(productType, sizeId, region);
+      if (pricing) {
+        totalPrice += pricing.price;
+        count++;
+      }
+    });
+    
+    const averagePrice = count > 0 ? Math.round(totalPrice / count) : size.suggestedPrice;
+    const profit = averagePrice - size.cost;
+    const profitPercentage = (profit / averagePrice) * 100;
+    
+    return {
+      price: averagePrice,
+      profit,
+      profitPercentage: Math.round(profitPercentage)
+    };
+  };
+
   return (
     <div className="max-w-7xl mx-auto space-y-8">
       <div className="flex items-center justify-between">
@@ -347,6 +398,9 @@ export default function Product() {
               <div className="divide-y divide-gray-100">
                 {group.sizes.map((size) => {
                   const config = sizeConfigurations.find(c => c.size.id === size.id)!;
+                  const recommendedRegions = getRecommendedRegions(size.id);
+                  const estimatedPrice = getEstimatedSellingPrice(size.id);
+                  
                   return (
                     <button
                       key={size.id}
@@ -366,6 +420,30 @@ export default function Product() {
                           <div className="text-sm text-gray-500">
                             {size.dimensions.cm}
                           </div>
+                          
+                          {/* Recommended regions */}
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {recommendedRegions.map(region => (
+                              <span 
+                                key={region} 
+                                className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-50 text-blue-700"
+                              >
+                                <Globe2 className="h-3 w-3 mr-1" />
+                                {CONTINENTS[region].name}
+                              </span>
+                            ))}
+                          </div>
+                          
+                          {/* Estimated price */}
+                          {estimatedPrice && !config.isLocked && currentSizeId !== size.id && (
+                            <div className="mt-2 text-sm">
+                              <span className="text-gray-500">Prix estimé: </span>
+                              <span className="font-medium text-gray-900">{estimatedPrice.price}€</span>
+                              <span className="text-green-600 ml-1">
+                                (+{estimatedPrice.profit}€)
+                              </span>
+                            </div>
+                          )}
                         </div>
                         {config.isLocked ? (
                           <Check className="h-5 w-5 text-green-600" />
@@ -430,14 +508,6 @@ export default function Product() {
                     {sizeConfigurations.find(c => c.size.id === currentSizeId)?.size.dimensions.cm}
                   </p>
                 </div>
-                <button
-                  onClick={handleValidateSize}
-                  disabled={!sizeConfigurations.find(c => c.size.id === currentSizeId)?.isValid}
-                  className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:opacity-50"
-                >
-                  <Check className="h-5 w-5 mr-2" />
-                  Valider
-                </button>
               </div>
 
               <div className="space-y-8">
@@ -484,7 +554,7 @@ export default function Product() {
                     2. Prix de vente
                   </h3>
                   <div className="bg-gray-50 rounded-xl p-6">
-                    <div className="grid grid-cols-3 gap-6">
+                    <div className="grid grid-cols-3 gap-6 mb-6">
                       <div>
                         <div className="text-sm text-gray-500 mb-1">Prix d'achat</div>
                         <div className="text-2xl font-semibold text-gray-900">
@@ -520,6 +590,75 @@ export default function Product() {
                       </div>
                     </div>
 
+                    {/* Prix estimé global */}
+                    {currentSizeId && (
+                      <div className="mt-6 pt-6 border-t border-gray-200">
+                        <h4 className="font-medium text-gray-900 mb-4 flex items-center gap-2">
+                          <Globe2 className="h-4 w-4 text-gray-500" />
+                          Prix de vente estimé
+                        </h4>
+                        <div className="bg-white p-4 rounded-lg border border-gray-200">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="font-medium text-gray-900">Prix conseillé global</div>
+                            <div className="text-sm text-gray-500">
+                              Moyenne sur toutes les régions
+                            </div>
+                          </div>
+                          
+                          {(() => {
+                            const estimatedPrice = getEstimatedSellingPrice(currentSizeId);
+                            if (!estimatedPrice) return null;
+                            
+                            return (
+                              <>
+                                <div className="flex items-center justify-between">
+                                  <div className="text-sm text-gray-600">Prix conseillé:</div>
+                                  <div className="text-xl font-semibold text-gray-900">{estimatedPrice.price}€</div>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <div className="text-sm text-gray-600">Bénéfice estimé:</div>
+                                  <div className="text-lg font-medium text-green-600">
+                                    +{estimatedPrice.profit.toFixed(2)}€ ({estimatedPrice.profitPercentage}%)
+                                  </div>
+                                </div>
+                                <div className="mt-3 text-sm text-gray-500">
+                                  <div className="flex items-start gap-2">
+                                    <Info className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                                    <p>Ce prix est une moyenne des prix conseillés sur toutes les régions. Vous pouvez l'ajuster selon votre stratégie commerciale.</p>
+                                  </div>
+                                </div>
+                              </>
+                            );
+                          })()}
+                        </div>
+                        
+                        <div className="mt-4 grid grid-cols-2 gap-4">
+                          <div className="bg-indigo-50 p-3 rounded-lg">
+                            <div className="font-medium text-indigo-900 mb-1">Régions recommandées</div>
+                            <div className="flex flex-wrap gap-1">
+                              {getRecommendedRegions(currentSizeId).map(region => (
+                                <span 
+                                  key={region} 
+                                  className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-indigo-100 text-indigo-800"
+                                >
+                                  <Globe2 className="h-3 w-3 mr-1" />
+                                  {CONTINENTS[region].name}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                          
+                          <div className="bg-green-50 p-3 rounded-lg">
+                            <div className="font-medium text-green-900 mb-1">Frais de livraison</div>
+                            <div className="text-sm text-green-800">
+                              De {Math.min(...Object.values(CONTINENTS).map(c => c.shipping.basePrice))}€ à {Math.max(...Object.values(CONTINENTS).map(c => c.shipping.basePrice))}€
+                              <div className="mt-1 text-xs">selon la région de livraison</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     {(sizeConfigurations.find(c => c.size.id === currentSizeId)?.price || 0) < (sizeConfigurations.find(c => c.size.id === currentSizeId)?.size.cost || 0) && (
                       <div className="mt-4 p-3 bg-red-50 rounded-lg flex items-start">
                         <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 mr-2" />
@@ -528,6 +667,18 @@ export default function Product() {
                         </div>
                       </div>
                     )}
+                    
+                    {/* Validate button moved below price section */}
+                    <div className="mt-6 flex justify-end">
+                      <button
+                        onClick={handleValidateSize}
+                        disabled={!sizeConfigurations.find(c => c.size.id === currentSizeId)?.isValid}
+                        className="flex items-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:opacity-50"
+                      >
+                        <Check className="h-5 w-5 mr-2" />
+                        Valider cette taille
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

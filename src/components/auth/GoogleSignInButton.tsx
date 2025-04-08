@@ -16,7 +16,7 @@ export default function GoogleSignInButton({ className }: GoogleSignInButtonProp
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
       toast.success('Connexion réussie');
-      navigate('/dashboard');
+      navigate('/');
     } catch (error: any) {
       console.error('Google sign in error:', error);
       toast.error('Erreur lors de la connexion avec Google');
