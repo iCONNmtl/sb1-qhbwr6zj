@@ -11,13 +11,14 @@ const PRODUCTS = {
     description: 'Impression artistique sur papier texturé 200g/m²',
     startingPrice: 10,
     images: [
-      'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?auto=format&fit=crop&q=80&w=2574',
-      'https://images.unsplash.com/photo-1582053433976-25c00369fc93?auto=format&fit=crop&q=80&w=2512',
-      'https://images.unsplash.com/photo-1581430872221-d1cfed785922?auto=format&fit=crop&q=80&w=2670'
+      'https://d2v7vpg8oce97p.cloudfront.net/Branding/Art1.webp',
+      'https://d2v7vpg8oce97p.cloudfront.net/Branding/Art2.webp',
+      'https://d2v7vpg8oce97p.cloudfront.net/Branding/Art3.webp',
+      'https://d2v7vpg8oce97p.cloudfront.net/Branding/4.webp'
     ],
     features: [
       'Papier texturé premium',
-      'Rendu artistique unique',
+      'Couleurs vibrantes',
       'Idéal pour les œuvres d\'art',
       'Finition mate élégante'
     ]
@@ -27,9 +28,10 @@ const PRODUCTS = {
     description: 'Impression mate professionnelle sur papier 250g/m²',
     startingPrice: 15,
     images: [
-      'https://images.unsplash.com/photo-1581430872221-d1cfed785922?auto=format&fit=crop&q=80&w=2670',
-      'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?auto=format&fit=crop&q=80&w=2574',
-      'https://images.unsplash.com/photo-1582053433976-25c00369fc93?auto=format&fit=crop&q=80&w=2512'
+      'https://d2v7vpg8oce97p.cloudfront.net/Branding/Mat1.webp',
+      'https://d2v7vpg8oce97p.cloudfront.net/Branding/Mat2.webp',
+      'https://d2v7vpg8oce97p.cloudfront.net/Branding/Mat3.webp',
+      'https://d2v7vpg8oce97p.cloudfront.net/Branding/4.webp'
     ],
     features: [
       'Papier premium 250g/m²',
@@ -43,9 +45,10 @@ const PRODUCTS = {
     description: 'Impression semi-brillante sur papier photo 250g/m²',
     startingPrice: 15,
     images: [
-      'https://images.unsplash.com/photo-1582053433976-25c00369fc93?auto=format&fit=crop&q=80&w=2512',
-      'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?auto=format&fit=crop&q=80&w=2574',
-      'https://images.unsplash.com/photo-1581430872221-d1cfed785922?auto=format&fit=crop&q=80&w=2670'
+      'https://d2v7vpg8oce97p.cloudfront.net/Branding/Glossy1.webp',
+      'https://d2v7vpg8oce97p.cloudfront.net/Branding/Glossy2.webp',
+      'https://d2v7vpg8oce97p.cloudfront.net/Branding/Glossy3.webp',
+      'https://d2v7vpg8oce97p.cloudfront.net/Branding/4.webp'
     ],
     features: [
       'Papier photo premium',
