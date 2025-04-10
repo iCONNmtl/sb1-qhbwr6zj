@@ -131,8 +131,7 @@ export default function FeatureBlocks() {
               {/* Image or Compare Component */}
               <div className="w-full md:w-1/2 relative">
                 <div className={clsx(
-                  "absolute -inset-4 rounded-2xl bg-gradient-to-r opacity-20 blur-2xl",
-                  block.color
+                  "absolute -inset-4 rounded-2xl blur-2xl"
                 )} />
                 <div className="relative overflow-hidden rounded-2xl aspect-[4/3]">
                   {block.useCompare ? (

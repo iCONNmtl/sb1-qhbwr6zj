@@ -3,10 +3,11 @@ import { Link } from 'react-router-dom';
 import { collection, query, where, getDocs, doc, deleteDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useStore } from '../store/useStore';
-import { Package, Edit, Trash2, Plus, Loader2, ChevronDown, ChevronUp, DollarSign, Eye, Globe2 } from 'lucide-react';
+import { Package, Edit, Trash2, Plus, Loader2, ChevronDown, ChevronUp, DollarSign, Eye, Globe2, Calendar, BarChart2, Layers, Store } from 'lucide-react';
 import ImageLoader from '../components/ImageLoader';
 import { usePagination } from '../hooks/usePagination';
 import Pagination from '../components/Pagination';
+import ProductPlatformExport from '../components/products/ProductPlatformExport';
 import toast from 'react-hot-toast';
 import clsx from 'clsx';
 
@@ -37,6 +38,7 @@ export default function MyProducts() {
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [expandedProduct, setExpandedProduct] = useState<string | null>(null);
+  const [showExportDialog, setShowExportDialog] = useState<Product | null>(null);
 
   const {
     currentPage,
@@ -143,145 +145,209 @@ export default function MyProducts() {
           </Link>
         </div>
       ) : (
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-          <div className="divide-y divide-gray-200">
-            {paginatedProducts.map((product) => (
-              <div key={product.firestoreId} className="p-6">
-                <div className="flex items-center gap-4">
-                  {/* Thumbnail */}
-                  <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
-                    <ImageLoader
-                      src={product.designUrl}
-                      alt={product.title || product.name}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
+        <div className="grid gap-6">
+          {paginatedProducts.map((product) => {
+            // Calculate stats
+            const totalVariants = product.variants.length;
+            const minPrice = Math.min(...product.variants.map(v => v.price));
+            const maxPrice = Math.max(...product.variants.map(v => v.price));
+            const totalProfit = product.variants.reduce((sum, v) => sum + (v.price - v.cost), 0);
+            const avgProfit = totalProfit / totalVariants;
+            const avgProfitPercentage = (avgProfit / (product.variants.reduce((sum, v) => sum + v.price, 0) / totalVariants)) * 100;
 
-                  {/* Product Info */}
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-gray-900">
-                      {product.title || product.name}
-                    </h3>
-                    <div className="text-sm text-gray-500">
-                      {product.type} • {product.variants.length} taille{product.variants.length > 1 ? 's' : ''} • 
-                      Créé le {new Date(product.createdAt).toLocaleDateString()}
+            return (
+              <div 
+                key={product.firestoreId} 
+                className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 hover:shadow-md transition-shadow duration-200"
+              >
+                <div className="p-6">
+                  <div className="flex items-start gap-6">
+                    {/* Thumbnail */}
+                    <div className="relative w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
+                      <ImageLoader
+                        src={product.designUrl}
+                        alt={product.title || product.name}
+                        className="w-full h-full object-contain"
+                      />
                     </div>
-                  </div>
 
-                  {/* Actions */}
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setExpandedProduct(expandedProduct === product.firestoreId ? null : product.firestoreId)}
-                      className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition"
-                      title="Voir les détails"
-                    >
-                      {expandedProduct === product.firestoreId ? (
-                        <ChevronUp className="h-5 w-5" />
-                      ) : (
-                        <ChevronDown className="h-5 w-5" />
-                      )}
-                    </button>
-                    <Link
-                      to={`/product/edit/${product.firestoreId}`}
-                      className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition"
-                    >
-                      <Edit className="h-5 w-5" />
-                    </Link>
-                    <button
-                      onClick={() => handleDelete(product.firestoreId)}
-                      disabled={deletingId === product.firestoreId}
-                      className={clsx(
-                        'p-2 rounded-lg transition',
-                        deletingId === product.firestoreId
-                          ? 'opacity-50 cursor-not-allowed'
-                          : 'text-red-600 hover:bg-red-50'
-                      )}
-                    >
-                      {deletingId === product.firestoreId ? (
-                        <Loader2 className="h-5 w-5 animate-spin" />
-                      ) : (
-                        <Trash2 className="h-5 w-5" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Variants Details */}
-                {expandedProduct === product.firestoreId && (
-                  <div className="mt-6 border-t border-gray-100 pt-6">
-                    <div className="space-y-4">
-                      {product.variants.map((variant) => (
-                        <div key={variant.sizeId} className="bg-gray-50 rounded-lg p-4">
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            {/* Size Info */}
-                            <div>
-                              <div className="text-sm font-medium text-gray-900">
-                                {variant.dimensions.inches}
-                              </div>
-                              <div className="text-sm text-gray-500">
-                                {variant.dimensions.cm}
-                              </div>
-                            </div>
-
-                            {/* Price Info */}
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <DollarSign className="h-4 w-4 text-gray-400" />
-                                <div className="text-sm font-medium text-gray-900">
-                                  Prix de vente: {variant.price}€
-                                </div>
-                              </div>
-                              <div className="text-sm text-gray-500">
-                                Prix d'achat: {variant.cost}€
-                              </div>
-                              <div className="text-sm font-medium text-green-600">
-                                Bénéfice: {(variant.price - variant.cost).toFixed(2)}€
-                              </div>
-                            </div>
-
-                            {/* SKU */}
-                            <div>
-                              <div className="text-sm font-medium text-gray-900">
-                                SKU
-                              </div>
-                              <div className="text-sm font-mono text-gray-500">
-                                {variant.sku}
-                              </div>
-                            </div>
-
-                            {/* Design Link */}
-                            <div>
-                              <div className="text-sm font-medium text-gray-900 mb-2">
-                                Design
-                              </div>
-                              <a
-                                href={product.designUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-colors"
-                              >
-                                <Eye className="h-4 w-4 mr-2" />
-                                Voir le design
-                              </a>
-                            </div>
-                          </div>
+                    {/* Product Info */}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-gray-900 text-lg mb-2">
+                        {product.title || product.name}
+                      </h3>
+                      <div className="flex flex-wrap gap-4 text-sm">
+                        <div className="flex items-center gap-2">
+                          <Package className="h-4 w-4 text-gray-400" />
+                          <span className="text-gray-600">{product.type}</span>
                         </div>
-                      ))}
+                        <div className="flex items-center gap-2">
+                          <Layers className="h-4 w-4 text-gray-400" />
+                          <span className="text-gray-600">{totalVariants} taille{totalVariants > 1 ? 's' : ''}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <DollarSign className="h-4 w-4 text-gray-400" />
+                          <span className="text-gray-600">{minPrice === maxPrice ? `${minPrice}€` : `${minPrice}€ - ${maxPrice}€`}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <BarChart2 className="h-4 w-4 text-green-500" />
+                          <span className="text-green-600">+{avgProfit.toFixed(2)}€ ({Math.round(avgProfitPercentage)}%)</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4 text-gray-400" />
+                          <span className="text-gray-600">
+                            Créé le {new Date(product.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setShowExportDialog(product)}
+                        className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition"
+                        title="Exporter"
+                      >
+                        <Store className="h-5 w-5" />
+                      </button>
+                      <Link
+                        to={`/product/edit/${product.firestoreId}`}
+                        className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition"
+                        title="Modifier"
+                      >
+                        <Edit className="h-5 w-5" />
+                      </Link>
+                      <button
+                        onClick={() => handleDelete(product.firestoreId)}
+                        disabled={deletingId === product.firestoreId}
+                        className={clsx(
+                          'p-2 rounded-lg transition',
+                          deletingId === product.firestoreId
+                            ? 'opacity-50 cursor-not-allowed'
+                            : 'text-red-600 hover:bg-red-50'
+                        )}
+                        title="Supprimer"
+                      >
+                        {deletingId === product.firestoreId ? (
+                          <Loader2 className="h-5 w-5 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-5 w-5" />
+                        )}
+                      </button>
+                      <button
+                        onClick={() => setExpandedProduct(expandedProduct === product.firestoreId ? null : product.firestoreId)}
+                        className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition"
+                        title="Voir les détails"
+                      >
+                        {expandedProduct === product.firestoreId ? (
+                          <ChevronUp className="h-5 w-5" />
+                        ) : (
+                          <ChevronDown className="h-5 w-5" />
+                        )}
+                      </button>
                     </div>
                   </div>
-                )}
-              </div>
-            ))}
-          </div>
 
-          <Pagination
-            currentPage={currentPage}
-            totalItems={totalItems}
-            pageSize={pageSize}
-            onPageChange={setCurrentPage}
-            onPageSizeChange={setPageSize}
-          />
+                  {/* Expanded Details */}
+                  {expandedProduct === product.firestoreId && (
+                    <div className="mt-6 pt-6 border-t border-gray-100">
+                      <h4 className="font-medium text-gray-900 mb-4">Variantes</h4>
+                      <div className="overflow-x-auto -mx-6">
+                        <div className="inline-block min-w-full align-middle px-6">
+                          <table className="min-w-full divide-y divide-gray-200">
+                            <thead>
+                              <tr>
+                                <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  Format
+                                </th>
+                                <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  Dimensions
+                                </th>
+                                <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  SKU
+                                </th>
+                                <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  Prix
+                                </th>
+                                <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  Coût
+                                </th>
+                                <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  Bénéfice
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                              {product.variants.map((variant, idx) => (
+                                <tr key={variant.sizeId} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                                  <td className="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                    {variant.dimensions.inches}
+                                  </td>
+                                  <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {variant.dimensions.cm}
+                                  </td>
+                                  <td className="px-3 py-4 whitespace-nowrap text-sm font-mono text-gray-500">
+                                    {variant.sku}
+                                  </td>
+                                  <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {variant.price}€
+                                  </td>
+                                  <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {variant.cost}€
+                                  </td>
+                                  <td className="px-3 py-4 whitespace-nowrap">
+                                    <div className="flex items-center">
+                                      <span className="text-sm font-medium text-green-600">
+                                        +{(variant.price - variant.cost).toFixed(2)}€
+                                      </span>
+                                      <span className="ml-2 text-xs text-gray-500">
+                                        ({Math.round(((variant.price - variant.cost) / variant.price) * 100)}%)
+                                      </span>
+                                    </div>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+
+                      <div className="mt-6 flex justify-end">
+                        <button
+                          onClick={() => setShowExportDialog(product)}
+                          className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+                        >
+                          <Store className="h-5 w-5 mr-2" />
+                          Exporter vers les plateformes
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
+      )}
+
+      {products.length > 0 && (
+        <Pagination
+          currentPage={currentPage}
+          totalItems={totalItems}
+          pageSize={pageSize}
+          onPageChange={setCurrentPage}
+          onPageSizeChange={setPageSize}
+        />
+      )}
+
+      {/* Export Dialog */}
+      {showExportDialog && (
+        <ProductPlatformExport
+          isOpen={true}
+          onClose={() => setShowExportDialog(null)}
+          product={showExportDialog}
+        />
       )}
     </div>
   );
