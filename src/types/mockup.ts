@@ -16,18 +16,31 @@ export type StandardAspectRatio =
 export type AspectRatio = LegacyAspectRatio | StandardAspectRatio;
 export type ExportFormat = 'webp' | 'png';
 export type GenerationPlatform = 'instagram' | 'pinterest' | null;
-export type LayerType = 'text' | 'image';
+
+export interface Mockup {
+  id: string;
+  firestoreId: string;
+  name: string;
+  category: string;
+  aspectRatio: AspectRatio;
+  previewUrl?: string;
+  previewUrlAfter?: string;
+  mockupUuid: string;
+  smartObjectUuid: string;
+  active: boolean;
+  createdAt: string;
+}
 
 export interface TextStyle {
   fontSize: string;
   fontWeight: 'normal' | 'bold';
   fontStyle: 'normal' | 'italic';
   color: string;
-  textAlign: 'left' | 'center' | 'right';
   fontFamily: string;
+  textAlign: 'left' | 'center' | 'right';
   backgroundColor?: string;
-  borderRadius?: string;
   padding?: string;
+  borderRadius?: string;
 }
 
 export interface ImageStyle {
@@ -35,30 +48,36 @@ export interface ImageStyle {
   opacity: string;
 }
 
-export interface Layer {
+export interface TextLayer {
   id: string;
-  type: LayerType;
-  position: {
-    x: number;
-    y: number;
-  };
-}
-
-export interface TextLayer extends Layer {
   type: 'text';
   text: string;
   style: TextStyle;
+  position: { x: number; y: number };
 }
 
-export interface ImageLayer extends Layer {
+export interface ImageLayer {
+  id: string;
   type: 'image';
   url: string;
   style: ImageStyle;
+  position: { x: number; y: number };
 }
 
-export interface Mockup {
+export interface Generation {
   id: string;
-  name: string;
-  url: string;
-  platform?: GenerationPlatform;
+  userId: string;
+  designName: string;
+  mockups: {
+    id: string;
+    name: string;
+    url: string;
+    platform?: GenerationPlatform;
+  }[];
+  exportFormat: ExportFormat;
+  customHtml?: string | null;
+  customizedMockups?: number[];
+  creditsUsed: number;
+  createdAt: string;
+  status: 'completed' | 'failed' | 'processing';
 }
