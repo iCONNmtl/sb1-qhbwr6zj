@@ -39,7 +39,7 @@ const PRODUCTS = [
     id: 'art-poster',
     name: 'Poster d\'Art',
     description: 'Impression artistique sur papier texturé 200g/m²',
-    image: 'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?auto=format&fit=crop&q=80&w=2574',
+    image: 'https://d2v7vpg8oce97p.cloudfront.net/Branding/Art1.webp',
     startingPrice: 12,
     rating: 4.8,
     reviewCount: 127,
@@ -55,7 +55,7 @@ const PRODUCTS = [
     id: 'premium-mat',
     name: 'Poster Premium Mat',
     description: 'Impression mate professionnelle sur papier 250g/m²',
-    image: 'https://images.unsplash.com/photo-1581430872221-d1cfed785922?auto=format&fit=crop&q=80&w=2670',
+    image: 'https://d2v7vpg8oce97p.cloudfront.net/Branding/Mat1.webp',
     startingPrice: 15,
     rating: 4.9,
     reviewCount: 243,
@@ -70,7 +70,7 @@ const PRODUCTS = [
   {
     id: 'premium-semigloss',
     name: 'Poster Premium Semi-Brillant',
-    image: 'https://images.unsplash.com/photo-1582053433976-25c00369fc93?auto=format&fit=crop&q=80&w=2512',
+    image: 'https://d2v7vpg8oce97p.cloudfront.net/Branding/Glossy1.webp',
     description: 'Impression semi-brillante sur papier photo 250g/m²',
     startingPrice: 15,
     rating: 4.7,
@@ -322,23 +322,16 @@ function PriceComparison() {
                     const pricing = product.sizes[size.id]?.[selectedRegion];
                     if (!pricing) return <td key={productId} className="py-4 px-4 text-center">-</td>;
 
-                    const totalPrice = pricing.price + pricing.shipping.basePrice;
-                    const profit = totalPrice - size.cost - pricing.shipping.basePrice;
-                    const profitPercentage = (profit / totalPrice) * 100;
-
                     return (
                       <td key={productId} className="py-4 px-4">
                         <div className="text-center space-y-2">
                           <div className="text-lg font-semibold text-indigo-600">
-                            {totalPrice.toFixed(2)}€
+                            {pricing.price.toFixed(2)}€
                           </div>
                           <div className="flex flex-col items-center gap-1 text-sm">
                             <div className="flex items-center gap-1 text-gray-500">
                               <Truck className="h-4 w-4" />
                               <span>+{pricing.shipping.basePrice.toFixed(2)}€</span>
-                            </div>
-                            <div className="text-green-600 font-medium">
-                              +{profit.toFixed(2)}€ ({Math.round(profitPercentage)}%)
                             </div>
                           </div>
                         </div>
@@ -483,7 +476,7 @@ export default function Products() {
   return (
     <div className="space-y-16">
       {/* Hero Section - Improved Design */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 p-8 sm:p-12 text-white shadow-xl">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-purple-600 to-indigo-600 p-8 sm:p-12 text-white shadow-xl">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2426&q=80')] bg-cover bg-center opacity-20"></div>
         
         <div className="relative z-10 text-center space-y-6">
@@ -500,26 +493,6 @@ export default function Products() {
             Des produits de qualité premium, une logistique simplifiée et des marges attractives
           </p>
 
-          {/* Stats */}
-          <div className="flex flex-wrap justify-center gap-8 sm:gap-12 mt-8">
-            {STATS.map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="text-3xl sm:text-4xl font-bold text-white">{stat.value}</div>
-                <div className="text-sm text-white/80">{stat.label}</div>
-              </div>
-            ))}
-          </div>
-          
-          {/* CTA Button */}
-          <div className="mt-8">
-            <Link
-              to="/signup"
-              className="inline-flex items-center px-6 py-3 bg-white text-indigo-600 rounded-xl hover:bg-indigo-50 transition-colors shadow-lg"
-            >
-              <Zap className="h-5 w-5 mr-2" />
-              Commencer gratuitement
-            </Link>
-          </div>
         </div>
       </div>
 
@@ -566,16 +539,7 @@ export default function Products() {
                 </div>
               </div>
             </div>
-            
-            <div className="mt-8">
-              <Link
-                to="/products/art-poster"
-                className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-              >
-                <Package className="h-5 w-5 mr-2" />
-                Découvrir nos produits
-              </Link>
-            </div>
+          
           </div>
           
           {/* Network Map */}
@@ -589,7 +553,7 @@ export default function Products() {
             
             <div className="relative aspect-[4/3] rounded-lg overflow-hidden mb-4">
               <img 
-                src="https://images.unsplash.com/photo-1504052434569-70ad5836ab65?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2000&q=80" 
+                src="https://d2v7vpg8oce97p.cloudfront.net/Branding/World.webp" 
                 alt="Réseau d'impression mondial" 
                 className="w-full h-full object-cover"
               />
@@ -723,7 +687,7 @@ export default function Products() {
       </div>
 
       {/* Services Section with Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 p-8 sm:p-12 text-white shadow-xl mb-12">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-purple-600 to-indigo-600 p-8 sm:p-12 text-white shadow-xl mb-12">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1557683316-973673baf926?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2426&q=80')] bg-cover bg-center opacity-20"></div>
         
         <div className="relative z-10 text-center space-y-6">
@@ -761,11 +725,6 @@ export default function Products() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                 
-                {/* Icon */}
-                <div className="absolute top-3 left-3 p-2 bg-white/90 backdrop-blur-sm rounded-lg">
-                  <Icon className="h-4 w-4 text-indigo-600" />
-                </div>
-                
                 {/* Price */}
                 <div className="absolute bottom-3 right-3 px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-lg">
                   <span className="font-semibold text-indigo-600">{service.price}€</span>
@@ -801,36 +760,13 @@ export default function Products() {
         })}
       </div>
 
-      {/* Benefits Section - Improved Design */}
-      <div className="grid md:grid-cols-3 gap-8">
-        {BENEFITS.map((benefit, index) => {
-          const Icon = benefit.icon;
-          return (
-            <div 
-              key={index} 
-              className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow border border-gray-100"
-            >
-              <div className="p-3 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-xl w-fit mb-4">
-                <Icon className="h-6 w-6 text-indigo-600" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                {benefit.title}
-              </h3>
-              <p className="text-gray-600">
-                {benefit.description}
-              </p>
-            </div>
-          );
-        })}
-      </div>
-
       {/* FAQ Section - Improved in component */}
       <div className="px-4 sm:px-0">
         <FAQ />
       </div>
 
       {/* CTA Section - Improved Design */}
-      <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-3xl p-8 sm:p-12 text-center text-white mx-4 sm:mx-0 shadow-xl">
+      <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-3xl p-8 sm:p-12 text-center text-white mx-4 sm:mx-0 shadow-xl">
         <div className="max-w-3xl mx-auto">
           <h2 className="text-2xl sm:text-3xl font-bold mb-4">
             Prêt à lancer votre business ?

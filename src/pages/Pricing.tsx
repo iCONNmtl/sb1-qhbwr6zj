@@ -347,33 +347,6 @@ export default function Pricing() {
         </div>
       </div>
 
-      {/* Avantages des crédits */}
-      <div className="mb-16 grid md:grid-cols-3 gap-8">
-        <div className="bg-white rounded-xl p-6 shadow-sm">
-          <div className="p-3 bg-indigo-100 rounded-xl w-fit mb-4">
-            <Star className="h-6 w-6 text-indigo-600" />
-          </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Flexibilité maximale</h3>
-          <p className="text-gray-600">Achetez uniquement ce dont vous avez besoin, sans engagement ni abonnement mensuel.</p>
-        </div>
-        
-        <div className="bg-white rounded-xl p-6 shadow-sm">
-          <div className="p-3 bg-indigo-100 rounded-xl w-fit mb-4">
-            <Zap className="h-6 w-6 text-indigo-600" />
-          </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Crédits permanents</h3>
-          <p className="text-gray-600">Vos crédits n'expirent jamais. Utilisez-les à votre rythme, quand vous en avez besoin.</p>
-        </div>
-        
-        <div className="bg-white rounded-xl p-6 shadow-sm">
-          <div className="p-3 bg-indigo-100 rounded-xl w-fit mb-4">
-            <Sparkles className="h-6 w-6 text-indigo-600" />
-          </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Économies d'échelle</h3>
-          <p className="text-gray-600">Plus vous achetez de crédits à la fois, plus le prix unitaire est avantageux.</p>
-        </div>
-      </div>
-
       {/* FAQ Section */}
       <div className="mb-16">
         <div className="text-center mb-8">

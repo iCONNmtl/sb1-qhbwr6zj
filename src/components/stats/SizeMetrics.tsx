@@ -1,7 +1,7 @@
 import React from 'react';
 import { COLORS, SIZES } from './constants';
 import PieChartWithTooltip from './PieChartWithTooltip';
-import { Package, TrendingUp, DollarSign } from 'lucide-react';
+import { Package } from 'lucide-react';
 
 interface SizeMetricsProps {
   sizeMetrics: Array<{
@@ -75,11 +75,8 @@ export default function SizeMetrics({ sizeMetrics }: SizeMetricsProps) {
       {/* Charts Grid */}
       <div className="grid grid-cols-3 gap-8">
         {/* Revenue Chart */}
-        <div className="bg-white rounded-xl p-6 shadow-sm">
+        <div className="bg-gray-50 rounded-xl p-6">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-indigo-100 rounded-lg">
-              <DollarSign className="h-5 w-5 text-indigo-600" />
-            </div>
             <h4 className="font-medium text-gray-900">Chiffre d'affaires</h4>
           </div>
           <div className="h-[200px]">
@@ -96,11 +93,8 @@ export default function SizeMetrics({ sizeMetrics }: SizeMetricsProps) {
         </div>
 
         {/* Profit Chart */}
-        <div className="bg-white rounded-xl p-6 shadow-sm">
+        <div className="bg-gray-50 rounded-xl p-6">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <TrendingUp className="h-5 w-5 text-green-600" />
-            </div>
             <h4 className="font-medium text-gray-900">Bénéfices</h4>
           </div>
           <div className="h-[200px]">
@@ -117,11 +111,8 @@ export default function SizeMetrics({ sizeMetrics }: SizeMetricsProps) {
         </div>
 
         {/* Items Chart */}
-        <div className="bg-white rounded-xl p-6 shadow-sm">
+        <div className="bg-gray-50 rounded-xl p-6">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <Package className="h-5 w-5 text-purple-600" />
-            </div>
             <h4 className="font-medium text-gray-900">Affiches vendues</h4>
           </div>
           <div className="h-[200px]">
@@ -139,7 +130,7 @@ export default function SizeMetrics({ sizeMetrics }: SizeMetricsProps) {
       </div>
 
       {/* Centralized Legend with Percentages */}
-      <div className="bg-white rounded-xl p-4 shadow-sm">
+      <div className="bg-gray-50 rounded-xl p-4">
         <ul className="flex flex-wrap justify-center gap-6">
           {revenueData.map((item, index) => (
             <li key={index} className="flex items-center gap-2">
