@@ -33,7 +33,6 @@ import MyProducts from './pages/MyProducts';
 import Orders from './pages/Orders';
 import Training from './pages/Training';
 import TrainingDetails from './pages/TrainingDetails';
-import DesignGenerator from './pages/DesignGenerator';
 import AuthGuard from './components/AuthGuard';
 import AdminGuard from './components/AdminGuard';
 import { useStore } from './store/useStore';
