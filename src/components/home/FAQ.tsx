@@ -1,137 +1,98 @@
 import React, { useState } from 'react';
-import { ChevronDown, HelpCircle } from 'lucide-react';
+import { ChevronDown, HelpCircle, ChevronUp, Link } from 'lucide-react';
 import clsx from 'clsx';
 
+// FAQ items
 const FAQ_ITEMS = [
   {
-    question: "Comment fonctionne Pixmock ?",
-    answer: [
-      "Pixmock est une plateforme intuitive qui transforme vos designs en mockups professionnels en quelques clics :",
-      "1. Uploadez votre design au format WebP ou JPEG",
-      "2. Sélectionnez vos mockups préférés dans notre bibliothèque",
-      "3. Personnalisez le texte et les éléments si besoin",
-      "4. Générez vos mockups instantanément en haute qualité"
-    ]
+    question: "Comment fonctionnent les crédits ?",
+    answer: "Chaque génération de mockup consomme un certain nombre de crédits. Les crédits sont disponibles immédiatement après l'achat et n'expirent jamais. Vous pouvez les utiliser à votre rythme, sans contrainte de temps."
   },
   {
-    question: "Quels formats de fichiers sont acceptés ?",
-    answer: [
-      "Nous acceptons deux formats optimisés pour le web :",
-      "• WebP : Format moderne recommandé pour une qualité optimale",
-      "• JPEG : Format universel compatible avec tous les logiciels",
-      "Pour des résultats optimaux, nous recommandons :",
-      "• Résolution minimale : 2000px de large",
-      "• Ratio : Adapté à votre design final",
-      "• Qualité : Export en haute qualité"
-    ]
+    question: "Quelle est la différence entre les packs et l'abonnement ?",
+    answer: "Les packs de crédits sont des achats uniques sans engagement, idéaux pour une utilisation ponctuelle. L'abonnement Expert offre un renouvellement mensuel automatique de 500 crédits, parfait pour une utilisation régulière."
   },
   {
-    question: "Puis-je créer mes propres mockups ?",
-    answer: [
-      "Oui ! Les utilisateurs Pro et Expert peuvent créer leurs mockups personnalisés :",
-      "• Upload de fichiers PSD structurés",
-      "• Positionnement intelligent des designs",
-      "• Personnalisation complète des effets",
-      "• Intégration dans votre bibliothèque privée",
-      "Un guide détaillé est fourni pour vous accompagner dans le processus."
-    ]
+    question: "Puis-je acheter plusieurs packs ?",
+    answer: "Oui, vous pouvez acheter autant de packs que vous le souhaitez. Les crédits s'accumulent dans votre compte et sont utilisés selon vos besoins."
   },
   {
-    question: "Comment fonctionne la bibliothèque de mockups ?",
-    answer: [
-      "Notre bibliothèque est organisée pour une expérience fluide :",
-      "• Catégories intuitives (Devices, Print, Packaging...)",
-      "• Filtres avancés (Format, Style, Orientation)",
-      "• Système de favoris pour un accès rapide",
-      "• Prévisualisation instantanée",
-      "• Mise à jour régulière avec de nouveaux mockups"
-    ]
+    question: "Comment fonctionne le paiement ?",
+    answer: "Le paiement est sécurisé via Stripe. Vous pouvez payer par carte bancaire. Les packs sont activés instantanément après le paiement, tandis que l'abonnement Expert est renouvelé automatiquement chaque mois."
   },
   {
-    question: "Les mockups générés sont-ils de bonne qualité ?",
-    answer: [
-      "Absolument ! Nos mockups sont optimisés pour un usage professionnel :",
-      "• Résolution 4K pour une qualité maximale",
-      "• Rendu photoréaliste avec ombres et reflets",
-      "• Respect des perspectives et déformations",
-      "• Export en haute définition",
-      "• Parfaits pour les présentations clients et portfolios"
-    ]
+    question: "Les crédits expirent-ils ?",
+    answer: "Non, les crédits achetés via les packs n'expirent jamais. Vous pouvez les utiliser à votre rythme. Pour l'abonnement Expert, vous recevez 500 nouveaux crédits chaque mois."
   },
   {
-    question: "Puis-je utiliser les mockups générés commercialement ?",
-    answer: [
-      "Oui, tous nos mockups sont libres de droits pour un usage commercial :",
-      "• Utilisation illimitée pour vos clients",
-      "• Intégration dans vos portfolios",
-      "• Présentation sur les réseaux sociaux",
-      "• Marketing et publicité",
-      "• Projets personnels et professionnels"
-    ]
+    question: "Puis-je me faire rembourser ?",
+    answer: "Les crédits non utilisés peuvent être remboursés dans les 14 jours suivant l'achat, conformément à nos conditions générales de vente. L'abonnement Expert peut être annulé à tout moment."
+  },
+  {
+    question: "Y a-t-il des frais cachés ?",
+    answer: "Non, le prix affiché est le prix final. Pas d'abonnement caché, pas de frais supplémentaires. Vous ne payez que ce que vous achetez."
+  },
+  {
+    question: "Comment utiliser mes crédits ?",
+    answer: "Vos crédits sont automatiquement déduits lorsque vous générez des mockups, achetez des formations premium ou traitez des commandes. Vous pouvez suivre votre solde de crédits dans votre tableau de bord."
   }
 ];
 
-export default function FAQ() {
+function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
-    <section className="max-w-3xl mx-auto">
+    <div className="bg-white rounded-2xl shadow-md p-8">
       <div className="text-center mb-12">
-        <h2 className="text-3xl font-bold text-gray-900 mb-4">
+        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
           Questions fréquentes
         </h2>
-        <p className="text-gray-600">
-          Tout ce que vous devez savoir sur Pixmock
+        <p className="text-lg text-gray-600">
+          Tout ce que vous devez savoir sur nos produits d'impression
         </p>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm divide-y divide-gray-100">
+      <div className="max-w-3xl mx-auto divide-y divide-gray-200">
         {FAQ_ITEMS.map((item, index) => (
-          <div key={index} className="overflow-hidden">
+          <div key={index} className="py-6">
             <button
               onClick={() => setOpenIndex(openIndex === index ? null : index)}
-              className="flex items-center justify-between w-full p-6 text-left hover:bg-gray-50 transition-colors"
+              className="flex w-full items-start justify-between text-left"
             >
-              <span className="font-medium text-gray-900">{item.question}</span>
-              <ChevronDown 
-                className={clsx(
-                  "h-5 w-5 text-gray-500 transition-transform duration-200 flex-shrink-0 ml-4",
-                  openIndex === index ? "rotate-180" : ""
+              <span className="text-lg font-medium text-gray-900">
+                {item.question}
+              </span>
+              <span className="ml-6 flex-shrink-0">
+                {openIndex === index ? (
+                  <ChevronUp className="h-6 w-6 text-indigo-500" />
+                ) : (
+                  <ChevronDown className="h-6 w-6 text-indigo-500" />
                 )}
-              />
+              </span>
             </button>
-            
-            <div 
+            <div
               className={clsx(
-                "transition-all duration-200 ease-in-out bg-gray-50",
-                openIndex === index 
-                  ? "max-h-[500px] opacity-100" 
-                  : "max-h-0 opacity-0"
+                'mt-2 pr-12 transition-all duration-300',
+                openIndex === index ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 overflow-hidden'
               )}
             >
-              <div className="p-6 space-y-4">
-                {Array.isArray(item.answer) ? (
-                  item.answer.map((paragraph, i) => (
-                    <p 
-                      key={i} 
-                      className={clsx(
-                        "text-gray-600",
-                        i === 0 ? "font-medium text-gray-700" : "",
-                        paragraph.startsWith('•') ? "pl-4" : "",
-                        paragraph.startsWith('1.') ? "pl-4" : ""
-                      )}
-                    >
-                      {paragraph}
-                    </p>
-                  ))
-                ) : (
-                  <p className="text-gray-600">{item.answer}</p>
-                )}
-              </div>
+              <p className="text-base text-gray-600">
+                {item.answer}
+              </p>
             </div>
           </div>
         ))}
       </div>
-    </section>
+
+      {/* Support CTA */}
+      <div className="mt-12 text-center">
+        <p className="text-gray-600">
+          Vous ne trouvez pas la réponse à votre question ?{' '}
+          <Link to="/contact" className="text-indigo-600 hover:text-indigo-500 font-medium">
+            Contactez notre support
+          </Link>
+        </p>
+      </div>
+    </div>
   );
 }

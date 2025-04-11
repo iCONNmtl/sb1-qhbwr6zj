@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { usePlans } from '../hooks/usePlans';
 import { useUserProfile } from '../hooks/useFirestore';
-import { Crown, Check, Minus, Loader2, CreditCard, Zap, Star, Sparkles, Info, HelpCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Crown, Check, Link, Minus, Loader2, CreditCard, Zap, Star, Sparkles, Info, HelpCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { LoadingSpinner } from '../components/common';
 import clsx from 'clsx';
 
@@ -61,6 +61,65 @@ const FAQ_ITEMS = [
     answer: "Vos crédits sont automatiquement déduits lorsque vous générez des mockups, achetez des formations premium ou traitez des commandes. Vous pouvez suivre votre solde de crédits dans votre tableau de bord."
   }
 ];
+
+function FAQ() {
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  return (
+    <div className="bg-white rounded-2xl shadow-md p-8">
+      <div className="text-center mb-12">
+        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
+          Questions fréquentes
+        </h2>
+        <p className="text-lg text-gray-600">
+          Tout ce que vous devez savoir sur nos produits d'impression
+        </p>
+      </div>
+
+      <div className="max-w-3xl mx-auto divide-y divide-gray-200">
+        {FAQ_ITEMS.map((item, index) => (
+          <div key={index} className="py-6">
+            <button
+              onClick={() => setOpenIndex(openIndex === index ? null : index)}
+              className="flex w-full items-start justify-between text-left"
+            >
+              <span className="text-lg font-medium text-gray-900">
+                {item.question}
+              </span>
+              <span className="ml-6 flex-shrink-0">
+                {openIndex === index ? (
+                  <ChevronUp className="h-6 w-6 text-indigo-500" />
+                ) : (
+                  <ChevronDown className="h-6 w-6 text-indigo-500" />
+                )}
+              </span>
+            </button>
+            <div
+              className={clsx(
+                'mt-2 pr-12 transition-all duration-300',
+                openIndex === index ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 overflow-hidden'
+              )}
+            >
+              <p className="text-base text-gray-600">
+                {item.answer}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Support CTA */}
+      <div className="mt-12 text-center">
+        <p className="text-gray-600">
+          Vous ne trouvez pas la réponse à votre question ?{' '}
+          <Link to="/contact" className="text-indigo-600 hover:text-indigo-500 font-medium">
+            Contactez notre support
+          </Link>
+        </p>
+      </div>
+    </div>
+  );
+}
 
 export default function Pricing() {
   const { user } = useStore();
@@ -347,47 +406,9 @@ export default function Pricing() {
         </div>
       </div>
 
-      {/* FAQ Section */}
-      <div className="mb-16">
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <HelpCircle className="h-5 w-5 text-indigo-600" />
-            <span className="text-sm font-medium uppercase tracking-wider text-indigo-600">FAQ</span>
-          </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Questions fréquentes</h2>
-          <p className="text-gray-600">Tout ce que vous devez savoir sur nos offres</p>
-        </div>
-
-        <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-sm divide-y divide-gray-100">
-          {FAQ_ITEMS.map((item, index) => (
-            <div key={index} className="overflow-hidden">
-              <button
-                onClick={() => setOpenFaqIndex(openFaqIndex === index ? null : index)}
-                className="flex items-center justify-between w-full p-6 text-left hover:bg-gray-50 transition-colors"
-              >
-                <span className="font-medium text-gray-900">{item.question}</span>
-                {openFaqIndex === index ? (
-                  <ChevronUp className="h-5 w-5 text-gray-500" />
-                ) : (
-                  <ChevronDown className="h-5 w-5 text-gray-500" />
-                )}
-              </button>
-              
-              <div 
-                className={clsx(
-                  "transition-all duration-200 ease-in-out bg-gray-50",
-                  openFaqIndex === index 
-                    ? "max-h-[500px] opacity-100" 
-                    : "max-h-0 opacity-0"
-                )}
-              >
-                <div className="p-6 text-gray-600">
-                  {item.answer}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+      {/* FAQ Section - Improved in component */}
+      <div className="px-4 sm:px-0">
+        <FAQ />
       </div>
 
       {/* Contact */}
