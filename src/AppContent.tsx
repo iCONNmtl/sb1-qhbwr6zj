@@ -77,11 +77,6 @@ export default function AppContent() {
                 <MockupGenerator />
               </AuthGuard>
             } />
-            <Route path="/design-generator" element={
-              <AuthGuard>
-                <DesignGenerator />
-              </AuthGuard>
-            } />
             <Route path="/custom-mockup" element={
               <AuthGuard>
                 <CustomMockup />

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { usePlans } from '../hooks/usePlans';
 import { useUserProfile } from '../hooks/useFirestore';
-import { Crown, Check, Minus, Loader2, CreditCard, Zap, Star, Sparkles, Info } from 'lucide-react';
+import { Crown, Check, Minus, Loader2, CreditCard, Zap, Star, Sparkles, Info, HelpCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { LoadingSpinner } from '../components/common';
 import clsx from 'clsx';
 
@@ -26,12 +26,49 @@ const CREDIT_PACKS = [
   { id: 'pack4', name: 'Expert', credits: 6500, price: 149, popular: false, unitPrice: 0.0229 },
 ];
 
+// FAQ items
+const FAQ_ITEMS = [
+  {
+    question: "Comment fonctionnent les crédits ?",
+    answer: "Chaque génération de mockup consomme un certain nombre de crédits. Les crédits sont disponibles immédiatement après l'achat et n'expirent jamais. Vous pouvez les utiliser à votre rythme, sans contrainte de temps."
+  },
+  {
+    question: "Quelle est la différence entre les packs et l'abonnement ?",
+    answer: "Les packs de crédits sont des achats uniques sans engagement, idéaux pour une utilisation ponctuelle. L'abonnement Expert offre un renouvellement mensuel automatique de 500 crédits, parfait pour une utilisation régulière."
+  },
+  {
+    question: "Puis-je acheter plusieurs packs ?",
+    answer: "Oui, vous pouvez acheter autant de packs que vous le souhaitez. Les crédits s'accumulent dans votre compte et sont utilisés selon vos besoins."
+  },
+  {
+    question: "Comment fonctionne le paiement ?",
+    answer: "Le paiement est sécurisé via Stripe. Vous pouvez payer par carte bancaire. Les packs sont activés instantanément après le paiement, tandis que l'abonnement Expert est renouvelé automatiquement chaque mois."
+  },
+  {
+    question: "Les crédits expirent-ils ?",
+    answer: "Non, les crédits achetés via les packs n'expirent jamais. Vous pouvez les utiliser à votre rythme. Pour l'abonnement Expert, vous recevez 500 nouveaux crédits chaque mois."
+  },
+  {
+    question: "Puis-je me faire rembourser ?",
+    answer: "Les crédits non utilisés peuvent être remboursés dans les 14 jours suivant l'achat, conformément à nos conditions générales de vente. L'abonnement Expert peut être annulé à tout moment."
+  },
+  {
+    question: "Y a-t-il des frais cachés ?",
+    answer: "Non, le prix affiché est le prix final. Pas d'abonnement caché, pas de frais supplémentaires. Vous ne payez que ce que vous achetez."
+  },
+  {
+    question: "Comment utiliser mes crédits ?",
+    answer: "Vos crédits sont automatiquement déduits lorsque vous générez des mockups, achetez des formations premium ou traitez des commandes. Vous pouvez suivre votre solde de crédits dans votre tableau de bord."
+  }
+];
+
 export default function Pricing() {
   const { user } = useStore();
   const navigate = useNavigate();
   const { plans, loading: plansLoading } = usePlans();
   const { userProfile, loading: profileLoading } = useUserProfile(user?.uid);
   const [loading, setLoading] = useState(false);
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
 
   const handlePlanSelection = (planId: string) => {
     if (!user) {
@@ -112,7 +149,7 @@ export default function Pricing() {
           <p className="text-gray-600 mt-2">Accès continu avec renouvellement automatique</p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <div className="grid md:grid-cols-2 gap-8">
           {/* Basic Plan */}
           <div className="relative rounded-2xl bg-white shadow-sm overflow-hidden">
             {/* Header */}
@@ -177,4 +214,218 @@ export default function Pricing() {
               <button 
                 onClick={() => handlePlanSelection('expert')}
                 disabled={loading}
-                className="w
+                className="w-full py-3 px-4 bg-black text-white rounded-xl hover:bg-black/90 transition mt-8 flex items-center justify-center"
+              >
+                {loading ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <>
+                    <Zap className="h-5 w-5 mr-2" />
+                    {user ? 'S\'abonner maintenant' : 'Commencer'}
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Features Table */}
+      <div className="rounded-2xl bg-black/5 p-8 mb-16">
+        <h2 className="text-xl font-bold text-gray-900 mb-6 text-center">Comparaison des fonctionnalités</h2>
+        <div className="grid grid-cols-3 gap-4">
+          <div className="font-medium">Fonctionnalités</div>
+          <div className="text-center font-medium">Basic</div>
+          <div className="text-center font-medium">Expert</div>
+
+          {FEATURES.map((feature, index) => (
+            <React.Fragment key={feature.name}>
+              <div className={clsx(
+                "py-4",
+                index !== FEATURES.length - 1 && "border-b border-black/10"
+              )}>
+                {feature.name}
+              </div>
+              <div className={clsx(
+                "flex justify-center items-center",
+                index !== FEATURES.length - 1 && "border-b border-black/10"
+              )}>
+                {typeof feature.basic === 'boolean' ? (
+                  feature.basic ? <Check className="h-5 w-5 text-purple-500" /> : <Minus className="h-5 w-5 text-gray-300" />
+                ) : (
+                  feature.basic
+                )}
+              </div>
+              <div className={clsx(
+                "flex justify-center items-center",
+                index !== FEATURES.length - 1 && "border-b border-black/10"
+              )}>
+                {typeof feature.expert === 'boolean' ? (
+                  feature.expert ? <Check className="h-5 w-5 text-purple-500" /> : <Minus className="h-5 w-5 text-gray-300" />
+                ) : (
+                  feature.expert
+                )}
+              </div>
+            </React.Fragment>
+          ))}
+        </div>
+      </div>
+
+      {/* Section Packs de crédits */}
+      <div className="mb-16">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold text-gray-900">Packs de crédits complémentaires</h2>
+          <p className="text-gray-600 mt-2">Achat unique sans engagement • Crédits permanents</p>
+        </div>
+
+        <div className="grid md:grid-cols-4 gap-6">
+          {CREDIT_PACKS.map((pack) => (
+            <div 
+              key={pack.id}
+              className={clsx(
+                "relative rounded-2xl bg-white shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md",
+                pack.popular && "ring-2 ring-indigo-600 transform hover:scale-105"
+              )}
+            >
+              {pack.popular && (
+                <div className="absolute top-0 right-8 px-4 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-sm font-medium rounded-b-lg shadow-lg">
+                  Populaire
+                </div>
+              )}
+
+              {/* Content */}
+              <div className="p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-1">{pack.name}</h3>
+                
+                {/* Credits */}
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="text-3xl font-bold text-purple-600">{pack.credits}</div>
+                  <div className="text-sm text-gray-600">crédits</div>
+                </div>
+
+                {/* Price */}
+                <div className="flex items-baseline gap-1 mb-1">
+                  <span className="text-2xl font-bold">{pack.price}</span>
+                  <span className="text-base">€</span>
+                </div>
+                
+                {/* Unit price */}
+                <div className="flex items-center mb-4">
+                  <div className="text-xs text-gray-500 flex items-center">
+                    <Info className="h-3 w-3 mr-1" />
+                    {pack.unitPrice.toFixed(3)}€ par crédit
+                  </div>
+                </div>
+                
+                <div className="text-xs text-gray-500 mb-4">
+                  Sans engagement • Achat unique • Crédits permanents
+                </div>
+
+                {/* Button */}
+                <button 
+                  onClick={() => handlePlanSelection(pack.id)}
+                  disabled={loading}
+                  className={clsx(
+                    "w-full py-2 px-4 rounded-lg flex items-center justify-center transition",
+                    pack.popular 
+                      ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:opacity-90" 
+                      : "bg-gray-100 text-gray-900 hover:bg-gray-200"
+                  )}
+                >
+                  {loading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <>
+                      <CreditCard className="h-4 w-4 mr-2" />
+                      Acheter
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Avantages des crédits */}
+      <div className="mb-16 grid md:grid-cols-3 gap-8">
+        <div className="bg-white rounded-xl p-6 shadow-sm">
+          <div className="p-3 bg-indigo-100 rounded-xl w-fit mb-4">
+            <Star className="h-6 w-6 text-indigo-600" />
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Flexibilité maximale</h3>
+          <p className="text-gray-600">Achetez uniquement ce dont vous avez besoin, sans engagement ni abonnement mensuel.</p>
+        </div>
+        
+        <div className="bg-white rounded-xl p-6 shadow-sm">
+          <div className="p-3 bg-indigo-100 rounded-xl w-fit mb-4">
+            <Zap className="h-6 w-6 text-indigo-600" />
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Crédits permanents</h3>
+          <p className="text-gray-600">Vos crédits n'expirent jamais. Utilisez-les à votre rythme, quand vous en avez besoin.</p>
+        </div>
+        
+        <div className="bg-white rounded-xl p-6 shadow-sm">
+          <div className="p-3 bg-indigo-100 rounded-xl w-fit mb-4">
+            <Sparkles className="h-6 w-6 text-indigo-600" />
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Économies d'échelle</h3>
+          <p className="text-gray-600">Plus vous achetez de crédits à la fois, plus le prix unitaire est avantageux.</p>
+        </div>
+      </div>
+
+      {/* FAQ Section */}
+      <div className="mb-16">
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <HelpCircle className="h-5 w-5 text-indigo-600" />
+            <span className="text-sm font-medium uppercase tracking-wider text-indigo-600">FAQ</span>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Questions fréquentes</h2>
+          <p className="text-gray-600">Tout ce que vous devez savoir sur nos offres</p>
+        </div>
+
+        <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-sm divide-y divide-gray-100">
+          {FAQ_ITEMS.map((item, index) => (
+            <div key={index} className="overflow-hidden">
+              <button
+                onClick={() => setOpenFaqIndex(openFaqIndex === index ? null : index)}
+                className="flex items-center justify-between w-full p-6 text-left hover:bg-gray-50 transition-colors"
+              >
+                <span className="font-medium text-gray-900">{item.question}</span>
+                {openFaqIndex === index ? (
+                  <ChevronUp className="h-5 w-5 text-gray-500" />
+                ) : (
+                  <ChevronDown className="h-5 w-5 text-gray-500" />
+                )}
+              </button>
+              
+              <div 
+                className={clsx(
+                  "transition-all duration-200 ease-in-out bg-gray-50",
+                  openFaqIndex === index 
+                    ? "max-h-[500px] opacity-100" 
+                    : "max-h-0 opacity-0"
+                )}
+              >
+                <div className="p-6 text-gray-600">
+                  {item.answer}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Contact */}
+      <div className="text-center">
+        <p className="text-gray-600">
+          Des questions ? {" "}
+          <a href="mailto:support@pixmock.com" className="text-purple-600 hover:text-purple-500">
+            Contactez-nous
+          </a>
+        </p>
+      </div>
+    </div>
+  );
+}
