@@ -1,7 +1,7 @@
 import React from 'react';
 import { COLORS, PLATFORMS } from './constants';
 import PieChartWithTooltip from './PieChartWithTooltip';
-import { Package, TrendingUp, DollarSign, Store } from 'lucide-react';
+import { Package, TrendingUp, DollarSign } from 'lucide-react';
 import type { OrderPlatform } from '../../types/order';
 
 interface PlatformMetricsProps {
@@ -42,11 +42,16 @@ export default function PlatformMetrics({ platformMetrics }: PlatformMetricsProp
 
   return (
     <div className="space-y-8">
+      <h2 className="text-xl font-semibold text-gray-900 mb-4">Performance par plateforme</h2>
+      
       {/* Charts Grid */}
       <div className="grid grid-cols-3 gap-8">
         {/* Revenue Chart */}
-        <div className="bg-gray-50 rounded-xl p-6">
+        <div className="bg-white rounded-xl p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 bg-indigo-100 rounded-lg">
+              <DollarSign className="h-5 w-5 text-indigo-600" />
+            </div>
             <h4 className="font-medium text-gray-900">Chiffre d'affaires</h4>
           </div>
           <div className="h-[200px]">
@@ -63,8 +68,11 @@ export default function PlatformMetrics({ platformMetrics }: PlatformMetricsProp
         </div>
 
         {/* Profit Chart */}
-        <div className="bg-gray-50 rounded-xl p-6">
+        <div className="bg-white rounded-xl p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 bg-green-100 rounded-lg">
+              <TrendingUp className="h-5 w-5 text-green-600" />
+            </div>
             <h4 className="font-medium text-gray-900">Bénéfices</h4>
           </div>
           <div className="h-[200px]">
@@ -81,8 +89,11 @@ export default function PlatformMetrics({ platformMetrics }: PlatformMetricsProp
         </div>
 
         {/* Items Chart */}
-        <div className="bg-gray-50 rounded-xl p-6">
+        <div className="bg-white rounded-xl p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 bg-purple-100 rounded-lg">
+              <Package className="h-5 w-5 text-purple-600" />
+            </div>
             <h4 className="font-medium text-gray-900">Affiches vendues</h4>
           </div>
           <div className="h-[200px]">
@@ -99,23 +110,32 @@ export default function PlatformMetrics({ platformMetrics }: PlatformMetricsProp
         </div>
       </div>
 
-      {/* Centralized Legend */}
-      <div className="bg-gray-50 rounded-xl p-4">
+      {/* Centralized Legend with Percentages */}
+      <div className="bg-white rounded-xl p-4 shadow-sm">
         <ul className="flex flex-wrap justify-center gap-6">
-          {PLATFORMS.map((platform) => (
-            <li key={platform.id} className="flex items-center gap-2">
-              <div 
-                className="w-3 h-3 rounded-full"
-                style={{ backgroundColor: platform.color }}
-              />
-              <span className="text-sm text-gray-600">{platform.label}</span>
-            </li>
-          ))}
+          {PLATFORMS.map((platform, index) => {
+            const platformData = platformMetrics.find(p => p.platform === platform.id);
+            if (!platformData) return null;
+            
+            const revenuePercentage = (platformData.revenue / totalRevenue) * 100;
+            
+            return (
+              <li key={platform.id} className="flex items-center gap-2">
+                <div 
+                  className="w-3 h-3 rounded-full"
+                  style={{ backgroundColor: platform.color }}
+                />
+                <span className="text-sm text-gray-600">
+                  {platform.label} <span className="text-gray-400">({revenuePercentage.toFixed(1)}%)</span>
+                </span>
+              </li>
+            );
+          })}
         </ul>
       </div>
 
       {/* Metrics Details */}
-      <div className="bg-white rounded-xl">
+      <div className="bg-white rounded-xl shadow-sm p-6">
         <div className="space-y-6">
           {platformMetrics.map((platform) => {
             const platformConfig = PLATFORMS.find(p => p.id === platform.platform);
@@ -128,7 +148,7 @@ export default function PlatformMetrics({ platformMetrics }: PlatformMetricsProp
                 {/* Platform Info */}
                 <div className="flex items-center gap-3 w-48">
                   <div className="p-2 rounded-lg" style={{ backgroundColor: `${platformConfig?.color}20` }}>
-                    <Store className="h-5 w-5" style={{ color: platformConfig?.color }} />
+                    <Package className="h-5 w-5" style={{ color: platformConfig?.color }} />
                   </div>
                   <span className="font-medium text-gray-900">
                     {platformConfig?.label || platform.platform}

@@ -25,7 +25,10 @@ interface PieChartWithTooltipProps {
 
 const RADIAN = Math.PI / 180;
 
-const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
+const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }: any) => {
+  // Only show labels for segments that are large enough (more than 5%)
+  if (percent < 0.05) return null;
+  
   const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
   const x = cx + radius * Math.cos(-midAngle * RADIAN);
   const y = cy + radius * Math.sin(-midAngle * RADIAN);
@@ -39,7 +42,8 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, per
       dominantBaseline="central"
       style={{
         fontSize: '12px',
-        fontWeight: 'bold'
+        fontWeight: 'bold',
+        textShadow: '0px 0px 3px rgba(0,0,0,0.5)'
       }}
     >
       {`${(percent * 100).toFixed(1)}%`}

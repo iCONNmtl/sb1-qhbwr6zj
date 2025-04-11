@@ -4,6 +4,7 @@ import TimeSeriesChart from '../components/stats/TimeSeriesChart';
 import SizeMetrics from '../components/stats/SizeMetrics';
 import PlatformMetrics from '../components/stats/PlatformMetrics';
 import CountryMetrics from '../components/stats/CountryMetrics';
+import ProductMetrics from '../components/stats/ProductMetrics';
 import Filters from '../components/stats/Filters';
 import { PLATFORMS } from '../components/stats/constants';
 import type { Order, OrderPlatform } from '../types/order';
@@ -22,6 +23,7 @@ export default function OrderStats({ orders }: OrderStatsProps) {
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
   const [selectedMetrics, setSelectedMetrics] = useState<string[]>(['revenue', 'profit', 'cost']);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
+  const [activeTab, setActiveTab] = useState<'overview' | 'platforms' | 'sizes' | 'countries' | 'products'>('overview');
 
   const availableCountries = useMemo(() => {
     const countries = new Set<string>();
@@ -192,6 +194,43 @@ export default function OrderStats({ orders }: OrderStatsProps) {
       .sort((a, b) => b.revenue - a.revenue);
   }, [filteredOrders]);
 
+  const productMetrics = useMemo(() => {
+    const metrics = new Map();
+    
+    filteredOrders.forEach(order => {
+      order.items.forEach(item => {
+        // Use SKU as unique identifier
+        if (!metrics.has(item.sku)) {
+          metrics.set(item.sku, {
+            sku: item.sku,
+            productName: item.size, // Default to size if no product name
+            productType: 'Poster', // Default product type
+            quantity: 0,
+            revenue: 0,
+            cost: 0,
+            profit: 0,
+            designUrl: item.designUrl // Add design URL
+          });
+        }
+        
+        const stats = metrics.get(item.sku);
+        stats.quantity += item.quantity;
+        stats.revenue += item.price * item.quantity;
+        stats.cost += item.purchasePrice * item.quantity;
+        stats.profit += (item.price - item.purchasePrice) * item.quantity;
+        
+        // Update product name if available
+        if (item.productId) {
+          stats.productName = `${item.size} (${item.dimensions.cm})`;
+          stats.productType = item.productId.includes('premium') ? 'Poster Premium' : 'Poster Standard';
+        }
+      });
+    });
+    
+    return Array.from(metrics.values())
+      .sort((a, b) => b.revenue - a.revenue);
+  }, [filteredOrders]);
+
   return (
     <div className="space-y-8">
       <Filters
@@ -212,35 +251,92 @@ export default function OrderStats({ orders }: OrderStatsProps) {
 
       <MetricsOverview metrics={metrics} />
 
-      <div className="bg-white rounded-xl shadow-sm p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-6">
-          Évolution dans le temps
-        </h3>
-        <TimeSeriesChart 
-          data={timeSeriesData}
-          selectedMetrics={selectedMetrics}
-        />
-      </div>
+      {/* Tabs Navigation */}
+      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div className="border-b border-gray-200">
+          <nav className="-mb-px flex space-x-8 px-6">
+            <button
+              onClick={() => setActiveTab('overview')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'overview'
+                  ? 'border-indigo-600 text-indigo-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Vue d'ensemble
+            </button>
+            <button
+              onClick={() => setActiveTab('platforms')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'platforms'
+                  ? 'border-indigo-600 text-indigo-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Par plateforme
+            </button>
+            <button
+              onClick={() => setActiveTab('sizes')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'sizes'
+                  ? 'border-indigo-600 text-indigo-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Par taille
+            </button>
+            <button
+              onClick={() => setActiveTab('countries')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'countries'
+                  ? 'border-indigo-600 text-indigo-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Par pays
+            </button>
+            <button
+              onClick={() => setActiveTab('products')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'products'
+                  ? 'border-indigo-600 text-indigo-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Par produit
+            </button>
+          </nav>
+        </div>
 
-      <div className="bg-white rounded-xl shadow-sm p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-6">
-          Performance par taille
-        </h3>
-        <SizeMetrics sizeMetrics={sizeMetrics} />
-      </div>
+        <div className="p-6">
+          {activeTab === 'overview' && (
+            <div className="bg-white rounded-xl p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-6">
+                Évolution dans le temps
+              </h3>
+              <TimeSeriesChart 
+                data={timeSeriesData}
+                selectedMetrics={selectedMetrics}
+              />
+            </div>
+          )}
 
-      <div className="bg-white rounded-xl shadow-sm p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-6">
-          Performance par plateforme
-        </h3>
-        <PlatformMetrics platformMetrics={platformMetrics} />
-      </div>
+          {activeTab === 'platforms' && (
+            <PlatformMetrics platformMetrics={platformMetrics} />
+          )}
 
-      <div className="bg-white rounded-xl shadow-sm p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-6">
-          Performance par pays
-        </h3>
-        <CountryMetrics countryMetrics={countryMetrics} />
+          {activeTab === 'sizes' && (
+            <SizeMetrics sizeMetrics={sizeMetrics} />
+          )}
+
+          {activeTab === 'countries' && (
+            <CountryMetrics countryMetrics={countryMetrics} />
+          )}
+
+          {activeTab === 'products' && (
+            <ProductMetrics productMetrics={productMetrics} />
+          )}
+        </div>
       </div>
     </div>
   );

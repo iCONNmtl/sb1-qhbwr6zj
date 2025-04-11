@@ -19,34 +19,67 @@ export default function SizeMetrics({ sizeMetrics }: SizeMetricsProps) {
   const totalProfit = sizeMetrics.reduce((sum, s) => sum + s.profit, 0);
   const totalItems = sizeMetrics.reduce((sum, s) => sum + s.quantity, 0);
 
-  // Prepare data for pie charts
-  const revenueData = sizeMetrics.map(size => ({
-    name: SIZES.find(s => s.id === size.size)?.label || size.size,
-    value: size.revenue,
-    percentage: (size.revenue / totalRevenue) * 100
-  }));
+  // Prepare data for pie charts - show top 5 and group the rest as "Autres"
+  const prepareChartData = (data: typeof sizeMetrics, valueKey: 'revenue' | 'profit' | 'quantity', total: number) => {
+    // Sort by the value key in descending order
+    const sortedData = [...data].sort((a, b) => b[valueKey] - a[valueKey]);
+    
+    // Take top 5
+    const top5 = sortedData.slice(0, 5);
+    
+    // Group the rest if there are more than 5 items
+    if (sortedData.length > 5) {
+      const others = sortedData.slice(5);
+      const othersValue = others.reduce((sum, item) => sum + item[valueKey], 0);
+      const othersPercentage = (othersValue / total) * 100;
+      
+      return [
+        ...top5.map(item => ({
+          name: SIZES.find(s => s.id === item.size)?.label || item.size,
+          value: item[valueKey],
+          percentage: (item[valueKey] / total) * 100
+        })),
+        {
+          name: 'Autres',
+          value: othersValue,
+          percentage: othersPercentage
+        }
+      ];
+    }
+    
+    // If 5 or fewer items, return them all
+    return top5.map(item => ({
+      name: SIZES.find(s => s.id === item.size)?.label || item.size,
+      value: item[valueKey],
+      percentage: (item[valueKey] / total) * 100
+    }));
+  };
 
-  const profitData = sizeMetrics.map(size => ({
-    name: SIZES.find(s => s.id === size.size)?.label || size.size,
-    value: size.profit,
-    percentage: (size.profit / totalProfit) * 100
-  }));
+  const revenueData = prepareChartData(sizeMetrics, 'revenue', totalRevenue);
+  const profitData = prepareChartData(sizeMetrics, 'profit', totalProfit);
+  const itemsData = prepareChartData(sizeMetrics, 'quantity', totalItems);
 
-  const itemsData = sizeMetrics.map(size => ({
-    name: SIZES.find(s => s.id === size.size)?.label || size.size,
-    value: size.quantity,
-    percentage: (size.quantity / totalItems) * 100
-  }));
+  // Get colors for each size
+  const getSizeColors = () => {
+    const colors = SIZES.map(size => size.color);
+    // Add a gray color for "Autres"
+    return [...colors.slice(0, 5), '#9CA3AF'];
+  };
 
-  const sizeColors = SIZES.map(size => size.color);
+  const sizeColors = getSizeColors();
 
   return (
     <div className="space-y-8">
+      <h2 className="text-xl font-semibold text-gray-900 mb-4">Performance par taille</h2>
+      
       {/* Charts Grid */}
       <div className="grid grid-cols-3 gap-8">
         {/* Revenue Chart */}
-        <div className="bg-gray-50 rounded-xl p-6">
+        <div className="bg-white rounded-xl p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 bg-indigo-100 rounded-lg">
+              <DollarSign className="h-5 w-5 text-indigo-600" />
+            </div>
             <h4 className="font-medium text-gray-900">Chiffre d'affaires</h4>
           </div>
           <div className="h-[200px]">
@@ -63,8 +96,11 @@ export default function SizeMetrics({ sizeMetrics }: SizeMetricsProps) {
         </div>
 
         {/* Profit Chart */}
-        <div className="bg-gray-50 rounded-xl p-6">
+        <div className="bg-white rounded-xl p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 bg-green-100 rounded-lg">
+              <TrendingUp className="h-5 w-5 text-green-600" />
+            </div>
             <h4 className="font-medium text-gray-900">Bénéfices</h4>
           </div>
           <div className="h-[200px]">
@@ -81,8 +117,11 @@ export default function SizeMetrics({ sizeMetrics }: SizeMetricsProps) {
         </div>
 
         {/* Items Chart */}
-        <div className="bg-gray-50 rounded-xl p-6">
+        <div className="bg-white rounded-xl p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 bg-purple-100 rounded-lg">
+              <Package className="h-5 w-5 text-purple-600" />
+            </div>
             <h4 className="font-medium text-gray-900">Affiches vendues</h4>
           </div>
           <div className="h-[200px]">
@@ -99,20 +138,17 @@ export default function SizeMetrics({ sizeMetrics }: SizeMetricsProps) {
         </div>
       </div>
 
-      {/* Centralized Legend */}
-      <div className="bg-gray-50 rounded-xl p-4">
+      {/* Centralized Legend with Percentages */}
+      <div className="bg-white rounded-xl p-4 shadow-sm">
         <ul className="flex flex-wrap justify-center gap-6">
-          {SIZES.map((size) => (
-            <li key={size.id} className="flex items-center gap-2">
+          {revenueData.map((item, index) => (
+            <li key={index} className="flex items-center gap-2">
               <div 
                 className="w-3 h-3 rounded-full"
-                style={{ backgroundColor: size.color }}
+                style={{ backgroundColor: sizeColors[index] }}
               />
-              <span 
-                className="text-sm"
-                style={{ color: size.color }}
-              >
-                {size.label}
+              <span className="text-sm text-gray-600">
+                {item.name} <span className="text-gray-400">({item.percentage.toFixed(1)}%)</span>
               </span>
             </li>
           ))}
@@ -120,7 +156,7 @@ export default function SizeMetrics({ sizeMetrics }: SizeMetricsProps) {
       </div>
 
       {/* Metrics Details */}
-      <div className="bg-white rounded-xl">
+      <div className="bg-white rounded-xl shadow-sm p-6">
         <div className="space-y-6">
           {sizeMetrics.map((size) => {
             const sizeConfig = SIZES.find(s => s.id === size.size);

@@ -28,10 +28,12 @@ import Products from './pages/Products';
 import Product from './pages/Product';
 import ProductDetails from './pages/ProductDetails';
 import ProductEdit from './pages/ProductEdit';
+import ServiceDetails from './pages/ServiceDetails';
 import MyProducts from './pages/MyProducts';
 import Orders from './pages/Orders';
 import Training from './pages/Training';
 import TrainingDetails from './pages/TrainingDetails';
+import DesignGenerator from './pages/DesignGenerator';
 import AuthGuard from './components/AuthGuard';
 import AdminGuard from './components/AdminGuard';
 import { useStore } from './store/useStore';
@@ -65,10 +67,20 @@ export default function AppContent() {
             <Route path="/training" element={<Training />} />
             <Route path="/training/:id" element={<TrainingDetails />} />
             
+            {/* Product Routes */}
+            <Route path="/products" element={<Products />} />
+            <Route path="/products/:id" element={<ProductDetails />} />
+            <Route path="/services/:id" element={<ServiceDetails />} />
+            
             {/* Protected Routes */}
             <Route path="/generator" element={
               <AuthGuard>
                 <MockupGenerator />
+              </AuthGuard>
+            } />
+            <Route path="/design-generator" element={
+              <AuthGuard>
+                <DesignGenerator />
               </AuthGuard>
             } />
             <Route path="/custom-mockup" element={
@@ -93,8 +105,6 @@ export default function AppContent() {
             } />
             
             {/* Product Routes */}
-            <Route path="/products" element={<Products />} />
-            <Route path="/products/:id" element={<ProductDetails />} />
             <Route path="/product" element={
               <AuthGuard>
                 <Product />

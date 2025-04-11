@@ -1,28 +1,37 @@
 import React from 'react';
-import { Globe2, Package, TrendingUp, DollarSign } from 'lucide-react';
+import { Package, TrendingUp, DollarSign } from 'lucide-react';
 import PieChartWithTooltip from './PieChartWithTooltip';
-import { COUNTRY_FLAGS } from './constants';
+import { COLORS } from './constants';
 
-interface CountryMetricsProps {
-  countryMetrics: Array<{
-    country: string;
-    revenue: number;
-    cost: number;
-    orders: number;
-    items: number;
-    profit: number;
-    averageOrder: number;
-  }>;
+interface ProductMetrics {
+  productName: string;
+  productType: string;
+  sku: string;
+  quantity: number;
+  revenue: number;
+  cost: number;
+  profit: number;
+  designUrl?: string;
 }
 
-export default function CountryMetrics({ countryMetrics }: CountryMetricsProps) {
+interface ProductMetricsProps {
+  productMetrics: ProductMetrics[];
+}
+
+export default function ProductMetrics({ productMetrics }: ProductMetricsProps) {
   // Calculate totals
-  const totalRevenue = countryMetrics.reduce((sum, c) => sum + c.revenue, 0);
-  const totalProfit = countryMetrics.reduce((sum, c) => sum + c.profit, 0);
-  const totalItems = countryMetrics.reduce((sum, c) => sum + c.items, 0);
+  const totalRevenue = productMetrics.reduce((sum, p) => sum + p.revenue, 0);
+  const totalProfit = productMetrics.reduce((sum, p) => sum + p.profit, 0);
+  const totalItems = productMetrics.reduce((sum, p) => sum + p.quantity, 0);
+
+  // Generate colors for products
+  const productColors = productMetrics.map((_, index) => {
+    const hue = (index * 360) / productMetrics.length;
+    return `hsl(${hue}, 70%, 50%)`;
+  });
 
   // Prepare data for pie charts - show top 5 and group the rest as "Autres"
-  const prepareChartData = (data: typeof countryMetrics, valueKey: 'revenue' | 'profit' | 'items', total: number) => {
+  const prepareChartData = (data: ProductMetrics[], valueKey: 'revenue' | 'profit' | 'quantity', total: number) => {
     // Sort by the value key in descending order
     const sortedData = [...data].sort((a, b) => b[valueKey] - a[valueKey]);
     
@@ -37,7 +46,7 @@ export default function CountryMetrics({ countryMetrics }: CountryMetricsProps) 
       
       return [
         ...top5.map(item => ({
-          name: item.country,
+          name: item.productName,
           value: item[valueKey],
           percentage: (item[valueKey] / total) * 100
         })),
@@ -51,32 +60,21 @@ export default function CountryMetrics({ countryMetrics }: CountryMetricsProps) 
     
     // If 5 or fewer items, return them all
     return top5.map(item => ({
-      name: item.country,
+      name: item.productName,
       value: item[valueKey],
       percentage: (item[valueKey] / total) * 100
     }));
   };
 
-  const revenueData = prepareChartData(countryMetrics, 'revenue', totalRevenue);
-  const profitData = prepareChartData(countryMetrics, 'profit', totalProfit);
-  const itemsData = prepareChartData(countryMetrics, 'items', totalItems);
+  const revenueData = prepareChartData(productMetrics, 'revenue', totalRevenue);
+  const profitData = prepareChartData(productMetrics, 'profit', totalProfit);
+  const itemsData = prepareChartData(productMetrics, 'quantity', totalItems);
 
-  // Generate colors for countries
-  const generateCountryColors = () => {
-    const colors = countryMetrics.slice(0, 5).map((_, index) => {
-      const hue = (index * 360) / 5;
-      return `hsl(${hue}, 70%, 50%)`;
-    });
-    // Add a gray color for "Autres"
-    return [...colors, '#9CA3AF'];
-  };
-
-  const countryColors = generateCountryColors();
+  // Colors for the charts - add a gray color for "Autres"
+  const chartColors = [...productColors.slice(0, 5), '#9CA3AF'];
 
   return (
     <div className="space-y-8">
-      <h2 className="text-xl font-semibold text-gray-900 mb-4">Performance par pays</h2>
-      
       {/* Charts Grid */}
       <div className="grid grid-cols-3 gap-8">
         {/* Revenue Chart */}
@@ -85,12 +83,12 @@ export default function CountryMetrics({ countryMetrics }: CountryMetricsProps) 
             <div className="p-2 bg-indigo-100 rounded-lg">
               <DollarSign className="h-5 w-5 text-indigo-600" />
             </div>
-            <h4 className="font-medium text-gray-900">Chiffre d'affaires</h4>
+            <h4 className="font-medium text-gray-900">Chiffre d'affaires par produit</h4>
           </div>
           <div className="h-[200px]">
             <PieChartWithTooltip
               data={revenueData}
-              colors={countryColors}
+              colors={chartColors}
               total={totalRevenue}
               valuePrefix=""
               valueSuffix="€"
@@ -106,12 +104,12 @@ export default function CountryMetrics({ countryMetrics }: CountryMetricsProps) 
             <div className="p-2 bg-green-100 rounded-lg">
               <TrendingUp className="h-5 w-5 text-green-600" />
             </div>
-            <h4 className="font-medium text-gray-900">Bénéfices</h4>
+            <h4 className="font-medium text-gray-900">Bénéfices par produit</h4>
           </div>
           <div className="h-[200px]">
             <PieChartWithTooltip
               data={profitData}
-              colors={countryColors}
+              colors={chartColors}
               total={totalProfit}
               valuePrefix=""
               valueSuffix="€"
@@ -127,12 +125,12 @@ export default function CountryMetrics({ countryMetrics }: CountryMetricsProps) 
             <div className="p-2 bg-purple-100 rounded-lg">
               <Package className="h-5 w-5 text-purple-600" />
             </div>
-            <h4 className="font-medium text-gray-900">Affiches vendues</h4>
+            <h4 className="font-medium text-gray-900">Affiches vendues par produit</h4>
           </div>
           <div className="h-[200px]">
             <PieChartWithTooltip
               data={itemsData}
-              colors={countryColors}
+              colors={chartColors}
               total={totalItems}
               valuePrefix=""
               valueSuffix=" affiches"
@@ -150,11 +148,8 @@ export default function CountryMetrics({ countryMetrics }: CountryMetricsProps) 
             <li key={index} className="flex items-center gap-2">
               <div 
                 className="w-3 h-3 rounded-full"
-                style={{ backgroundColor: countryColors[index] }}
+                style={{ backgroundColor: chartColors[index] }}
               />
-              <span className="text-2xl mr-1" role="img" aria-label={`Drapeau ${item.name}`}>
-                {COUNTRY_FLAGS[item.name as keyof typeof COUNTRY_FLAGS] || '🌍'}
-              </span>
               <span className="text-sm text-gray-600">
                 {item.name} <span className="text-gray-400">({item.percentage.toFixed(1)}%)</span>
               </span>
@@ -166,70 +161,84 @@ export default function CountryMetrics({ countryMetrics }: CountryMetricsProps) 
       {/* Metrics Details */}
       <div className="bg-white rounded-xl shadow-sm p-6">
         <div className="space-y-6">
-          {countryMetrics.map((country, index) => (
+          {productMetrics.map((product, index) => (
             <div 
-              key={country.country} 
+              key={product.sku} 
               className="flex items-center gap-8 p-6 bg-gray-50 rounded-xl hover:shadow-md transition-shadow duration-200"
-              style={{ borderLeft: `4px solid ${index < 5 ? countryColors[index] : countryColors[5]}` }}
+              style={{ borderLeft: `4px solid ${index < 5 ? productColors[index] : '#9CA3AF'}` }}
             >
-              {/* Country Info */}
-              <div className="flex items-center gap-3 w-48">
-                <span className="text-2xl" role="img" aria-label={`Drapeau ${country.country}`}>
-                  {COUNTRY_FLAGS[country.country as keyof typeof COUNTRY_FLAGS] || '🌍'}
-                </span>
-                <span className="font-medium text-gray-900">
-                  {country.country}
-                </span>
+              {/* Product Image */}
+              {product.designUrl && (
+                <div className="w-16 h-16 rounded-lg overflow-hidden bg-white border border-gray-200 flex-shrink-0">
+                  <img 
+                    src={product.designUrl} 
+                    alt={product.productName}
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+              )}
+              
+              {/* Product Info */}
+              <div className="flex-1 min-w-0">
+                <div className="font-medium text-gray-900 truncate">
+                  {product.productName}
+                </div>
+                <div className="text-sm text-gray-500 flex flex-wrap gap-2">
+                  <span>{product.productType}</span>
+                  <span className="text-xs font-mono bg-gray-100 px-2 py-0.5 rounded">
+                    SKU: {product.sku}
+                  </span>
+                </div>
+              </div>
+
+              {/* Quantity */}
+              <div className="w-32">
+                <div className="text-sm text-gray-500 mb-1">Quantité</div>
+                <div className="flex items-baseline gap-2">
+                  <div className="text-lg font-medium text-gray-900">
+                    {product.quantity}
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    ({((product.quantity / totalItems) * 100).toFixed(1)}%)
+                  </div>
+                </div>
               </div>
 
               {/* Revenue */}
-              <div className="flex-1">
+              <div className="w-32">
                 <div className="text-sm text-gray-500 mb-1">Chiffre d'affaires</div>
                 <div className="flex items-baseline gap-2">
                   <div className="text-lg font-medium text-gray-900">
-                    {country.revenue.toFixed(2)}€
+                    {product.revenue.toFixed(2)}€
                   </div>
                   <div className="text-sm text-gray-600">
-                    ({((country.revenue / totalRevenue) * 100).toFixed(1)}%)
+                    ({((product.revenue / totalRevenue) * 100).toFixed(1)}%)
                   </div>
                 </div>
               </div>
 
               {/* Profit */}
-              <div className="flex-1">
+              <div className="w-32">
                 <div className="text-sm text-gray-500 mb-1">Bénéfices</div>
                 <div className="flex items-baseline gap-2">
                   <div className="text-lg font-medium text-green-600">
-                    {country.profit.toFixed(2)}€
+                    {product.profit.toFixed(2)}€
                   </div>
                   <div className="text-sm text-gray-600">
-                    ({((country.profit / totalProfit) * 100).toFixed(1)}%)
-                  </div>
-                </div>
-              </div>
-
-              {/* Items */}
-              <div className="flex-1">
-                <div className="text-sm text-gray-500 mb-1">Affiches vendues</div>
-                <div className="flex items-baseline gap-2">
-                  <div className="text-lg font-medium text-gray-900">
-                    {country.items}
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    ({((country.items / totalItems) * 100).toFixed(1)}%)
+                    ({((product.profit / totalProfit) * 100).toFixed(1)}%)
                   </div>
                 </div>
               </div>
 
               {/* Margin */}
-              <div className="flex-1">
-                <div className="text-sm text-gray-500 mb-1">Marge moyenne</div>
+              <div className="w-32">
+                <div className="text-sm text-gray-500 mb-1">Marge</div>
                 <div className="flex items-baseline gap-2">
                   <div className="text-lg font-medium text-indigo-600">
-                    {((country.profit / country.revenue) * 100).toFixed(1)}%
+                    {((product.profit / product.revenue) * 100).toFixed(1)}%
                   </div>
                   <div className="text-sm text-gray-600">
-                    ({(country.profit / country.items).toFixed(2)}€/unité)
+                    ({(product.profit / product.quantity).toFixed(2)}€/unité)
                   </div>
                 </div>
               </div>
