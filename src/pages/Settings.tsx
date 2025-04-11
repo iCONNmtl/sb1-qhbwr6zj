@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { doc, updateDoc, onSnapshot, query, collection, where } from 'firebase/firestore';
-import { auth, db } from '../lib/firebase';
+import { db } from '../lib/firebase';
 import { useStore } from '../store/useStore';
-import { ShoppingBag, Camera, BookmarkIcon, Save, Loader2, Plus, Trash2, Edit, Mail, Lock, User, DollarSign } from 'lucide-react';
+import { FileDown, Camera, BookmarkIcon, Save, Loader2, Plus, Trash2, Edit, Mail, Lock, User, DollarSign } from 'lucide-react';
 import LogoUploader from '../components/settings/LogoUploader';
 import PinterestAuthButton from '../components/settings/PinterestAuthButton';
 import PinterestCallback from '../components/settings/PinterestCallback';
@@ -14,14 +14,10 @@ import toast from 'react-hot-toast';
 import clsx from 'clsx';
 import type { UserProfile, PlatformAccount } from '../types/user';
 import type { Invoice } from '../types/invoice';
-import ShopifyAuthButton from '../components/settings/ShopifyAuthButton';
-import ShopifyCallback from '../components/settings/ShopifyCallback';
-import EtsyAuthButton from '../components/settings/EtsyAuthButton';
-import EtsyCallback from '../components/settings/EtsyCallback';
+import ShopifyCSVExport from '../components/settings/ShopifyCSVExport';
 
 const PLATFORMS = [
-  { id: 'etsy', label: 'Etsy', icon: ShoppingBag },
-  { id: 'shopify', label: 'Shopify', icon: ShoppingBag },
+  { id: 'shopify', label: 'Shopify', icon: FileDown },
   { id: 'pinterest', label: 'Pinterest', icon: BookmarkIcon },
   { id: 'instagram', label: 'Instagram', icon: Camera },
 ] as const;
@@ -47,10 +43,7 @@ export default function Settings() {
   const [newAccount, setNewAccount] = useState<Partial<PlatformAccount>>({});
   const [showNewAccountForm, setShowNewAccountForm] = useState(false);
 
-  const isAdmin = user?.uid === 'Juvh6BgsXhYsi3loKegWfzRIphG2';
-
-  // Si l'utilisateur est admin, ajouter l'onglet plateformes
-  const allTabs = isAdmin ? [...TABS, { id: 'platforms' as const, label: 'Plateformes', icon: ShoppingBag }] : TABS;
+  const isAdmin = user?.uid === 'Juvh6BgsXhYsi3loKegWfzRIphG2' || user?.uid === 'j5UXKluDdnMFb7mZEagfKRRyhO82';
 
   useEffect(() => {
     if (!user) return;
@@ -141,16 +134,6 @@ export default function Settings() {
     window.location.reload();
   };
 
-  const handleShopifySuccess = () => {
-    navigate('/settings');
-    window.location.reload();
-  };
-
-  const handleEtsySuccess = () => {
-    navigate('/settings');
-    window.location.reload();
-  };
-
   const onRefresh = () => {
     window.location.reload();
   };
@@ -164,7 +147,7 @@ export default function Settings() {
       {/* Tabs */}
       <div className="border-b border-gray-200">
         <nav className="-mb-px flex space-x-8">
-          {allTabs.map((tab) => {
+          {TABS.map((tab) => {
             const Icon = tab.icon;
             return (
               <button
@@ -266,22 +249,6 @@ export default function Settings() {
         <PinterestCallback 
           userId={user.uid} 
           onSuccess={handlePinterestSuccess}
-        />
-      )}
-
-      {/* Shopify Callback */}
-      {searchParams.has('code') && user && (
-        <ShopifyCallback 
-          userId={user.uid} 
-          onSuccess={handleShopifySuccess}
-        />
-      )}
-
-      {/* Etsy Callback */}
-      {searchParams.has('code') && user && (
-        <EtsyCallback 
-          userId={user.uid} 
-          onSuccess={handleEtsySuccess}
         />
       )}
     </div>

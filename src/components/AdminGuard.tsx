@@ -21,7 +21,7 @@ export default function AdminGuard({ children }: AdminGuardProps) {
 
       try {
         const userDoc = await getDoc(doc(db, 'users', user.uid));
-        if (!userDoc.exists() || user.uid !== 'Juvh6BgsXhYsi3loKegWfzRIphG2') {
+        if (!userDoc.exists() || (user.uid !== 'Juvh6BgsXhYsi3loKegWfzRIphG2' && user.uid !== 'j5UXKluDdnMFb7mZEagfKRRyhO82')) {
           navigate('/');
         }
       } catch (error) {
@@ -33,7 +33,7 @@ export default function AdminGuard({ children }: AdminGuardProps) {
     checkAdminAccess();
   }, [user, navigate]);
 
-  if (!user || user.uid !== 'Juvh6BgsXhYsi3loKegWfzRIphG2') {
+  if (!user || (user.uid !== 'Juvh6BgsXhYsi3loKegWfzRIphG2' && user.uid !== 'j5UXKluDdnMFb7mZEagfKRRyhO82')) {
     return null;
   }
 
