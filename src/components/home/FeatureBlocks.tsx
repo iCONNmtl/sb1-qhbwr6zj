@@ -212,23 +212,6 @@ export default function FeatureBlocks() {
                     </div>
                   </div>
                 )}
-
-                {/* Testimonial */}
-                {block.testimonial && (
-                  <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4">
-                    <div className="flex items-start gap-3">
-                      <img 
-                        src={block.testimonial.image} 
-                        alt={block.testimonial.author}
-                        className="w-10 h-10 rounded-full object-cover"
-                      />
-                      <div>
-                        <p className="text-indigo-900 italic">"{block.testimonial.quote}"</p>
-                        <p className="text-sm text-indigo-700 mt-1 font-medium">{block.testimonial.author}</p>
-                      </div>
-                    </div>
-                  </div>
-                )}
                 
               </div>
             </div>

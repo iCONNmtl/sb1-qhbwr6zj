@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
-import { CreditCard, X, Loader2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { CreditCard, X, Loader2, Crown, Sparkles } from 'lucide-react';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../../lib/firebase';
 import toast from 'react-hot-toast';
+import type { UserProfile } from '../../types/user';
 
 interface PurchaseConfirmDialogProps {
   plan: {
@@ -15,14 +18,45 @@ interface PurchaseConfirmDialogProps {
 
 export default function PurchaseConfirmDialog({ plan, userId, onClose }: PurchaseConfirmDialogProps) {
   const [loading, setLoading] = useState(false);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [totalCredits, setTotalCredits] = useState(plan.credits);
+  const [bonusCredits, setBonusCredits] = useState(0);
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const userRef = doc(db, 'users', userId);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+          const profile = userSnap.data() as UserProfile;
+          setUserProfile(profile);
+          
+          // Calculate bonus if user is on Expert plan
+          if (profile.subscription?.plan === 'Expert') {
+            const bonus = Math.round(plan.credits * 0.1);
+            setBonusCredits(bonus);
+            setTotalCredits(plan.credits + bonus);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+      }
+    };
+    
+    fetchUserProfile();
+  }, [userId, plan.credits]);
 
   const handleConfirm = async () => {
     setLoading(true);
     try {
       // Liens de paiement Stripe directs
       const stripeLinks = {
-        pro: 'https://buy.stripe.com/28o9Dwgt22UbeaYfZ1',
-        expert: 'https://buy.stripe.com/fZeaHA4Kk7ar8QE9AC'
+        pack1: 'https://buy.stripe.com/test_3cs9Dn6UM3b0c924gi',
+        pack2: 'https://buy.stripe.com/test_9AQ7vf7YQ12Sc92dQT',
+        pack3: 'https://buy.stripe.com/test_3cs9Dn6UM3b0c924gi',
+        pack4: 'https://buy.stripe.com/test_9AQ7vf7YQ12Sc92dQT',
+        pro: 'https://buy.stripe.com/test_3cs9Dn6UM3b0c924gi',
+        expert: 'https://buy.stripe.com/test_9AQ7vf7YQ12Sc92dQT'
       };
 
       const baseUrl = stripeLinks[plan.id.toLowerCase() as keyof typeof stripeLinks];
@@ -39,6 +73,8 @@ export default function PurchaseConfirmDialog({ plan, userId, onClose }: Purchas
       setLoading(false);
     }
   };
+
+  const isExpertPlan = userProfile?.subscription?.plan === 'Expert';
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
@@ -62,11 +98,26 @@ export default function PurchaseConfirmDialog({ plan, userId, onClose }: Purchas
               <h4 className="font-medium text-indigo-900 mb-1">
                 Pack {plan.name}
               </h4>
-              <div className="flex items-baseline justify-center space-x-1.5 mb-2">
-                <span className="text-2xl font-bold text-indigo-600">
-                  {plan.credits}
-                </span>
-                <span className="text-sm text-indigo-600/70">crédits</span>
+              <div className="flex flex-col items-center mb-2">
+                <div className="flex items-baseline gap-1">
+                  <span className="text-2xl font-bold text-indigo-600">
+                    {plan.credits}
+                  </span>
+                  <span className="text-sm text-indigo-600/70">crédits</span>
+                </div>
+                
+                {isExpertPlan && bonusCredits > 0 && (
+                  <div className="flex items-center mt-1 px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-sm">
+                    <Sparkles className="h-4 w-4 mr-1" />
+                    +{bonusCredits} crédits bonus Expert
+                  </div>
+                )}
+                
+                {isExpertPlan && bonusCredits > 0 && (
+                  <div className="mt-2 text-sm font-medium text-indigo-600">
+                    Total: {totalCredits} crédits
+                  </div>
+                )}
               </div>
               <p className="text-lg font-semibold text-indigo-900">
                 {plan.price}€
@@ -80,6 +131,11 @@ export default function PurchaseConfirmDialog({ plan, userId, onClose }: Purchas
               <li>Vous serez redirigé vers notre page de paiement sécurisée</li>
               <li>Les crédits seront ajoutés instantanément à votre compte</li>
               <li>Vous recevrez une confirmation par email</li>
+              {isExpertPlan && bonusCredits > 0 && (
+                <li className="text-amber-700 font-medium">
+                  Votre bonus Expert de {bonusCredits} crédits sera automatiquement ajouté
+                </li>
+              )}
             </ul>
           </div>
 

@@ -99,12 +99,32 @@ export async function cancelSubscription(userId: string): Promise<void> {
     }
   }
 
-  await updateUserSubscription(userId, {
-    plan: PLAN_NAMES.BASIC,
-    startDate: new Date().toISOString(),
-    credits: 5,
-    active: true,
-    stripeCustomerId: null,
-    stripeSubscriptionId: null
+  // Ne pas changer le plan immédiatement, mais marquer comme annulé
+  // Le plan sera changé automatiquement à la fin de la période de facturation
+  await updateDoc(userRef, {
+    'subscription.canceledAt': new Date().toISOString(),
+    'subscription.willDowngradeToPlan': PLAN_NAMES.BASIC
   });
+}
+
+// Fonction pour ajouter des crédits bonus pour les utilisateurs Expert
+export async function addExpertBonusCredits(userId: string, baseCredits: number): Promise<void> {
+  const userRef = doc(db, 'users', userId);
+  const userSnap = await getDoc(userRef);
+  
+  if (!userSnap.exists()) {
+    throw new Error('User not found');
+  }
+  
+  const userData = userSnap.data();
+  const isExpert = userData.subscription?.plan === PLAN_NAMES.EXPERT;
+  
+  if (isExpert) {
+    const bonusCredits = Math.round(baseCredits * 0.1); // 10% bonus
+    await updateDoc(userRef, {
+      'subscription.credits': increment(bonusCredits)
+    });
+    
+    return;
+  }
 }

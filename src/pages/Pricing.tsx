@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { usePlans } from '../hooks/usePlans';
 import { useUserProfile } from '../hooks/useFirestore';
-import { Crown, Check, Link, Minus, Loader2, CreditCard, Zap, Star, Sparkles, Info, HelpCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Crown, Check, Minus, Loader2, CreditCard, Zap, Star, Sparkles, Info, HelpCircle, ChevronDown, ChevronUp, X, AlertCircle, Gift } from 'lucide-react';
 import { LoadingSpinner } from '../components/common';
+import { cancelSubscription } from '../utils/subscription';
+import toast from 'react-hot-toast';
 import clsx from 'clsx';
 
 const FEATURES = [
@@ -111,10 +113,7 @@ function FAQ() {
       {/* Support CTA */}
       <div className="mt-12 text-center">
         <p className="text-gray-600">
-          Vous ne trouvez pas la réponse à votre question ?{' '}
-          <Link to="/contact" className="text-indigo-600 hover:text-indigo-500 font-medium">
-            Contactez notre support
-          </Link>
+          Vous ne trouvez pas la réponse à votre question ? Contactez notre support
         </p>
       </div>
     </div>
@@ -128,6 +127,13 @@ export default function Pricing() {
   const { userProfile, loading: profileLoading } = useUserProfile(user?.uid);
   const [loading, setLoading] = useState(false);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [cancelLoading, setCancelLoading] = useState(false);
+
+  const isExpertPlan = userProfile?.subscription?.plan === 'Expert';
+  const subscriptionEndDate = userProfile?.subscription?.endDate 
+    ? new Date(userProfile.subscription.endDate) 
+    : undefined;
 
   const handlePlanSelection = (planId: string) => {
     if (!user) {
@@ -158,6 +164,39 @@ export default function Pricing() {
     setLoading(false);
   };
 
+  const handleCancelSubscription = async () => {
+    if (!user) return;
+    
+    setCancelLoading(true);
+    try {
+      await cancelSubscription(user.uid);
+      toast.success('Votre abonnement a été annulé avec succès');
+      setShowCancelDialog(false);
+      // Reload user profile to update UI
+      window.location.reload();
+    } catch (error) {
+      console.error('Error cancelling subscription:', error);
+      toast.error('Une erreur est survenue lors de l\'annulation de votre abonnement');
+    } finally {
+      setCancelLoading(false);
+    }
+  };
+
+  // Calcul du bonus pour les utilisateurs Expert
+  const calculateExpertBonus = (packCredits: number) => {
+    if (isExpertPlan) {
+      const bonusCredits = Math.round(packCredits * 0.1);
+      return {
+        totalCredits: packCredits + bonusCredits,
+        bonusCredits
+      };
+    }
+    return {
+      totalCredits: packCredits,
+      bonusCredits: 0
+    };
+  };
+
   if (plansLoading || profileLoading) {
     return <LoadingSpinner message="Chargement des plans..." />;
   }
@@ -177,24 +216,42 @@ export default function Pricing() {
       {userProfile && (
         <div className="mb-12">
           <div className="bg-white rounded-xl shadow-sm p-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div className="flex items-center space-x-4">
-                <div className="p-3 bg-purple-100 rounded-xl">
-                  <Crown className="h-6 w-6 text-purple-600" />
+                <div className={clsx(
+                  "p-3 rounded-xl",
+                  isExpertPlan ? "bg-amber-100" : "bg-indigo-100"
+                )}>
+                  {isExpertPlan ? (
+                    <Crown className="h-6 w-6 text-amber-600" />
+                  ) : (
+                    <CreditCard className="h-6 w-6 text-indigo-600" />
+                  )}
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">
                     Plan {userProfile.subscription.plan}
                   </h3>
-                  <p className="text-sm text-gray-600">
-                    {userProfile.subscription.credits || 0} crédit{(userProfile.subscription.credits || 0) > 1 ? 's' : ''} disponible{(userProfile.subscription.credits || 0) > 1 ? 's' : ''}
-                  </p>
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
+                    <p className="text-sm text-gray-600">
+                      {userProfile.subscription.credits || 0} crédit{(userProfile.subscription.credits || 0) > 1 ? 's' : ''} disponible{(userProfile.subscription.credits || 0) > 1 ? 's' : ''}
+                    </p>
+                    {isExpertPlan && subscriptionEndDate && (
+                      <p className="text-sm text-amber-600">
+                        Prochain renouvellement le {subscriptionEndDate.toLocaleDateString()}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
-              {userProfile.subscription.plan === 'Basic' && (
-                <p className="text-sm text-purple-600 font-medium">
-                  Passez à un plan supérieur pour plus de crédits
-                </p>
+              
+              {isExpertPlan && (
+                <button
+                  onClick={() => setShowCancelDialog(true)}
+                  className="px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition-colors"
+                >
+                  Annuler mon abonnement
+                </button>
               )}
             </div>
           </div>
@@ -240,7 +297,7 @@ export default function Pricing() {
           {/* Expert Plan */}
           <div className="relative rounded-2xl bg-white shadow-sm overflow-hidden">
             {/* Header */}
-            <div className="p-8 bg-gradient-to-r from-amber-500 to-amber-600 border-b border-gray-800">
+            <div className="p-8 bg-gradient-to-r from-amber-500 to-amber-600 border-b border-amber-600">
               <h3 className="text-2xl font-bold text-white mb-2">Expert</h3>
               <p className="text-white/80">Conçu pour les experts du quotidien</p>
             </div>
@@ -270,20 +327,30 @@ export default function Pricing() {
               </div>
 
               {/* Button */}
-              <button 
-                onClick={() => handlePlanSelection('expert')}
-                disabled={loading}
-                className="w-full py-3 px-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl hover:bg-black/90 transition mt-8 flex items-center justify-center"
-              >
-                {loading ? (
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                ) : (
-                  <>
-                    <Zap className="h-5 w-5 mr-2" />
-                    {user ? 'S\'abonner maintenant' : 'Commencer'}
-                  </>
-                )}
-              </button>
+              {isExpertPlan ? (
+                <button 
+                  onClick={() => setShowCancelDialog(true)}
+                  className="w-full py-3 px-4 border border-red-300 text-red-600 rounded-xl hover:bg-red-50 transition mt-8 flex items-center justify-center"
+                >
+                  <X className="h-5 w-5 mr-2" />
+                  Annuler mon abonnement
+                </button>
+              ) : (
+                <button 
+                  onClick={() => handlePlanSelection('expert')}
+                  disabled={loading}
+                  className="w-full py-3 px-4 bg-black text-white rounded-xl hover:bg-black/90 transition mt-8 flex items-center justify-center"
+                >
+                  {loading ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <>
+                      <Zap className="h-5 w-5 mr-2" />
+                      {user ? 'S\'abonner maintenant' : 'Commencer'}
+                    </>
+                  )}
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -335,91 +402,143 @@ export default function Pricing() {
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold text-gray-900">Packs de crédits complémentaires</h2>
           <p className="text-gray-600 mt-2">Achat unique sans engagement • Crédits permanents</p>
+          {isExpertPlan && (
+            <div className="mt-2 inline-flex items-center px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-full">
+              <span className="font-medium">+10% de crédits bonus avec votre plan Expert</span>
+            </div>
+          )}
         </div>
 
-        <div className="grid md:grid-cols-4 gap-6">
-          {CREDIT_PACKS.map((pack) => (
-            <div 
-              key={pack.id}
-              className={clsx(
-                "relative rounded-2xl bg-white shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md",
-                pack.popular && "ring-2 ring-indigo-600 transform hover:scale-105"
-              )}
-            >
-              {pack.popular && (
-                <div className="absolute top-0 right-8 px-4 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-sm font-medium rounded-b-lg shadow-lg">
-                  Populaire
-                </div>
-              )}
-
-              {/* Content */}
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-1">{pack.name}</h3>
-                
-                {/* Credits */}
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="text-3xl font-bold text-purple-600">{pack.credits}</div>
-                  <div className="text-sm text-gray-600">crédits</div>
-                </div>
-
-                {/* Price */}
-                <div className="flex items-baseline gap-1 mb-1">
-                  <span className="text-2xl font-bold">{pack.price}</span>
-                  <span className="text-base">€</span>
-                </div>
-                
-                {/* Unit price */}
-                <div className="flex items-center mb-4">
-                  <div className="text-xs text-gray-500 flex items-center">
-                    <Info className="h-3 w-3 mr-1" />
-                    {pack.unitPrice.toFixed(3)}€ par crédit
+        {/* Packs de crédits sur 2 lignes même sur grand écran */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          {CREDIT_PACKS.map((pack) => {
+            const { totalCredits, bonusCredits } = calculateExpertBonus(pack.credits);
+            
+            return (
+              <div 
+                key={pack.id}
+                className={clsx(
+                  "relative rounded-2xl bg-white shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md",
+                  pack.popular && "ring-2 ring-indigo-600 transform hover:scale-105"
+                )}
+              >
+                {pack.popular && (
+                  <div className="absolute top-0 right-8 px-4 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-sm font-medium rounded-b-lg shadow-lg">
+                    Populaire
                   </div>
-                </div>
-                
-                <div className="text-xs text-gray-500 mb-4">
-                  Sans engagement • Achat unique • Crédits permanents
-                </div>
+                )}
 
-                {/* Button */}
-                <button 
-                  onClick={() => handlePlanSelection(pack.id)}
-                  disabled={loading}
-                  className={clsx(
-                    "w-full py-2 px-4 rounded-lg flex items-center justify-center transition",
-                    pack.popular 
-                      ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:opacity-90" 
-                      : "bg-gray-100 text-gray-900 hover:bg-gray-200"
-                  )}
-                >
-                  {loading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <>
-                      <CreditCard className="h-4 w-4 mr-2" />
-                      Acheter
-                    </>
-                  )}
-                </button>
+                {/* Content */}
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-gray-900 mb-1">{pack.name}</h3>
+                  
+                  {/* Credits */}
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="text-3xl font-bold text-purple-600">{totalCredits}</div>
+                    <div className="text-sm text-gray-600">crédits</div>
+                    {bonusCredits > 0 && (
+                      <div className="ml-1 px-2 py-0.5 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-xs font-medium rounded-full flex items-center">
+                        <Gift className="h-3 w-3 mr-1" />
+                        +{bonusCredits} bonus
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Price */}
+                  <div className="flex items-baseline gap-1 mb-1">
+                    <span className="text-2xl font-bold">{pack.price}</span>
+                    <span className="text-base">€</span>
+                  </div>
+                  
+                  {/* Unit price */}
+                  <div className="flex items-center mb-4">
+                    <div className="text-xs text-gray-500 flex items-center">
+                      <Info className="h-3 w-3 mr-1" />
+                      {(pack.price / totalCredits).toFixed(3)}€ par crédit
+                    </div>
+                  </div>
+                  
+                  <div className="text-xs text-gray-500 mb-4">
+                    Sans engagement • Achat unique • Crédits permanents
+                  </div>
+
+                  {/* Button */}
+                  <button 
+                    onClick={() => handlePlanSelection(pack.id)}
+                    disabled={loading}
+                    className={clsx(
+                      "w-full py-2 px-4 rounded-lg flex items-center justify-center transition",
+                      pack.popular 
+                        ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:opacity-90" 
+                        : "bg-gray-100 text-gray-900 hover:bg-gray-200"
+                    )}
+                  >
+                    {loading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <>
+                        <CreditCard className="h-4 w-4 mr-2" />
+                        Acheter
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
-      {/* FAQ Section - Improved in component */}
       <div className="px-4 sm:px-0">
         <FAQ />
       </div>
 
-      {/* Contact */}
-      <div className="text-center">
-        <p className="text-gray-600">
-          Des questions ? {" "}
-          <a href="mailto:support@pixmock.com" className="text-purple-600 hover:text-purple-500">
-            Contactez-nous
-          </a>
-        </p>
-      </div>
+      {/* Confirmation Dialog for Cancellation */}
+      {showCancelDialog && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md">
+            <div className="mb-4 flex items-start gap-4">
+              <div className="p-2 bg-red-100 rounded-lg flex-shrink-0">
+                <AlertCircle className="h-6 w-6 text-red-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Confirmer l'annulation
+                </h3>
+                <p className="text-gray-600 mb-2">
+                  Êtes-vous sûr de vouloir annuler votre abonnement Expert ?
+                </p>
+                {subscriptionEndDate && (
+                  <p className="text-sm text-gray-500 mb-4">
+                    Votre abonnement restera actif jusqu'au {subscriptionEndDate.toLocaleDateString()}, puis sera automatiquement désactivé. Vous passerez alors au plan Basic.
+                  </p>
+                )}
+              </div>
+            </div>
+            
+            <div className="flex flex-col gap-3 mt-6">
+              <button
+                onClick={handleCancelSubscription}
+                disabled={cancelLoading}
+                className="w-full py-3 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 transition flex items-center justify-center disabled:opacity-50"
+              >
+                {cancelLoading ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  "Confirmer l'annulation"
+                )}
+              </button>
+              <button
+                onClick={() => setShowCancelDialog(false)}
+                disabled={cancelLoading}
+                className="w-full py-3 px-4 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
+              >
+                Annuler
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

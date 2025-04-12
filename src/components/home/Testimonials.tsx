@@ -190,7 +190,6 @@ export default function Testimonials() {
                       key={testimonial.id} 
                       className="bg-white rounded-xl shadow-md overflow-hidden flex flex-col h-full"
                     >
-                      <div className="h-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
                       <div className="p-6 flex flex-col flex-grow">
                         <div className="flex items-start mb-4">
                           <div className="relative flex-shrink-0">
