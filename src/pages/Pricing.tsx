@@ -240,7 +240,7 @@ export default function Pricing() {
           {/* Expert Plan */}
           <div className="relative rounded-2xl bg-white shadow-sm overflow-hidden">
             {/* Header */}
-            <div className="p-8 bg-gradient-to-br from-gray-900 to-black border-b border-gray-800">
+            <div className="p-8 bg-gradient-to-r from-amber-500 to-amber-600 border-b border-gray-800">
               <h3 className="text-2xl font-bold text-white mb-2">Expert</h3>
               <p className="text-white/80">Conçu pour les experts du quotidien</p>
             </div>
@@ -273,7 +273,7 @@ export default function Pricing() {
               <button 
                 onClick={() => handlePlanSelection('expert')}
                 disabled={loading}
-                className="w-full py-3 px-4 bg-black text-white rounded-xl hover:bg-black/90 transition mt-8 flex items-center justify-center"
+                className="w-full py-3 px-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl hover:bg-black/90 transition mt-8 flex items-center justify-center"
               >
                 {loading ? (
                   <Loader2 className="h-5 w-5 animate-spin" />

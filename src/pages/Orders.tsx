@@ -337,7 +337,7 @@ export default function Orders() {
           )}
 
           {activeTab === 'stats' && (
-            <OrderStats orders={orders} />
+            <OrderStats orders={orders} userProfile={userProfile} />
           )}
 
           {activeTab === 'orders' && (

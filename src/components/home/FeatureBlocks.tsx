@@ -131,7 +131,7 @@ export default function FeatureBlocks() {
               {/* Image or Compare Component */}
               <div className="w-full md:w-1/2 relative">
                 <div className={clsx(
-                  "absolute -inset-4 rounded-2xl blur-2xl"
+                  "absolute -inset-4 rounded-2xl"
                 )} />
                 <div className="relative overflow-hidden rounded-2xl aspect-[4/3]">
                   {block.useCompare ? (
@@ -164,9 +164,6 @@ export default function FeatureBlocks() {
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 pointer-events-none" />
                     </>
                   )}
-                  <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm p-3 rounded-xl">
-                    <Icon className="h-6 w-6 text-gray-900" />
-                  </div>
                 </div>
               </div>
 
@@ -192,7 +189,7 @@ export default function FeatureBlocks() {
                 {block.stats && (
                   <div className="grid grid-cols-3 gap-2">
                     {block.stats.map((stat, statIndex) => (
-                      <div key={statIndex} className="bg-gray-50 rounded-xl p-3 border border-gray-100">
+                      <div key={statIndex} className="bg-white rounded-xl p-3 border border-gray-100">
                         <div className="flex items-center gap-2 mb-1">
                           <stat.icon className="h-4 w-4 text-indigo-600" />
                           <span className="font-semibold text-gray-900">{stat.value}</span>
@@ -233,13 +230,6 @@ export default function FeatureBlocks() {
                   </div>
                 )}
                 
-                <Link 
-                  to={block.link}
-                  className="inline-flex items-center text-indigo-600 font-medium hover:text-indigo-700 transition-colors group"
-                >
-                  {block.linkText}
-                  <ArrowRight className="h-4 w-4 ml-2 transition-transform group-hover:translate-x-1" />
-                </Link>
               </div>
             </div>
           );

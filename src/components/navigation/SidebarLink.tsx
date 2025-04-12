@@ -27,28 +27,35 @@ export default function SidebarLink({
     <Link
       to={to}
       className={clsx(
-        'flex items-center px-3 py-2 rounded-lg transition-all duration-200 relative',
+        'group flex items-center px-3 py-2 rounded-lg transition-all duration-200 relative',
         isActive && !className?.includes('gradient-bg')
           ? 'bg-indigo-50 text-indigo-600'
-          : 'text-gray-600 hover:bg-gray-100',
+          : 'text-gray-700 hover:bg-gray-100',
         className
       )}
       title={isCollapsed ? label : undefined}
     >
-      <Icon className="h-5 w-5" />
+      {/* Icon - always visible */}
+      <div className={clsx(
+        "flex items-center justify-center",
+        isCollapsed ? "w-6 h-6" : "w-5 h-5 mr-3"
+      )}>
+        <Icon className="h-full w-full" />
+      </div>
+      
+      {/* Label - only visible when not collapsed */}
       {!isCollapsed && (
-        <div className="ml-3 flex items-center">
-          <span>{label}</span>
-          {notificationCount !== undefined && notificationCount > 0 && (
-            <div className="ml-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs font-medium rounded-full min-w-[20px] h-5 px-1.5 flex items-center justify-center">
-              {notificationCount}
-            </div>
-          )}
-        </div>
+        <span className="text-sm font-medium">{label}</span>
       )}
       
-      {isCollapsed && notificationCount !== undefined && notificationCount > 0 && (
-        <div className="absolute -top-1 -right-1 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs font-medium rounded-full w-5 h-5 flex items-center justify-center">
+      {/* Notification badge */}
+      {notificationCount !== undefined && notificationCount > 0 && (
+        <div className={clsx(
+          "bg-red-500 text-white text-xs font-medium rounded-full flex items-center justify-center",
+          isCollapsed 
+            ? "absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1" 
+            : "ml-auto min-w-[20px] h-5 px-1.5"
+        )}>
           {notificationCount}
         </div>
       )}

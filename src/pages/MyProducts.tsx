@@ -3,34 +3,17 @@ import { Link } from 'react-router-dom';
 import { collection, query, where, getDocs, doc, deleteDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useStore } from '../store/useStore';
-import { Package, Edit, Trash2, Plus, Loader2, ChevronDown, ChevronUp, DollarSign, Eye, Globe2, Calendar, BarChart2, Layers, Store } from 'lucide-react';
+import { Package, Edit, Trash2, Plus, Loader2, ChevronDown, ChevronUp, DollarSign, Eye, Globe2, Calendar, BarChart2, Crown, Sparkles, Wand2 } from 'lucide-react';
 import ImageLoader from '../components/ImageLoader';
 import { usePagination } from '../hooks/usePagination';
 import Pagination from '../components/Pagination';
 import ProductPlatformExport from '../components/products/ProductPlatformExport';
 import toast from 'react-hot-toast';
 import clsx from 'clsx';
+import type { Product } from '../types/product';
+import type { UserProfile } from '../types/user';
 
-interface Product {
-  id: string;
-  firestoreId: string;
-  type: string;
-  title: string;
-  name: string;
-  designUrl: string;
-  variants: {
-    sizeId: string;
-    name: string;
-    price: number;
-    cost: number;
-    sku: string;
-    dimensions: {
-      cm: string;
-      inches: string;
-    };
-  }[];
-  createdAt: string;
-}
+interface MyProductsProps {}
 
 export default function MyProducts() {
   const { user } = useStore();
@@ -39,6 +22,7 @@ export default function MyProducts() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [expandedProduct, setExpandedProduct] = useState<string | null>(null);
   const [showExportDialog, setShowExportDialog] = useState<Product | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
   const {
     currentPage,
@@ -54,6 +38,14 @@ export default function MyProducts() {
       if (!user) return;
 
       try {
+        // Fetch user profile
+        const userRef = doc(db, 'users', user.uid);
+        const userSnap = await getDocs(query(collection(db, 'users'), where('__name__', '==', user.uid)));
+        if (!userSnap.empty) {
+          setUserProfile(userSnap.docs[0].data() as UserProfile);
+        }
+
+        // Fetch products
         const productsRef = collection(db, 'products');
         const q = query(productsRef, where('userId', '==', user.uid));
         const snapshot = await getDocs(q);
@@ -96,6 +88,8 @@ export default function MyProducts() {
     }
   };
 
+  const isExpertPlan = userProfile?.subscription?.plan === 'Expert';
+
   if (loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
@@ -126,6 +120,47 @@ export default function MyProducts() {
           Créer un produit
         </Link>
       </div>
+
+      {/* Expert Plan Banner */}
+      {!isExpertPlan && (
+        <div className="bg-gradient-to-r from-amber-500 to-amber-600 rounded-xl p-6 text-white shadow-md">
+          <div className="flex items-start gap-4">
+            <div className="p-3 bg-white/20 rounded-xl">
+              <Wand2 className="h-6 w-6 text-white" />
+            </div>
+            <div className="flex-1">
+              <h2 className="text-xl font-semibold mb-2 flex items-center">
+                <Crown className="h-5 w-5 mr-2" />
+                Devenez membre Expert
+              </h2>
+              <p className="mb-4">
+                Obtenez des fiches produits optimisées générées avec l'IA, des descriptions SEO parfaites et des titres accrocheurs pour maximiser vos ventes sur toutes les plateformes.
+              </p>
+              <div className="flex flex-wrap gap-4 mb-4">
+                <div className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-lg">
+                  <Sparkles className="h-4 w-4" />
+                  <span className="text-sm">Descriptions IA</span>
+                </div>
+                <div className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-lg">
+                  <Globe2 className="h-4 w-4" />
+                  <span className="text-sm">Optimisation SEO</span>
+                </div>
+                <div className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-lg">
+                  <BarChart2 className="h-4 w-4" />
+                  <span className="text-sm">Statistiques avancées</span>
+                </div>
+              </div>
+              <Link
+                to="/pricing"
+                className="inline-flex items-center px-4 py-2 bg-white text-amber-600 rounded-lg hover:bg-amber-50 transition-colors"
+              >
+                <Crown className="h-5 w-5 mr-2" />
+                Passer au plan Expert
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
 
       {products.length === 0 ? (
         <div className="bg-white rounded-xl shadow-sm p-12 text-center">
@@ -182,7 +217,7 @@ export default function MyProducts() {
                           <span className="text-gray-600">{product.type}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Layers className="h-4 w-4 text-gray-400" />
+                          <Loader2 className="h-4 w-4 text-gray-400" />
                           <span className="text-gray-600">{totalVariants} taille{totalVariants > 1 ? 's' : ''}</span>
                         </div>
                         <div className="flex items-center gap-2">
@@ -209,7 +244,7 @@ export default function MyProducts() {
                         className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition"
                         title="Exporter"
                       >
-                        <Store className="h-5 w-5" />
+                        <Globe2 className="h-5 w-5" />
                       </button>
                       <Link
                         to={`/product/edit/${product.firestoreId}`}
@@ -318,7 +353,7 @@ export default function MyProducts() {
                           onClick={() => setShowExportDialog(product)}
                           className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
                         >
-                          <Store className="h-5 w-5 mr-2" />
+                          <Globe2 className="h-5 w-5 mr-2" />
                           Exporter vers les plateformes
                         </button>
                       </div>

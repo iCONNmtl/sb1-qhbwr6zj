@@ -3,7 +3,6 @@ import { Routes, Route } from 'react-router-dom';
 import Sidebar from './components/navigation/Sidebar';
 import PageContainer from './components/layout/PageContainer';
 import SupportButton from './components/support/SupportButton';
-import AnnouncementBanner from './components/AnnouncementBanner';
 import CookieConsent from './components/CookieConsent';
 import { useScrollToTop } from './hooks/useScrollToTop';
 import Home from './pages/Home';
@@ -44,7 +43,6 @@ export default function AppContent() {
   
   return (
     <div className="min-h-screen flex flex-col">
-      {showBanner && <AnnouncementBanner onClose={() => setShowBanner(false)} />}
       <div className="flex flex-1">
         {user && <Sidebar />}
         <PageContainer>

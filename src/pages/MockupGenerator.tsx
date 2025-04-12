@@ -3,7 +3,7 @@ import { useStore } from '../store/useStore';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { Link } from 'react-router-dom';
-import { Plus, Ruler, ChevronDown, Info } from 'lucide-react';
+import { Plus, Ruler, ChevronDown, Info, Crown, Lock } from 'lucide-react';
 import clsx from 'clsx';
 import toast from 'react-hot-toast';
 
@@ -204,6 +204,9 @@ export default function MockupGenerator() {
     setShowSizeDropdown(false);
   };
 
+  // Check if user has Expert plan
+  const isExpertPlan = userProfile?.subscription?.plan === 'Expert';
+
   return (
     <div className="space-y-6 md:space-y-8">
       {isGenerating && <GenerationProgress totalMockups={selectedMockups.length} />}
@@ -232,7 +235,7 @@ export default function MockupGenerator() {
             <div className="relative flex-1 md:flex-none">
               <button
                 onClick={() => setShowSizeDropdown(!showSizeDropdown)}
-                className="w-full md:w-auto flex items-center px-4 py-2 border border-indigo-600 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors"
+                className="w-full md:w-auto flex items-center px-4 py-2 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors"
               >
                 <Ruler className="h-5 w-5 mr-2" />
                 <span className="flex-1 text-left">
@@ -246,7 +249,7 @@ export default function MockupGenerator() {
 
               {/* Size Dropdown */}
               {showSizeDropdown && (
-                <div className="absolute z-50 mt-2 w-full md:w-72 border border-indigo-600 bg-white rounded-xl shadow-lg border border-gray-200 py-2">
+                <div className="absolute z-50 mt-2 w-full md:w-72 bg-white rounded-xl shadow-lg border border-gray-200 py-2">
                   <button
                     onClick={() => handleSizeChange('all')}
                     className={clsx(
@@ -297,7 +300,7 @@ export default function MockupGenerator() {
 
             <Link
               to="/custom-mockup"
-              className="flex items-center px-4 py-2 text-indigo-600 bg-indigo-50 border border-indigo-600 hover:bg-indigo-100 rounded-lg transition-colors whitespace-nowrap"
+              className="flex items-center px-4 py-2 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors whitespace-nowrap"
             >
               <Plus className="h-5 w-5 mr-2" />
               <span>Ajouter votre mockup</span>
@@ -364,22 +367,64 @@ export default function MockupGenerator() {
             3. Personnalisez votre texte
           </h2>
           
-          <div className="space-y-6">
-            <TextCustomizationToggle
-              isEnabled={isTextCustomizationEnabled}
-              onChange={setIsTextCustomizationEnabled}
-            />
-
-            {isTextCustomizationEnabled && (
-              <TextEditor
-                selectedMockups={selectedMockupData}
-                onGenerateHtml={setCustomHtml}
-                onCustomizedMockupsChange={setCustomizedMockups}
-                userId={user?.uid}
-                userLogo={userProfile?.logoUrl}
-              />
-            )}
-          </div>
+          <TextCustomizationToggle
+            isEnabled={isTextCustomizationEnabled}
+            onChange={setIsTextCustomizationEnabled}
+          />
+          
+          {isTextCustomizationEnabled && (
+            <>
+              {isExpertPlan ? (
+                <div className="mt-6">
+                  <TextEditor
+                    selectedMockups={selectedMockupData}
+                    onGenerateHtml={setCustomHtml}
+                    onCustomizedMockupsChange={setCustomizedMockups}
+                    userId={user?.uid}
+                    userLogo={userProfile?.logoUrl}
+                  />
+                </div>
+              ) : (
+                <div className="mt-6 bg-gradient-to-r from-amber-500 to-amber-600 rounded-xl p-6 text-white shadow-md">
+                  <div className="flex items-start gap-4">
+                    <div className="p-3 bg-white/20 rounded-xl">
+                      <Lock className="h-6 w-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-xl font-semibold mb-2 flex items-center">
+                        <Crown className="h-5 w-5 mr-2" />
+                        Fonctionnalité réservée au plan Expert
+                      </h3>
+                      <p className="mb-4">
+                        La personnalisation de texte vous permet d'ajouter du texte, des logos et des éléments visuels à vos mockups pour créer des présentations professionnelles et prêtes à l'emploi.
+                      </p>
+                      <div className="flex flex-wrap gap-4 mb-4">
+                        <div className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-lg">
+                          <Info className="h-4 w-4" />
+                          <span className="text-sm">Texte personnalisé</span>
+                        </div>
+                        <div className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-lg">
+                          <Info className="h-4 w-4" />
+                          <span className="text-sm">Ajout de logo</span>
+                        </div>
+                        <div className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-lg">
+                          <Info className="h-4 w-4" />
+                          <span className="text-sm">Templates prédéfinis</span>
+                        </div>
+                      </div>
+                      <Link
+                        to="/pricing"
+                        className="inline-flex items-center px-4 py-2 bg-white text-amber-600 rounded-lg hover:bg-amber-50 transition-colors"
+                      >
+                        <Crown className="h-5 w-5 mr-2" />
+                        Passer au plan Expert
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
         </section>
       )}
 
@@ -403,8 +448,8 @@ export default function MockupGenerator() {
           onGenerate={handleGenerate}
           designFile={designFile}
           designUrl={designUrl}
-          isTextCustomizationEnabled={isTextCustomizationEnabled}
-          customizedMockups={customizedMockups}
+          isTextCustomizationEnabled={isExpertPlan && isTextCustomizationEnabled}
+          customizedMockups={isExpertPlan ? customizedMockups : []}
         />
       </div>
 

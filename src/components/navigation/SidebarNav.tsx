@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Wand2, Calendar, Package, ShoppingBag, FileText, Book, CreditCard } from 'lucide-react';
+import React from 'react';
+import { LayoutDashboard, Wand2, Calendar, Package, ShoppingBag, FileText, Book, CreditCard, Palette } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
@@ -24,12 +24,11 @@ interface SidebarNavProps {
 
 export default function SidebarNav({ isCollapsed }: SidebarNavProps) {
   const { user } = useStore();
-  const [pendingOrders, setPendingOrders] = useState(0);
-  const [openTickets, setOpenTickets] = useState(0);
-  const isAdmin = user?.uid === 'Juvh6BgsXhYsi3loKegWfzRIphG2';
-  const [visibleSections, setVisibleSections] = useState<string[]>([]);
+  const [pendingOrders, setPendingOrders] = React.useState(0);
+  const [openTickets, setOpenTickets] = React.useState(0);
+  const isAdmin = user?.uid === 'Juvh6BgsXhYsi3loKegWfzRIphG2' || user?.uid === 'j5UXKluDdnMFb7mZEagfKRRyhO82';
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (!user) return;
 
     // Subscribe to pending orders count
@@ -60,7 +59,7 @@ export default function SidebarNav({ isCollapsed }: SidebarNavProps) {
 
   const navSections: NavSection[] = [
     {
-      title: 'Produits',
+      title: "Business",
       items: [
         {
           to: '/products',
@@ -81,12 +80,13 @@ export default function SidebarNav({ isCollapsed }: SidebarNavProps) {
       ]
     },
     {
-      title: 'Mockups',
+      title: "Création",
       items: [
         {
           to: '/generator',
           icon: Wand2,
-          label: 'Mockups'
+          label: 'Mockups',
+          primary: true
         },
         {
           to: '/dashboard',
@@ -96,18 +96,13 @@ export default function SidebarNav({ isCollapsed }: SidebarNavProps) {
       ]
     },
     {
-      title: 'Cours',
+      title: "Ressources",
       items: [
         {
           to: '/training',
           icon: Book,
-          label: 'Cours'
-        }
-      ]
-    },
-    {
-      title: 'Tarifs',
-      items: [
+          label: 'Formations'
+        },
         {
           to: '/pricing',
           icon: CreditCard,
@@ -120,7 +115,7 @@ export default function SidebarNav({ isCollapsed }: SidebarNavProps) {
   // Add admin section if user is admin
   if (isAdmin) {
     navSections.push({
-      title: 'Administration',
+      title: "Administration",
       items: [
         {
           to: '/admin',
@@ -133,45 +128,51 @@ export default function SidebarNav({ isCollapsed }: SidebarNavProps) {
   }
 
   return (
-    <nav id="sidebar-nav" className="space-y-3 overflow-y-auto max-h-[calc(100vh-200px)]">
-      {navSections.map((section, index) => (
-        <div 
-          key={section.title} 
-          id={`section-${index}`}
-          className={clsx(
-            'nav-section',
-            index > 0 ? 'border-t border-gray-100 pt-3 mt-2' : ''
-          )}
-        >
-          {!isCollapsed && (
-            <h3 className="px-3 mb-1 text-xs font-medium text-gray-500 uppercase tracking-wider">
-              {section.title}
-            </h3>
-          )}
-          <div className="space-y-1 px-3">
-            {section.items
-              .filter(item => !item.adminOnly || isAdmin)
-              .map((item) => (
-                <SidebarLink
-                  key={item.to}
-                  to={item.to}
-                  icon={item.icon}
-                  label={item.label}
-                  isCollapsed={isCollapsed}
-                  notificationCount={
-                    item.showNotification && item.to === '/admin' ? (pendingOrders + openTickets) :
-                    item.showNotification && item.to === '/orders' ? pendingOrders :
-                    undefined
-                  }
-                  className={clsx(
-                    item.primary && 'gradient-bg text-white hover:opacity-90',
-                    isCollapsed && 'justify-center'
-                  )}
-                />
-              ))}
+    <nav className="flex-1 overflow-y-auto py-4">
+      <div className="space-y-1 px-3">
+        {navSections.map((section, index) => (
+          <div 
+            key={section.title} 
+            className={clsx(
+              index > 0 ? 'mt-6' : '',
+              'space-y-1'
+            )}
+          >
+            {/* Section header - only show when sidebar is expanded */}
+            {!isCollapsed && (
+              <div className="px-3 py-2">
+                <h3 className="text-xs font-medium uppercase tracking-wider text-gray-500">
+                  {section.title}
+                </h3>
+              </div>
+            )}
+            
+            {/* Section items */}
+            <div className="space-y-1">
+              {section.items
+                .filter(item => !item.adminOnly || isAdmin)
+                .map((item) => (
+                  <SidebarLink
+                    key={item.to}
+                    to={item.to}
+                    icon={item.icon}
+                    label={item.label}
+                    isCollapsed={isCollapsed}
+                    notificationCount={
+                      item.showNotification && item.to === '/admin' ? (pendingOrders + openTickets) :
+                      item.showNotification && item.to === '/orders' ? pendingOrders :
+                      undefined
+                    }
+                    className={clsx(
+                      item.primary && 'gradient-bg text-white hover:opacity-90',
+                      isCollapsed && 'justify-center'
+                    )}
+                  />
+                ))}
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </nav>
   );
 }

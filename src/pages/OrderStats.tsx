@@ -7,13 +7,17 @@ import CountryMetrics from '../components/stats/CountryMetrics';
 import ProductMetrics from '../components/stats/ProductMetrics';
 import Filters from '../components/stats/Filters';
 import { PLATFORMS } from '../components/stats/constants';
+import { Link } from 'react-router-dom';
+import { Crown, Lock } from 'lucide-react';
 import type { Order, OrderPlatform } from '../types/order';
+import type { UserProfile } from '../types/user';
 
 interface OrderStatsProps {
   orders: Order[];
+  userProfile?: UserProfile | null;
 }
 
-export default function OrderStats({ orders }: OrderStatsProps) {
+export default function OrderStats({ orders, userProfile }: OrderStatsProps) {
   const [dateRange, setDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({
     from: undefined,
     to: undefined
@@ -24,6 +28,8 @@ export default function OrderStats({ orders }: OrderStatsProps) {
   const [selectedMetrics, setSelectedMetrics] = useState<string[]>(['revenue', 'profit', 'cost']);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<'overview' | 'platforms' | 'sizes' | 'countries' | 'products'>('overview');
+
+  const isExpertPlan = userProfile?.subscription?.plan === 'Expert';
 
   const availableCountries = useMemo(() => {
     const countries = new Set<string>();
@@ -251,93 +257,113 @@ export default function OrderStats({ orders }: OrderStatsProps) {
 
       <MetricsOverview metrics={metrics} />
 
-      {/* Tabs Navigation */}
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-        <div className="border-b border-gray-200">
-          <nav className="-mb-px flex space-x-8 px-6">
-            <button
-              onClick={() => setActiveTab('overview')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'overview'
-                  ? 'border-indigo-600 text-indigo-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              Vue d'ensemble
-            </button>
-            <button
-              onClick={() => setActiveTab('platforms')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'platforms'
-                  ? 'border-indigo-600 text-indigo-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              Par plateforme
-            </button>
-            <button
-              onClick={() => setActiveTab('sizes')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'sizes'
-                  ? 'border-indigo-600 text-indigo-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              Par taille
-            </button>
-            <button
-              onClick={() => setActiveTab('countries')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'countries'
-                  ? 'border-indigo-600 text-indigo-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              Par pays
-            </button>
-            <button
-              onClick={() => setActiveTab('products')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'products'
-                  ? 'border-indigo-600 text-indigo-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              Par produit
-            </button>
-          </nav>
+      {/* Tabs Navigation - Only visible for Expert plan */}
+      {isExpertPlan ? (
+        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+          <div className="border-b border-gray-200">
+            <nav className="-mb-px flex space-x-8 px-6">
+              <button
+                onClick={() => setActiveTab('overview')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'overview'
+                    ? 'border-indigo-600 text-indigo-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Vue d'ensemble
+              </button>
+              <button
+                onClick={() => setActiveTab('platforms')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'platforms'
+                    ? 'border-indigo-600 text-indigo-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Par plateforme
+              </button>
+              <button
+                onClick={() => setActiveTab('sizes')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'sizes'
+                    ? 'border-indigo-600 text-indigo-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Par taille
+              </button>
+              <button
+                onClick={() => setActiveTab('countries')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'countries'
+                    ? 'border-indigo-600 text-indigo-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Par pays
+              </button>
+              <button
+                onClick={() => setActiveTab('products')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'products'
+                    ? 'border-indigo-600 text-indigo-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Par produit
+              </button>
+            </nav>
+          </div>
+
+          <div className="p-6">
+            {activeTab === 'overview' && (
+              <div className="bg-white rounded-xl p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-6">
+                  Évolution dans le temps
+                </h3>
+                <TimeSeriesChart 
+                  data={timeSeriesData}
+                  selectedMetrics={selectedMetrics}
+                />
+              </div>
+            )}
+
+            {activeTab === 'platforms' && (
+              <PlatformMetrics platformMetrics={platformMetrics} />
+            )}
+
+            {activeTab === 'sizes' && (
+              <SizeMetrics sizeMetrics={sizeMetrics} />
+            )}
+
+            {activeTab === 'countries' && (
+              <CountryMetrics countryMetrics={countryMetrics} />
+            )}
+
+            {activeTab === 'products' && (
+              <ProductMetrics productMetrics={productMetrics} />
+            )}
+          </div>
         </div>
-
-        <div className="p-6">
-          {activeTab === 'overview' && (
-            <div className="bg-white rounded-xl p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-6">
-                Évolution dans le temps
-              </h3>
-              <TimeSeriesChart 
-                data={timeSeriesData}
-                selectedMetrics={selectedMetrics}
-              />
-            </div>
-          )}
-
-          {activeTab === 'platforms' && (
-            <PlatformMetrics platformMetrics={platformMetrics} />
-          )}
-
-          {activeTab === 'sizes' && (
-            <SizeMetrics sizeMetrics={sizeMetrics} />
-          )}
-
-          {activeTab === 'countries' && (
-            <CountryMetrics countryMetrics={countryMetrics} />
-          )}
-
-          {activeTab === 'products' && (
-            <ProductMetrics productMetrics={productMetrics} />
-          )}
+      ) : (
+        <div className="bg-white rounded-xl shadow-sm p-8 text-center">
+          <div className="max-w-md mx-auto">
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              Statistiques détaillées réservées au plan Expert
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Passez au plan Expert pour accéder aux statistiques détaillées par plateforme, pays, taille et produit, ainsi qu'à l'évolution dans le temps.
+            </p>
+            <Link
+              to="/pricing"
+              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl hover:opacity-90 transition-colors"
+            >
+              <Lock className="h-5 w-5 mr-2" />
+              Passer au plan Expert
+            </Link>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

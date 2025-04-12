@@ -92,12 +92,12 @@ const getSimilarSizes = (sizeId: string): string[] => {
     '24x36': ['8x12', '12x18'],
     'A4': ['A3', 'A2', 'A1', 'A0', '5x7', '20x28', '28x40'],
     'A3': ['A4', 'A2', 'A1', 'A0', '5x7', '20x28', '28x40'],
-    'A2': ['A3', 'A4', 'A1', 'A0', '5x7', '20x28', '28x40'],
-    'A1': ['A3', 'A2', 'A4', 'A0', '5x7', '20x28', '28x40'],
-    'A0': ['A3', 'A2', 'A1', 'A4', '5x7', '20x28', '28x40'],
-    '5x7': ['A4','A3', 'A2', 'A1', 'A0', '20x28', '28x40'],
-    '20x28': ['A4','A3', 'A2', 'A1', 'A0', '5x7', '28x40'],
-    '28x40': ['A4','A3', 'A2', 'A1', 'A0', '5x7', '20x28']
+    'A2': ['A4', 'A3', 'A1', 'A0', '5x7', '20x28', '28x40'],
+    'A1': ['A4', 'A3', 'A2', 'A0', '5x7', '20x28', '28x40'],
+    'A0': ['A4', 'A3', 'A2', 'A1', '5x7', '20x28', '28x40'],
+    '5x7': ['A4', 'A3', 'A2', 'A1', 'A0', '20x28', '28x40'],
+    '20x28': ['A4', 'A3', 'A2', 'A1', 'A0', 'A4', '5x7', '28x40'],
+    '28x40': ['A4', 'A3', 'A2', 'A1', 'A0', 'A4', '5x7', '20x28']
   } as const;
 
   return similarGroups[sizeId as keyof typeof similarGroups] || [];
@@ -163,6 +163,8 @@ export default function Product() {
     fetchUserProfile();
   }, [user]);
 
+  const isExpertPlan = userProfile?.subscription?.plan === 'Expert';
+
   const handleSave = async () => {
     if (!user) {
       toast.error('Vous devez être connecté');
@@ -206,126 +208,45 @@ export default function Product() {
           name: PRODUCT_TYPES[productType],
           cost: config.size.cost,
           price: config.price,
-          sku: `${user.uid.substring(0, 8)}-${productId.substring(0, 8)}-${config.size.id}`,
+          sku: `${user.uid}-${productId.substring(0, 8)}-${config.size.id}`,
           designUrl: config.designUrl,
           dimensions: config.size.dimensions
         })),
         createdAt: new Date().toISOString(),
-        status: 'active',
-        // Champs spécifiques pour Etsy
-        etsy: {
-          title: productTitle.trim(),
-          description: `Impression haute qualité sur papier premium ${PRODUCT_TYPES[productType]}.
-
-Caractéristiques :
-• Papier premium de haute qualité
-• Impression haute définition
-• Couleurs éclatantes et détails nets
-• Disponible en plusieurs tailles
-
-Tailles disponibles :
-${selectedConfigs.map(config => `• ${config.size.dimensions.inches} (${config.size.dimensions.cm})`).join('\n')}
-
-Livraison :
-• Expédition mondiale depuis nos centres d'impression locaux
-• Emballage sécurisé dans un tube rigide pour protéger votre affiche
-• Numéro de suivi fourni pour toutes les commandes
-• Délai de traitement : 1-3 jours ouvrables
-• Délai de livraison : 3-7 jours ouvrables (selon la destination)
-
-Informations importantes :
-• Les couleurs peuvent légèrement varier selon les paramètres de votre écran
-• Cadre non inclus
-• Imprimé à la demande spécialement pour vous
-
-Politique de retour :
-Si vous n'êtes pas satisfait de votre achat, contactez-nous dans les 14 jours suivant la réception pour un remboursement ou un échange.`,
-          tags: ['poster', 'print', 'wall art', 'home decor', 'art print', 'decoration', 'wall decor', 'minimalist', 'modern art', 'gift idea', 'interior design'],
-          category: 'Art & Collectibles > Prints > Digital Prints',
-          materials: ['paper', 'ink', 'art print', 'poster'],
-          who_made: 'i_did',
-          when_made: 'made_to_order',
-          is_supply: false,
-          is_customizable: false,
-          is_digital: false,
-          processing_time: '1_3_business_days'
-        },
-        // Champs spécifiques pour Shopify
-        shopify: {
-          title: productTitle.trim(),
-          body_html: `<h2>Impression haute qualité sur papier premium ${PRODUCT_TYPES[productType]}</h2>
-
-<h3>Caractéristiques :</h3>
-<ul>
-  <li>Papier premium de haute qualité</li>
-  <li>Impression haute définition</li>
-  <li>Couleurs éclatantes et détails nets</li>
-  <li>Disponible en plusieurs tailles</li>
-</ul>
-
-<h3>Tailles disponibles :</h3>
-<ul>
-  ${selectedConfigs.map(config => `<li>${config.size.dimensions.inches} (${config.size.dimensions.cm})</li>`).join('\n  ')}
-</ul>
-
-<h3>Livraison :</h3>
-<ul>
-  <li>Expédition mondiale depuis nos centres d'impression locaux</li>
-  <li>Emballage sécurisé dans un tube rigide pour protéger votre affiche</li>
-  <li>Numéro de suivi fourni pour toutes les commandes</li>
-  <li>Délai de traitement : 1-3 jours ouvrables</li>
-  <li>Délai de livraison : 3-7 jours ouvrables (selon la destination)</li>
-</ul>
-
-<h3>Informations importantes :</h3>
-<ul>
-  <li>Les couleurs peuvent légèrement varier selon les paramètres de votre écran</li>
-  <li>Cadre non inclus</li>
-  <li>Imprimé à la demande spécialement pour vous</li>
-</ul>
-
-<h3>Politique de retour :</h3>
-<p>Si vous n'êtes pas satisfait de votre achat, contactez-nous dans les 14 jours suivant la réception pour un remboursement ou un échange.</p>`,
-          vendor: userProfile.organizationName || 'Your Brand',
-          product_type: 'Poster',
-          tags: ['poster', 'print', 'wall art', 'home decor', 'art print', 'decoration', 'wall decor', 'minimalist', 'modern art', 'gift idea', 'interior design'],
-          status: 'active',
-          published: true,
-          options: [
-            {
-              name: 'Size',
-              values: selectedConfigs.map(config => `${config.size.dimensions.inches} (${config.size.dimensions.cm})`)
-            }
-          ],
-          seo_title: productTitle.trim(),
-          seo_description: `Découvrez notre ${productTitle.trim()} de haute qualité. Impression premium disponible en plusieurs tailles.`
-        }
+        status: 'active'
       };
-
+      
       // Ajouter le produit à Firestore
       const docRef = await addDoc(productRef, productData);
 
-      // Appeler le webhook Make avec la structure complète
-      const webhookResponse = await fetch(PRODUCT_CREATION_WEBHOOK, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          product: {
-            ...productData,
-            firestoreId: docRef.id,
-            userProfile: {
-              email: userProfile.email,
-              organizationName: userProfile.organizationName,
-              address: userProfile.address || {}
-            }
-          }
-        })
-      });
+      // Si l'utilisateur est Expert, appeler le webhook Make avec la structure complète
+      if (isExpertPlan) {
+        try {
+          const webhookResponse = await fetch(PRODUCT_CREATION_WEBHOOK, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              product: {
+                ...productData,
+                firestoreId: docRef.id,
+                userProfile: {
+                  email: userProfile.email,
+                  organizationName: userProfile.organizationName,
+                  address: userProfile.address || {}
+                }
+              }
+            })
+          });
 
-      if (!webhookResponse.ok) {
-        console.warn('Webhook call failed, but product was created in Firestore');
+          if (!webhookResponse.ok) {
+            console.warn('Webhook call failed, but product was created in Firestore');
+          }
+        } catch (error) {
+          console.error('Error calling webhook:', error);
+          // Ne pas bloquer la création du produit si le webhook échoue
+        }
       }
 
       toast.success('Produit créé avec succès');
