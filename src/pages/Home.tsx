@@ -3,15 +3,11 @@ import { Link } from 'react-router-dom';
 import { Zap, Calendar, Store } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { BackgroundBeamsWithCollision } from '../components/ui/background-beams-with-collision';
-import TrustedCompanies from '../components/home/TrustedCompanies';
-import Features from '../components/home/Features';
-import ROISection from '../components/home/ROISection';
 import Testimonials from '../components/home/Testimonials';
 import FAQ from '../components/home/FAQ';
 import CTASection from '../components/home/CTASection';
-import BeforeAfterSection from '../components/home/BeforeAfterSection';
-import SolutionSteps from '../components/home/SolutionSteps';
 import FeatureBlocks from '../components/home/FeatureBlocks';
+import AllInOneToolsSection from '../components/home/AllInOneToolsSection';
 import { AnimatedTooltip } from '../components/ui/animated-tooltip';
 
 const USERS = [
@@ -128,6 +124,9 @@ export default function Home() {
           </div>
         </div>
       </BackgroundBeamsWithCollision>
+
+      {/* All-in-One Tools Section */}
+      <AllInOneToolsSection />
 
        {/* Feature Blocks */}
        <FeatureBlocks />
