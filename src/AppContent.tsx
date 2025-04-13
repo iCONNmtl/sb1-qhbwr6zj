@@ -32,6 +32,7 @@ import MyProducts from './pages/MyProducts';
 import Orders from './pages/Orders';
 import Training from './pages/Training';
 import TrainingDetails from './pages/TrainingDetails';
+import DesignGenerator from './pages/DesignGenerator';
 import AuthGuard from './components/AuthGuard';
 import AdminGuard from './components/AdminGuard';
 import { useStore } from './store/useStore';
@@ -39,7 +40,6 @@ import { useStore } from './store/useStore';
 export default function AppContent() {
   useScrollToTop();
   const { user } = useStore();
-  const [showBanner, setShowBanner] = React.useState(true);
   
   return (
     <div className="min-h-screen flex flex-col">
@@ -73,6 +73,11 @@ export default function AppContent() {
             <Route path="/generator" element={
               <AuthGuard>
                 <MockupGenerator />
+              </AuthGuard>
+            } />
+            <Route path="/design-generator" element={
+              <AuthGuard>
+                <DesignGenerator />
               </AuthGuard>
             } />
             <Route path="/custom-mockup" element={
@@ -133,4 +138,4 @@ export default function AppContent() {
       <CookieConsent />
     </div>
   );
-}
+}   

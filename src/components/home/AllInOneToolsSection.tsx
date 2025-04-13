@@ -120,13 +120,6 @@ export default function AllInOneToolsSection() {
                 <div className="text-sm mb-6">
                   Tout ce dont vous avez besoin en une seule plateforme
                 </div>
-                <Link
-                  to="/signup"
-                  className="inline-flex items-center px-6 py-3 bg-white text-indigo-600 rounded-xl hover:bg-indigo-50 transition-colors font-medium"
-                >
-                  Essayer gratuitement
-                  <ArrowRight className="h-5 w-5 ml-2" />
-                </Link>
               </div>
             </div>
           </div>
@@ -145,7 +138,7 @@ export default function AllInOneToolsSection() {
                 <tr className="bg-gray-50">
                   <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Fonctionnalité</th>
                   <th className="px-6 py-4 text-center text-sm font-medium text-gray-500">5 outils séparés</th>
-                  <th className="px-6 py-4 text-center text-sm font-medium text-indigo-600">MockupPro</th>
+                  <th className="px-6 py-4 text-center text-sm font-medium text-indigo-600">Pixmock</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">

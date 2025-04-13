@@ -87,10 +87,7 @@ export default function FAQ() {
       {/* Support CTA */}
       <div className="mt-12 text-center">
         <p className="text-gray-600">
-          Vous ne trouvez pas la réponse à votre question ?{' '}
-          <Link to="/contact" className="text-indigo-600 hover:text-indigo-500 font-medium">
-            Contactez notre support
-          </Link>
+          Vous ne trouvez pas la réponse à votre question ? Contactez notre support
         </p>
       </div>
     </div>
