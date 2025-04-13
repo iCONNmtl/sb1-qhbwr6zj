@@ -1,5 +1,5 @@
 import React from 'react';
-import { Zap, DollarSign, Clock, Layers, Palette, Image, ShoppingBag, BarChart2, ArrowRight, Check, X } from 'lucide-react';
+import { Zap, DollarSign, Clock, Layers, Check, X, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import clsx from 'clsx';
 
@@ -7,7 +7,7 @@ import clsx from 'clsx';
 const REPLACED_TOOLS = [
   {
     name: "Photoshop",
-    icon: Palette,
+    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Adobe_Photoshop_CC_icon.svg/1200px-Adobe_Photoshop_CC_icon.svg.png",
     price: 29.99,
     color: "#31A8FF",
     features: ["Création de mockups", "Manipulation d'images", "Ajustements visuels"],
@@ -16,7 +16,7 @@ const REPLACED_TOOLS = [
   },
   {
     name: "Canva Pro",
-    icon: Image,
+    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Canva_icon_2021.svg/2048px-Canva_icon_2021.svg.png",
     price: 12.99,
     color: "#00C4CC",
     features: ["Création de designs", "Templates", "Exports d'images"],
@@ -25,7 +25,7 @@ const REPLACED_TOOLS = [
   },
   {
     name: "Shopify",
-    icon: ShoppingBag,
+    logo: "https://cdn.worldvectorlogo.com/logos/shopify.svg",
     price: 29.99,
     color: "#96BF47",
     features: ["Gestion de produits", "Vente en ligne", "Traitement des commandes"],
@@ -34,7 +34,7 @@ const REPLACED_TOOLS = [
   },
   {
     name: "Hootsuite",
-    icon: Layers,
+    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Hootsuite_logo.svg/1200px-Hootsuite_logo.svg.png",
     price: 19.99,
     color: "#FF7A59",
     features: ["Programmation de posts", "Gestion multi-plateformes", "Analytics"],
@@ -43,7 +43,7 @@ const REPLACED_TOOLS = [
   },
   {
     name: "Google Analytics",
-    icon: BarChart2,
+    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Google_Analytics_4_logo.svg/1200px-Google_Analytics_4_logo.svg.png",
     price: 0,
     color: "#F9AB00",
     features: ["Suivi des performances", "Rapports détaillés", "Analyse des ventes"],
@@ -79,11 +79,12 @@ export default function AllInOneToolsSection() {
                   className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 transform transition-transform hover:-translate-y-1 hover:shadow-md"
                 >
                   <div className="flex flex-col items-center text-center">
-                    <div 
-                      className="p-3 rounded-lg mb-3"
-                      style={{ backgroundColor: `${tool.color}20` }}
-                    >
-                      <tool.icon style={{ color: tool.color }} className="h-6 w-6" />
+                    <div className="w-16 h-16 flex items-center justify-center mb-3">
+                      <img 
+                        src={tool.logo} 
+                        alt={tool.name} 
+                        className="max-w-full max-h-full object-contain"
+                      />
                     </div>
                     <h3 className="font-semibold text-gray-900 mb-1">{tool.name}</h3>
                     <div className="text-sm text-gray-500">
@@ -99,14 +100,12 @@ export default function AllInOneToolsSection() {
 
             {/* Flèche centrale */}
             <div className="flex justify-center items-center">
-              <div className="bg-indigo-600 rounded-full p-3 shadow-lg hidden md:block">
-                <ArrowRight className="h-6 w-6 text-white" />
-              </div>
-              <div className="flex md:hidden items-center justify-center w-full">
-                <div className="w-1 h-12 bg-indigo-600"></div>
-                <div className="bg-indigo-600 rounded-full p-2 shadow-lg">
-                  <ArrowRight className="h-5 w-5 text-white" />
-                </div>
+              <div className="w-full relative">
+                <img 
+                  src="https://d2v7vpg8oce97p.cloudfront.net/Branding/Arrow.webp" 
+                  alt="Arrow" 
+                  className="w-3/4 h-auto mx-auto"
+                />
               </div>
             </div>
 
@@ -121,6 +120,13 @@ export default function AllInOneToolsSection() {
                 <div className="text-sm mb-6">
                   Tout ce dont vous avez besoin en une seule plateforme
                 </div>
+                <Link
+                  to="/signup"
+                  className="inline-flex items-center px-6 py-3 bg-white text-indigo-600 rounded-xl hover:bg-indigo-50 transition-colors font-medium"
+                >
+                  Essayer gratuitement
+                  <ArrowRight className="h-5 w-5 ml-2" />
+                </Link>
               </div>
             </div>
           </div>
@@ -189,6 +195,7 @@ export default function AllInOneToolsSection() {
             </table>
           </div>
         </div>
+
       </div>
     </section>
   );

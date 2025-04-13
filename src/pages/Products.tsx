@@ -442,10 +442,7 @@ function FAQ() {
       {/* Support CTA */}
       <div className="mt-12 text-center">
         <p className="text-gray-600">
-          Vous ne trouvez pas la réponse à votre question ?{' '}
-          <Link to="/contact" className="text-indigo-600 hover:text-indigo-500 font-medium">
-            Contactez notre support
-          </Link>
+          Vous ne trouvez pas la réponse à votre question ? Contactez notre support
         </p>
       </div>
     </div>
@@ -480,12 +477,8 @@ export default function Products() {
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2426&q=80')] bg-cover bg-center opacity-20"></div>
         
         <div className="relative z-10 text-center space-y-6">
-          <div className="inline-flex items-center px-4 py-2 bg-white/20 backdrop-blur-sm text-white rounded-full">
-            <Star className="h-5 w-5 mr-2 text-yellow-300" />
-            <span className="font-medium">Note moyenne de 4.8/5 sur plus de 500 avis</span>
-          </div>
           
-          <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold">
+          <h1 className="text-3xl sm:text-5xl md:text-5xl font-bold">
             Lancez votre business d'impression à la demande
           </h1>
           
@@ -574,7 +567,7 @@ export default function Products() {
                   </div>
                   
                   {/* North America */}
-                  <div className="absolute top-[35%] left-[20%] animate-pulse">
+                  <div className="absolute top-[40%] left-[20%] animate-pulse">
                     <div className="w-3 h-3 bg-indigo-600 rounded-full"></div>
                     <div className="absolute -top-1 -left-1 w-5 h-5 bg-indigo-600 rounded-full opacity-30 animate-ping"></div>
                   </div>
@@ -592,7 +585,7 @@ export default function Products() {
                   </div>
                   
                   {/* Australia */}
-                  <div className="absolute top-[75%] left-[80%] animate-pulse">
+                  <div className="absolute top-[75%] left-[85%] animate-pulse">
                     <div className="w-3 h-3 bg-indigo-600 rounded-full"></div>
                     <div className="absolute -top-1 -left-1 w-5 h-5 bg-indigo-600 rounded-full opacity-30 animate-ping"></div>
                   </div>
@@ -682,7 +675,7 @@ export default function Products() {
                       to={`/products/${product.id}`}
                       className="flex items-center px-3 py-1.5 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors"
                     >
-                      <span className="text-sm">Détails</span>
+                      <span className="text-sm">Choisir ce produit</span>
                       <ChevronRight className="h-4 w-4 ml-1" />
                     </Link>
                   </div>

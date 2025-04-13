@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useStore } from '../store/useStore';
-import { doc, onSnapshot } from 'firebase/firestore';
+import { doc, onSnapshot, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { Link } from 'react-router-dom';
-import { Plus, Ruler, ChevronDown, Info, Crown, Lock } from 'lucide-react';
+import { Plus, Ruler, ChevronDown, Info, Crown, Lock, ChevronLeft, ChevronRight, Clock } from 'lucide-react';
 import clsx from 'clsx';
 import toast from 'react-hot-toast';
 
@@ -27,8 +27,11 @@ import { useCategories } from '../hooks/useCategories';
 // Types
 import type { UserProfile } from '../types/user';
 import type { ExportFormat, AspectRatio } from '../types/mockup';
+import type { Product } from '../types/product';
 
 const ITEMS_PER_PAGE = 20;
+const DESIGNS_PER_ROW = 6;
+const DESIGNS_PER_PAGE = DESIGNS_PER_ROW * 2;
 
 // Groupes de formats similaires avec dimensions
 const SIZE_GROUPS = [
@@ -97,6 +100,48 @@ const SIZE_GROUPS = [
     name: '28x40"',
     description: '70x100cm',
     similar: ['A4', '5x7', '20x28']
+  },
+  {
+    id: '16:9',
+    name: 'Paysage 16:9',
+    description: 'Format écran large',
+    similar: ['3:2', '4:3']
+  },
+  {
+    id: '3:2',
+    name: 'Paysage 3:2',
+    description: 'Format photo standard',
+    similar: ['16:9', '4:3']
+  },
+  {
+    id: '4:3',
+    name: 'Paysage 4:3',
+    description: 'Format classique',
+    similar: ['16:9', '3:2']
+  },
+  {
+    id: '1:1',
+    name: 'Carré 1:1',
+    description: 'Format carré',
+    similar: []
+  },
+  {
+    id: '9:16',
+    name: 'Portrait 16:9',
+    description: 'Format vertical écran',
+    similar: ['2:3', '3:4']
+  },
+  {
+    id: '2:3',
+    name: 'Portrait 3:2',
+    description: 'Format photo vertical',
+    similar: ['9:16', '3:4']
+  },
+  {
+    id: '3:4',
+    name: 'Portrait 4:3',
+    description: 'Format classique vertical',
+    similar: ['9:16', '2:3']
   }
 ];
 
@@ -115,6 +160,10 @@ export default function MockupGenerator() {
   const [isTextCustomizationEnabled, setIsTextCustomizationEnabled] = useState(false);
   const [customizedMockups, setCustomizedMockups] = useState<number[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [userDesigns, setUserDesigns] = useState<{id: string, url: string, name: string, createdAt: string}[]>([]);
+  const [showUserDesigns, setShowUserDesigns] = useState(false);
+  const [designsPage, setDesignsPage] = useState(0);
+  const sliderRef = useRef<HTMLDivElement>(null);
 
   const { mockups, loading: mockupsLoading } = useMockups();
   const { categories } = useCategories(mockups, favorites);
@@ -143,6 +192,7 @@ export default function MockupGenerator() {
 
   // Calculate total pages
   const totalPages = Math.ceil(filteredMockups.length / ITEMS_PER_PAGE);
+  const totalDesignPages = Math.ceil(userDesigns.length / DESIGNS_PER_PAGE);
 
   // Reset to page 1 when category or size changes
   useEffect(() => {
@@ -154,10 +204,15 @@ export default function MockupGenerator() {
   const indexOfFirstMockup = indexOfLastMockup - ITEMS_PER_PAGE;
   const currentMockups = filteredMockups.slice(indexOfFirstMockup, indexOfLastMockup);
 
+  // Get current designs for the slider
+  const startDesignIndex = designsPage * DESIGNS_PER_PAGE;
+  const endDesignIndex = startDesignIndex + DESIGNS_PER_PAGE;
+  const currentDesigns = userDesigns.slice(startDesignIndex, endDesignIndex);
+
   useEffect(() => {
     if (!user) return;
 
-    const unsubscribe = onSnapshot(
+    const unsubscribeUser = onSnapshot(
       doc(db, 'users', user.uid),
       (doc) => {
         if (doc.exists()) {
@@ -176,7 +231,44 @@ export default function MockupGenerator() {
       }
     );
 
-    return () => unsubscribe();
+    // Fetch user's products to get designs
+    const fetchUserDesigns = async () => {
+      try {
+        const productsRef = collection(db, 'products');
+        const q = query(productsRef, where('userId', '==', user.uid));
+        const snapshot = await getDocs(q);
+        
+        if (snapshot.empty) {
+          return;
+        }
+
+        const designs: {id: string, url: string, name: string, createdAt: string}[] = [];
+        
+        snapshot.docs.forEach(doc => {
+          const product = doc.data() as Product;
+          if (product.designUrl) {
+            designs.push({
+              id: doc.id,
+              url: product.designUrl,
+              name: product.title || product.type || 'Design sans nom',
+              createdAt: product.createdAt || new Date().toISOString()
+            });
+          }
+        });
+        
+        // Sort by creation date (newest first)
+        designs.sort((a, b) => 
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+        
+        setUserDesigns(designs);
+      } catch (error) {
+        console.error('Error fetching user designs:', error);
+      }
+    };
+
+    fetchUserDesigns();
+    return () => unsubscribeUser();
   }, [user, selectedCategory]);
 
   const handleGenerate = () => {
@@ -204,6 +296,19 @@ export default function MockupGenerator() {
     setShowSizeDropdown(false);
   };
 
+  const handleSelectUserDesign = (url: string) => {
+    setDesignFile(undefined);
+    setDesignUrl(url);
+  };
+
+  const handlePrevDesignsPage = () => {
+    setDesignsPage(prev => Math.max(0, prev - 1));
+  };
+
+  const handleNextDesignsPage = () => {
+    setDesignsPage(prev => Math.min(totalDesignPages - 1, prev + 1));
+  };
+
   // Check if user has Expert plan
   const isExpertPlan = userProfile?.subscription?.plan === 'Expert';
 
@@ -216,13 +321,181 @@ export default function MockupGenerator() {
         <h2 className="text-xl font-semibold text-gray-900 mb-4 px-4 md:px-0">
           1. Choisissez votre design
         </h2>
-        <DesignUploader
-          onUpload={(file, url, dimensions) => {
-            setDesignFile(file);
-            setDesignUrl(url);
-          }}
-          selectedUrl={designUrl}
-        />
+        
+        <div className="bg-white rounded-xl shadow-sm p-6 mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <h3 className="text-lg font-medium text-gray-900">Source du design</h3>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowUserDesigns(false)}
+                className={clsx(
+                  "px-4 py-2 rounded-lg transition-colors",
+                  !showUserDesigns 
+                    ? "bg-indigo-600 text-white" 
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                )}
+              >
+                Uploader un design
+              </button>
+              
+              <button
+                onClick={() => setShowUserDesigns(true)}
+                className={clsx(
+                  "px-4 py-2 rounded-lg transition-colors",
+                  showUserDesigns 
+                    ? "bg-indigo-600 text-white" 
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                )}
+                disabled={userDesigns.length === 0}
+              >
+                Mes designs ({userDesigns.length})
+              </button>
+            </div>
+          </div>
+          
+          {showUserDesigns ? (
+            <div>
+              {userDesigns.length === 0 ? (
+                <div className="text-center py-8 bg-gray-50 rounded-lg">
+                  <p className="text-gray-600 mb-4">Vous n'avez pas encore de designs</p>
+                  <Link 
+                    to="/design-generator" 
+                    className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+                  >
+                    <Plus className="h-5 w-5 mr-2" />
+                    Créer un design
+                  </Link>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Designs Slider */}
+                  <div className="relative" ref={sliderRef}>
+                    {/* Navigation buttons */}
+                    {designsPage > 0 && (
+                      <button 
+                        onClick={handlePrevDesignsPage}
+                        className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white rounded-full shadow-md hover:bg-gray-100 transition-colors"
+                        aria-label="Designs précédents"
+                      >
+                        <ChevronLeft className="h-5 w-5 text-gray-700" />
+                      </button>
+                    )}
+                    
+                    {designsPage < totalDesignPages - 1 && (
+                      <button 
+                        onClick={handleNextDesignsPage}
+                        className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white rounded-full shadow-md hover:bg-gray-100 transition-colors"
+                        aria-label="Designs suivants"
+                      >
+                        <ChevronRight className="h-5 w-5 text-gray-700" />
+                      </button>
+                    )}
+                    
+                    {/* First row */}
+                    <div className="grid grid-cols-6 gap-3 mb-3">
+                      {currentDesigns.slice(0, DESIGNS_PER_ROW).map(design => (
+                        <div 
+                          key={design.id}
+                          onClick={() => handleSelectUserDesign(design.url)}
+                          className={clsx(
+                            "aspect-square bg-gray-50 rounded-lg overflow-hidden cursor-pointer border-2 transition-all duration-200 relative",
+                            designUrl === design.url ? "border-indigo-600 shadow-md" : "border-transparent hover:border-gray-300"
+                          )}
+                        >
+                          <img 
+                            src={design.url} 
+                            alt={design.name}
+                            className="absolute inset-0 w-full h-full object-contain"
+                          />
+                          {designUrl === design.url && (
+                            <div className="absolute inset-0 bg-indigo-600/10 flex items-center justify-center">
+                              <div className="bg-indigo-600 text-white text-xs font-medium px-2 py-1 rounded-full">
+                                Sélectionné
+                              </div>
+                            </div>
+                          )}
+                          <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent p-2">
+                            <p className="text-white text-xs truncate">{design.name}</p>
+                          </div>
+                          <div className="absolute top-1 right-1">
+                            <div className="bg-black/50 text-white text-xs px-1.5 py-0.5 rounded-full flex items-center">
+                              <Clock className="h-3 w-3 mr-1" />
+                              <span>{new Date(design.createdAt).toLocaleDateString()}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    {/* Second row */}
+                    {currentDesigns.length > DESIGNS_PER_ROW && (
+                      <div className="grid grid-cols-6 gap-3">
+                        {currentDesigns.slice(DESIGNS_PER_ROW, DESIGNS_PER_PAGE).map(design => (
+                          <div 
+                            key={design.id}
+                            onClick={() => handleSelectUserDesign(design.url)}
+                            className={clsx(
+                              "aspect-square bg-gray-50 rounded-lg overflow-hidden cursor-pointer border-2 transition-all duration-200 relative",
+                              designUrl === design.url ? "border-indigo-600 shadow-md" : "border-transparent hover:border-gray-300"
+                            )}
+                          >
+                            <img 
+                              src={design.url} 
+                              alt={design.name}
+                              className="absolute inset-0 w-full h-full object-contain"
+                            />
+                            {designUrl === design.url && (
+                              <div className="absolute inset-0 bg-indigo-600/10 flex items-center justify-center">
+                                <div className="bg-indigo-600 text-white text-xs font-medium px-2 py-1 rounded-full">
+                                  Sélectionné
+                                </div>
+                              </div>
+                            )}
+                            <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent p-2">
+                              <p className="text-white text-xs truncate">{design.name}</p>
+                            </div>
+                            <div className="absolute top-1 right-1">
+                              <div className="bg-black/50 text-white text-xs px-1.5 py-0.5 rounded-full flex items-center">
+                                <Clock className="h-3 w-3 mr-1" />
+                                <span>{new Date(design.createdAt).toLocaleDateString()}</span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Pagination dots */}
+                  {totalDesignPages > 1 && (
+                    <div className="flex justify-center gap-2 mt-4">
+                      {Array.from({ length: totalDesignPages }).map((_, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setDesignsPage(index)}
+                          className={clsx(
+                            "w-2 h-2 rounded-full transition-all",
+                            designsPage === index ? "bg-indigo-600 w-4" : "bg-gray-300 hover:bg-gray-400"
+                          )}
+                          aria-label={`Page ${index + 1}`}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          ) : (
+            <DesignUploader
+              onUpload={(file, url, dimensions) => {
+                setDesignFile(file);
+                setDesignUrl(url);
+              }}
+              selectedUrl={designUrl}
+            />
+          )}
+        </div>
       </section>
 
       {/* Mockup Selection */}

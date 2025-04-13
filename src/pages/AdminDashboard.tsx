@@ -29,14 +29,28 @@ interface Ticket {
   createdAt: string;
 }
 
-type Tab = 'users' | 'mockups' | 'orders' | 'support' | 'training';
+interface Notification {
+  id: string;
+  type: string;
+  orderId: string;
+  userId: string;
+  serviceId: string;
+  serviceName: string;
+  customerName: string;
+  customerEmail: string;
+  read: boolean;
+  createdAt: string;
+}
+
+type Tab = 'users' | 'mockups' | 'orders' | 'support' | 'training' | 'notifications';
 
 const TABS = [
   { id: 'users' as const, label: 'Utilisateurs', icon: Users },
   { id: 'mockups' as const, label: 'Mockups', icon: Package },
   { id: 'orders' as const, label: 'Commandes', icon: ShoppingBag },
   { id: 'support' as const, label: 'Support', icon: MessageCircle },
-  { id: 'training' as const, label: 'Formations', icon: Book }
+  { id: 'training' as const, label: 'Formations', icon: Book },
+  { id: 'notifications' as const, label: 'Notifications', icon: MessageCircle, badge: true }
 ] as const;
 
 export default function AdminDashboard() {
@@ -48,6 +62,7 @@ export default function AdminDashboard() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [trainings, setTrainings] = useState<Training[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [stats, setStats] = useState({
     users: {
       total: 0,
@@ -67,13 +82,14 @@ export default function AdminDashboard() {
     const initialize = async () => {
       try {
         await initializePlans();
-        const [adminStats, mockupsData, usersData, ordersData, ticketsData, trainingsData] = await Promise.all([
+        const [adminStats, mockupsData, usersData, ordersData, ticketsData, trainingsData, notificationsData] = await Promise.all([
           fetchAdminStats(),
           fetchMockups(),
           fetchUsers(),
           fetchOrders(),
           fetchTickets(),
-          fetchTrainings()
+          fetchTrainings(),
+          fetchNotifications()
         ]);
         
         setStats(adminStats);
@@ -82,6 +98,7 @@ export default function AdminDashboard() {
         setOrders(ordersData);
         setTickets(ticketsData);
         setTrainings(trainingsData);
+        setNotifications(notificationsData);
       } catch (error) {
         console.error('Error initializing dashboard:', error);
         toast.error('Erreur lors du chargement des données');
@@ -136,7 +153,7 @@ export default function AdminDashboard() {
       
       productsSnap.docs.forEach(doc => {
         const product = doc.data();
-        product.variants.forEach((variant: any) => {
+        product.variants?.forEach((variant: any) => {
           if (variant.sku && variant.designUrl) {
             designUrlMap[variant.sku] = variant.designUrl;
           }
@@ -211,16 +228,36 @@ export default function AdminDashboard() {
     }
   };
 
+  const fetchNotifications = async () => {
+    try {
+      const notificationsSnap = await getDocs(collection(db, 'notifications'));
+      const notificationsData = notificationsSnap.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as Notification[];
+      
+      notificationsData.sort((a, b) => 
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+      
+      return notificationsData;
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+      return [];
+    }
+  };
+
   const handleRefresh = async () => {
     setLoading(true);
     try {
-      const [adminStats, mockupsData, usersData, ordersData, ticketsData, trainingsData] = await Promise.all([
+      const [adminStats, mockupsData, usersData, ordersData, ticketsData, trainingsData, notificationsData] = await Promise.all([
         fetchAdminStats(),
         fetchMockups(),
         fetchUsers(),
         fetchOrders(),
         fetchTickets(),
-        fetchTrainings()
+        fetchTrainings(),
+        fetchNotifications()
       ]);
       
       setStats(adminStats);
@@ -229,6 +266,7 @@ export default function AdminDashboard() {
       setOrders(ordersData);
       setTickets(ticketsData);
       setTrainings(trainingsData);
+      setNotifications(notificationsData);
       toast.success('Données mises à jour');
     } catch (error) {
       toast.error('Erreur lors de la mise à jour');
@@ -236,6 +274,26 @@ export default function AdminDashboard() {
       setLoading(false);
     }
   };
+
+  const markNotificationAsRead = async (notificationId: string) => {
+    try {
+      const notificationRef = doc(db, 'notifications', notificationId);
+      await updateDoc(notificationRef, { read: true });
+      
+      // Update local state
+      setNotifications(prev => 
+        prev.map(notification => 
+          notification.id === notificationId 
+            ? { ...notification, read: true } 
+            : notification
+        )
+      );
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+    }
+  };
+
+  const unreadNotificationsCount = notifications.filter(n => !n.read).length;
 
   if (loading) {
     return <LoadingSpinner message="Chargement du tableau de bord..." />;
@@ -308,12 +366,14 @@ export default function AdminDashboard() {
           <div className="flex">
             {TABS.map((tab) => {
               const Icon = tab.icon;
+              const badgeCount = tab.badge ? unreadNotificationsCount : 0;
+              
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={clsx(
-                    'flex items-center px-6 py-4 text-sm font-medium border-b-2 transition-colors',
+                    'flex items-center px-6 py-4 text-sm font-medium border-b-2 transition-colors relative',
                     activeTab === tab.id
                       ? 'border-indigo-600 text-indigo-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -321,6 +381,12 @@ export default function AdminDashboard() {
                 >
                   <Icon className="h-5 w-5 mr-2" />
                   {tab.label}
+                  
+                  {tab.badge && badgeCount > 0 && (
+                    <span className="absolute top-2 right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-medium text-white">
+                      {badgeCount}
+                    </span>
+                  )}
                 </button>
               );
             })}
@@ -365,6 +431,87 @@ export default function AdminDashboard() {
               trainings={trainings}
               onRefresh={handleRefresh}
             />
+          )}
+
+          {activeTab === 'notifications' && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-gray-900">Notifications</h2>
+                <button
+                  onClick={handleRefresh}
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+                >
+                  Actualiser
+                </button>
+              </div>
+
+              {notifications.length === 0 ? (
+                <div className="text-center py-12 bg-gray-50 rounded-lg">
+                  <MessageCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-600">Aucune notification</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {notifications.map(notification => (
+                    <div 
+                      key={notification.id}
+                      className={clsx(
+                        "p-4 rounded-lg border transition-colors",
+                        notification.read 
+                          ? "bg-white border-gray-200" 
+                          : "bg-indigo-50 border-indigo-200"
+                      )}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <div className="font-medium text-gray-900 mb-1">
+                            {notification.type === 'new_service_order' && 'Nouvelle commande de service'}
+                          </div>
+                          <p className="text-sm text-gray-600">
+                            {notification.type === 'new_service_order' && (
+                              <>
+                                <span className="font-medium">{notification.customerName}</span> a commandé le service <span className="font-medium">{notification.serviceName}</span>
+                              </>
+                            )}
+                          </p>
+                          <div className="text-xs text-gray-500 mt-1">
+                            {new Date(notification.createdAt).toLocaleString()}
+                          </div>
+                        </div>
+                        
+                        {!notification.read && (
+                          <button
+                            onClick={() => markNotificationAsRead(notification.id)}
+                            className="px-3 py-1 bg-indigo-600 text-white text-xs rounded-lg hover:bg-indigo-700 transition"
+                          >
+                            Marquer comme lu
+                          </button>
+                        )}
+                      </div>
+                      
+                      {notification.type === 'new_service_order' && (
+                        <div className="mt-3 pt-3 border-t border-gray-200">
+                          <div className="flex items-center justify-between">
+                            <div className="text-sm">
+                              <span className="text-gray-500">Email: </span>
+                              <a href={`mailto:${notification.customerEmail}`} className="text-indigo-600 hover:text-indigo-500">
+                                {notification.customerEmail}
+                              </a>
+                            </div>
+                            <Link
+                              to={`/orders?id=${notification.orderId}`}
+                              className="px-3 py-1 bg-gray-100 text-gray-700 text-xs rounded-lg hover:bg-gray-200 transition"
+                            >
+                              Voir la commande
+                            </Link>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>

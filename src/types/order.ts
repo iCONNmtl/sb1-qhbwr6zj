@@ -1,5 +1,5 @@
 export type OrderStatus = 'pending' | 'paid' | 'shipped' | 'delivered';
-export type OrderPlatform = 'shopify' | 'etsy';
+export type OrderPlatform = 'shopify' | 'etsy' | 'internal';
 
 export interface OrderItem {
   productId: string;
@@ -13,6 +13,7 @@ export interface OrderItem {
     inches: string;
   };
   sku: string;
+  designUrl?: string;
 }
 
 export interface ShippingAddress {
@@ -40,6 +41,12 @@ export interface Order {
   orderId: string;
   customerName: string;
   customerEmail: string;
+  customerPhone?: string;
+  customerCompany?: string;
+  message?: string;
+  serviceId?: string;
+  serviceName?: string;
+  servicePrice?: number;
   shippingAddress: ShippingAddress;
   items: OrderItem[];
   totalAmount: number;

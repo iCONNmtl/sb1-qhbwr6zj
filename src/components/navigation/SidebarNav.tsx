@@ -83,6 +83,11 @@ export default function SidebarNav({ isCollapsed }: SidebarNavProps) {
       title: "Création",
       items: [
         {
+          to: '/design-generator',
+          icon: Palette,
+          label: 'Créer un design'
+        },
+        {
           to: '/generator',
           icon: Wand2,
           label: 'Mockups',

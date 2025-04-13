@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useStore } from '../store/useStore';
 import { 
   ChevronLeft, 
   CheckCircle, 
@@ -13,8 +14,10 @@ import {
   ArrowRight,
   Palette,
   Layers,
-  Briefcase
+  Briefcase,
+  CreditCard
 } from 'lucide-react';
+import ServiceOrderDialog from '../components/services/ServiceOrderDialog';
 
 // Services data
 const SERVICES = {
@@ -227,6 +230,9 @@ const SERVICES = {
 
 export default function ServiceDetails() {
   const { id } = useParams<{ id: string }>();
+  const { user } = useStore();
+  const [showOrderDialog, setShowOrderDialog] = useState(false);
+  
   const service = SERVICES[id as keyof typeof SERVICES];
 
   if (!service) {
@@ -241,6 +247,11 @@ export default function ServiceDetails() {
   }
 
   const Icon = service.icon;
+
+  const handleOrderSuccess = () => {
+    setShowOrderDialog(false);
+    // You could add additional success handling here
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-12">
@@ -280,8 +291,11 @@ export default function ServiceDetails() {
             </div>
           </div>
           
-          <button className="w-full sm:w-auto px-8 py-4 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors flex items-center justify-center">
-            <ShoppingBag className="h-5 w-5 mr-2" />
+          <button 
+            onClick={() => setShowOrderDialog(true)}
+            className="w-full sm:w-auto px-8 py-4 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors flex items-center justify-center"
+          >
+            <CreditCard className="h-5 w-5 mr-2" />
             Commander maintenant
           </button>
         </div>
@@ -406,7 +420,10 @@ export default function ServiceDetails() {
         <p className="text-lg mb-6 text-white/90">
           Commandez dès maintenant et recevez votre {service.name.toLowerCase()} en 7 jours
         </p>
-        <button className="px-8 py-4 bg-white text-indigo-600 rounded-xl hover:bg-indigo-50 transition-colors shadow-lg">
+        <button 
+          onClick={() => setShowOrderDialog(true)}
+          className="px-8 py-4 bg-white text-indigo-600 rounded-xl hover:bg-indigo-50 transition-colors shadow-lg"
+        >
           <ShoppingBag className="h-5 w-5 inline-block mr-2" />
           Commander pour {service.price}€
         </button>
@@ -460,6 +477,20 @@ export default function ServiceDetails() {
             })}
         </div>
       </div>
+
+      {/* Order Dialog */}
+      {showOrderDialog && user && (
+        <ServiceOrderDialog
+          isOpen={showOrderDialog}
+          onClose={() => setShowOrderDialog(false)}
+          onSuccess={handleOrderSuccess}
+          userId={user.uid}
+          serviceId={service.id}
+          serviceName={service.name}
+          servicePrice={service.price}
+          serviceIcon={service.icon}
+        />
+      )}
     </div>
   );
 }
