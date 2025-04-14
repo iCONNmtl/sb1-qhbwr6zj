@@ -224,9 +224,6 @@ export default function Testimonials() {
                             <div className="text-xs text-gray-500">
                               {testimonial.company}
                             </div>
-                            <div className="px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-xs font-medium">
-                              {testimonial.highlight}
-                            </div>
                           </div>
                         </div>
                       </div>

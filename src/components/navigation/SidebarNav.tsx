@@ -90,8 +90,7 @@ export default function SidebarNav({ isCollapsed }: SidebarNavProps) {
         {
           to: '/generator',
           icon: Wand2,
-          label: 'Mockups',
-          primary: true
+          label: 'Mockups'
         },
         {
           to: '/dashboard',

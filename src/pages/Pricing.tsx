@@ -11,13 +11,17 @@ import clsx from 'clsx';
 
 const FEATURES = [
   { name: 'Accès à tous les mockups', basic: true, expert: true },
-  { name: 'Export PNG haute qualité', basic: true, expert: true },
-  { name: 'Export WEBP haute qualité', basic: false, expert: true },
-  { name: 'Support par email 24/7', basic: true, expert: true },
+  { name: 'Export PNG et WEBP', basic: true, expert: true },
+  { name: 'Support 24/7', basic: true, expert: true },
   { name: 'Pas de filigrane', basic: true, expert: true },
-  { name: 'Personnalisation des mockups', basic: true, expert: true },
   { name: 'Générations simultanées', basic: '1', expert: '15' },
-  { name: 'Accès au Pixmock Club', basic: false, expert: true },
+  { name: 'Création de design', basic: true, expert: true },
+  { name: 'Traitement des commandes', basic: true, expert: true },
+  { name: 'Configuration de produits', basic: false, expert: true },
+  { name: 'Fiche Produit', basic: 'Basic', expert: 'Optimisé SEO' },
+  { name: 'Personnalisation des mockups', basic: false, expert: true },
+  { name: 'Bonus crédits packs', basic: false, expert: '+10%' },
+  { name: 'Statistique des ventes', basic: false, expert: true },
 ];
 
 // Packs de crédits
