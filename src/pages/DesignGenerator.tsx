@@ -1,17 +1,20 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { nanoid } from 'nanoid';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { doc, getDoc, addDoc, collection } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { Save, Download, Loader2, Grid, Wand2, Layers, Type, Square, Circle, Image as ImageIcon, Triangle, Star, Hexagon } from 'lucide-react';
+import { Save, Download, Loader2, Grid, Wand2, Layers, Type, Square, Circle, Image as ImageIcon, Triangle, Star, Hexagon, BookmarkIcon } from 'lucide-react';
 import { toPng } from 'html-to-image';
 import toast from 'react-hot-toast';
 import Canvas from '../components/design/Canvas';
 import PropertiesPanel from '../components/design/PropertiesPanel';
 import ToolsPanel from '../components/design/ToolsPanel';
+import SaveTemplateDialog from '../components/design/SaveTemplateDialog';
+import TemplateGallery from '../components/design/TemplateGallery';
 import type { DesignState, DesignElement, TextElement, ShapeElement, ImageElement } from '../types/design';
 import type { UserProfile } from '../types/user';
+import type { DesignTemplate } from '../types/designTemplate';
 
 // Available sizes - Poster sizes
 const AVAILABLE_SIZES = [
@@ -191,6 +194,9 @@ const COLOR_PRESETS = [
   '#2E8B57'  // SeaGreen
 ];
 
+// Webhook URL for Make.com
+const DESIGN_WEBHOOK_URL = 'https://hook.eu1.make.com/u7aoqjp9k9x8mvhxrfpb5ljsp6njpasj';
+
 export default function DesignGenerator() {
   const { user } = useStore();
   const navigate = useNavigate();
@@ -203,6 +209,9 @@ export default function DesignGenerator() {
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [showBackgroundColorPicker, setShowBackgroundColorPicker] = useState(false);
   const [showBorderColorPicker, setShowBorderColorPicker] = useState(false);
+  const [showSaveTemplateDialog, setShowSaveTemplateDialog] = useState(false);
+  const [showTemplateGallery, setShowTemplateGallery] = useState(false);
+  const [thumbnailUrl, setThumbnailUrl] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
 
@@ -546,6 +555,176 @@ export default function DesignGenerator() {
     }));
   };
 
+  // Generate HTML representation of the design
+  const generateDesignHtml = () => {
+    if (!canvasRef.current) return '';
+    
+    const canvas = canvasRef.current;
+    const { backgroundColor, elements, canvasWidth, canvasHeight } = designState;
+    
+    // Create a container with the same dimensions and background
+    const containerStyle = `
+      position: relative;
+      width: ${canvasWidth}px;
+      height: ${canvasHeight}px;
+      background-color: ${backgroundColor};
+      overflow: hidden;
+    `;
+    
+    // Generate HTML for each element
+    const elementsHtml = elements.map(element => {
+      if (!element.visible) return '';
+      
+      const baseStyle = `
+        position: absolute;
+        left: ${element.x}px;
+        top: ${element.y}px;
+        width: ${element.width}px;
+        height: ${element.height}px;
+        transform: rotate(${element.rotation}deg);
+        z-index: ${element.zIndex};
+      `;
+      
+      if (element.type === 'text') {
+        const textElement = element as TextElement;
+        const textStyle = `
+          font-family: ${textElement.fontFamily};
+          font-size: ${textElement.fontSize}px;
+          font-weight: ${textElement.fontWeight};
+          font-style: ${textElement.fontStyle};
+          color: ${textElement.color};
+          text-align: ${textElement.textAlign};
+          text-decoration: ${textElement.textDecoration};
+          background-color: ${textElement.backgroundColor};
+          padding: ${textElement.padding}px;
+          border-radius: ${textElement.borderRadius}px;
+          display: flex;
+          align-items: center;
+          justify-content: ${
+            textElement.textAlign === 'center' ? 'center' : 
+            textElement.textAlign === 'right' ? 'flex-end' : 'flex-start'
+          };
+          overflow: hidden;
+          word-break: break-word;
+        `;
+        
+        return `<div style="${baseStyle}${textStyle}">${textElement.content}</div>`;
+      }
+      
+      if (element.type === 'shape') {
+        const shapeElement = element as ShapeElement;
+        
+        if (shapeElement.shapeType === 'rectangle') {
+          return `
+            <div style="${baseStyle}
+              background-color: ${shapeElement.color};
+              border: ${shapeElement.borderWidth}px solid ${shapeElement.borderColor};
+              border-radius: ${shapeElement.borderRadius || 0}px;
+              opacity: ${shapeElement.opacity};
+            "></div>
+          `;
+        }
+        
+        if (shapeElement.shapeType === 'circle') {
+          return `
+            <div style="${baseStyle}
+              background-color: ${shapeElement.color};
+              border: ${shapeElement.borderWidth}px solid ${shapeElement.borderColor};
+              border-radius: 50%;
+              opacity: ${shapeElement.opacity};
+            "></div>
+          `;
+        }
+        
+        if (shapeElement.shapeType === 'triangle') {
+          return `
+            <div style="${baseStyle} background-color: transparent; opacity: ${shapeElement.opacity};">
+              <div style="
+                width: 0;
+                height: 0;
+                border-left: ${element.width / 2}px solid transparent;
+                border-right: ${element.width / 2}px solid transparent;
+                border-bottom: ${element.height}px solid ${shapeElement.color};
+                position: absolute;
+                top: 0;
+                left: 0;
+              "></div>
+            </div>
+          `;
+        }
+        
+        if (shapeElement.shapeType === 'star' || shapeElement.shapeType === 'hexagon') {
+          // For complex shapes, we'll use SVG
+          const svgShape = shapeElement.shapeType === 'star' 
+            ? '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />'
+            : '<path d="M21 16.5v-9l-9-6-9 6v9l9 6 9-6z" />';
+          
+          return `
+            <div style="${baseStyle}">
+              <svg 
+                viewBox="0 0 24 24" 
+                fill="${shapeElement.color}" 
+                stroke="${shapeElement.borderWidth > 0 ? shapeElement.borderColor : 'none'}" 
+                stroke-width="${shapeElement.borderWidth}"
+                width="100%" 
+                height="100%" 
+                style="opacity: ${shapeElement.opacity};"
+              >
+                ${svgShape}
+              </svg>
+            </div>
+          `;
+        }
+      }
+      
+      if (element.type === 'image') {
+        const imageElement = element as ImageElement;
+        return `
+          <div style="${baseStyle}">
+            <img 
+              src="${imageElement.src}" 
+              alt="Element" 
+              style="
+                width: 100%;
+                height: 100%;
+                object-fit: ${imageElement.objectFit};
+                opacity: ${imageElement.opacity};
+              "
+            />
+          </div>
+        `;
+      }
+      
+      return '';
+    }).join('');
+    
+    return `
+      <div style="${containerStyle}">
+        ${elementsHtml}
+      </div>
+    `;
+  };
+
+  // Generate thumbnail for template
+  const generateThumbnail = async (): Promise<string> => {
+    if (!canvasRef.current) return '';
+    
+    try {
+      const dataUrl = await toPng(canvasRef.current, { 
+        cacheBust: true,
+        pixelRatio: 1,
+        quality: 0.8,
+        width: designState.canvasWidth,
+        height: designState.canvasHeight
+      });
+      
+      return dataUrl;
+    } catch (error) {
+      console.error('Error generating thumbnail:', error);
+      return '';
+    }
+  };
+
   // Download design
   const handleDownload = async () => {
     if (!canvasRef.current) return;
@@ -576,6 +755,32 @@ export default function DesignGenerator() {
     try {
       setSaving(true);
       
+      // Generate HTML representation of the design
+      const designHtml = generateDesignHtml();
+      
+      // Send design HTML to webhook
+      try {
+        await fetch(DESIGN_WEBHOOK_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            html: designHtml,
+            designName: designState.designName,
+            size: {
+              id: designState.currentSize,
+              width: designState.canvasWidth,
+              height: designState.canvasHeight
+            },
+            userId: user.uid
+          })
+        });
+      } catch (webhookError) {
+        console.error('Error sending to webhook:', webhookError);
+        // Continue with saving even if webhook fails
+      }
+      
       // Convert canvas to image
       const dataUrl = await toPng(canvasRef.current!, { cacheBust: true });
       
@@ -597,6 +802,48 @@ export default function DesignGenerator() {
     } finally {
       setSaving(false);
     }
+  };
+
+  // Save as template
+  const handleSaveAsTemplate = async () => {
+    if (!user) {
+      toast.error('You must be logged in to save templates');
+      return;
+    }
+    
+    try {
+      const thumbnail = await generateThumbnail();
+      setThumbnailUrl(thumbnail);
+      setShowSaveTemplateDialog(true);
+    } catch (error) {
+      console.error('Error preparing template:', error);
+      toast.error('Error preparing template');
+    }
+  };
+
+  // Load template
+  const handleLoadTemplate = (template: DesignTemplate) => {
+    // Find the size in available sizes
+    const size = AVAILABLE_SIZES.find(s => s.id === template.sizeId);
+    if (!size) {
+      toast.error('Size not found in template');
+      return;
+    }
+    
+    // Update design state with template data
+    setDesignState(prev => ({
+      ...prev,
+      elements: template.elements,
+      backgroundColor: template.backgroundColor,
+      canvasWidth: template.canvasWidth,
+      canvasHeight: template.canvasHeight,
+      currentSize: template.sizeId,
+      designName: `${template.name} - Copy`,
+      selectedElementId: null
+    }));
+    
+    setShowTemplateGallery(false);
+    toast.success('Template chargé avec succès');
   };
 
   return (
@@ -626,6 +873,20 @@ export default function DesignGenerator() {
               </option>
             ))}
           </select>
+          <button
+            onClick={() => setShowTemplateGallery(true)}
+            className="flex items-center px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors"
+          >
+            <Template className="h-5 w-5 mr-2" />
+            Templates
+          </button>
+          <button
+            onClick={handleSaveAsTemplate}
+            className="flex items-center px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors"
+          >
+            <BookmarkIcon className="h-5 w-5 mr-2" />
+            Sauvegarder comme template
+          </button>
           <button
             onClick={handleDownload}
             disabled={loading}
@@ -730,6 +991,30 @@ export default function DesignGenerator() {
           />
         </div>
       </div>
+
+      {/* Save Template Dialog */}
+      {showSaveTemplateDialog && user && (
+        <SaveTemplateDialog
+          isOpen={showSaveTemplateDialog}
+          onClose={() => setShowSaveTemplateDialog(false)}
+          onSuccess={() => {
+            setShowSaveTemplateDialog(false);
+            toast.success('Template sauvegardé avec succès');
+          }}
+          designState={designState}
+          thumbnailUrl={thumbnailUrl}
+          userId={user.uid}
+        />
+      )}
+
+      {/* Template Gallery */}
+      {showTemplateGallery && user && (
+        <TemplateGallery
+          userId={user.uid}
+          onSelectTemplate={handleLoadTemplate}
+          onClose={() => setShowTemplateGallery(false)}
+        />
+      )}
     </div>
   );
 }

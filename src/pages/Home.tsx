@@ -125,11 +125,11 @@ export default function Home() {
         </div>
       </BackgroundBeamsWithCollision>
 
-      {/* All-in-One Tools Section */}
-      <AllInOneToolsSection />
-
        {/* Feature Blocks */}
        <FeatureBlocks />
+
+       {/* All-in-One Tools Section */}
+      <AllInOneToolsSection />
 
       {/* Testimonials */}
         <Testimonials />

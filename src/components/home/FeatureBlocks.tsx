@@ -48,7 +48,7 @@ const FEATURE_BLOCKS = [
     ]
   },
   {
-    title: "Créez votre produit",
+    title: "Configurez vos produits",
     description: "Transformez vos designs en produits prêts à vendre. Choisissez parmi une variété de formats et de tailles, définissez vos prix et créez des fiches produits optimisées pour maximiser vos ventes.",
     image: "https://images.unsplash.com/photo-1586717791821-3f44a563fa4c?q=80&w=2000&auto=format&fit=crop",
     icon: ShoppingBag,
