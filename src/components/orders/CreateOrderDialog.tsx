@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Package, Loader2, Plus, Minus, DollarSign, MapPin, Calendar, Search, ShoppingBag } from 'lucide-react';
+import { X, Package, Loader2, Plus, Minus, DollarSign, MapPin, Calendar, Search, Filter, ArrowUpDown } from 'lucide-react';
 import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { nanoid } from 'nanoid';
@@ -23,7 +23,7 @@ interface Product {
   type: string;
   title: string;
   designUrl: string;
-  variants: {
+  variants: Array<{
     sizeId: string;
     name: string;
     price: number;
@@ -33,7 +33,7 @@ interface Product {
       cm: string;
       inches: string;
     };
-  }[];
+  }>;
 }
 
 interface OrderItem {
@@ -56,6 +56,8 @@ export default function CreateOrderDialog({ userId, onClose, onSuccess }: Create
   const [products, setProducts] = useState<Product[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState<'name' | 'price-low' | 'price-high'>('name');
+  const [showSortOptions, setShowSortOptions] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
@@ -106,12 +108,28 @@ export default function CreateOrderDialog({ userId, onClose, onSuccess }: Create
     fetchProducts();
   }, [userId]);
 
+  // Filter products based on search term
   const filteredProducts = products.filter(product => {
     const searchString = searchTerm.toLowerCase();
     const productTitle = (product.title ?? '').toLowerCase();
     const productType = (product.type ?? '').toLowerCase();
     
     return productTitle.includes(searchString) || productType.includes(searchString);
+  });
+
+  // Sort products
+  const sortedProducts = [...filteredProducts].sort((a, b) => {
+    if (sortBy === 'name') {
+      return (a.title || a.type).localeCompare(b.title || b.type);
+    } else if (sortBy === 'price-low') {
+      const aPrice = Math.min(...a.variants.map(v => v.price));
+      const bPrice = Math.min(...b.variants.map(v => v.price));
+      return aPrice - bPrice;
+    } else {
+      const aPrice = Math.max(...a.variants.map(v => v.price));
+      const bPrice = Math.max(...b.variants.map(v => v.price));
+      return bPrice - aPrice;
+    }
   });
 
   const selectedProduct = products.find(p => p.id === selectedProductId);
@@ -461,7 +479,7 @@ export default function CreateOrderDialog({ userId, onClose, onSuccess }: Create
             {/* Product Selection */}
             <div>
               <h4 className="font-medium text-gray-900 mb-4 flex items-center gap-2">
-                <ShoppingBag className="h-4 w-4 text-gray-500" />
+                <Package className="h-4 w-4 text-gray-500" />
                 Sélection des produits
               </h4>
               
@@ -472,7 +490,7 @@ export default function CreateOrderDialog({ userId, onClose, onSuccess }: Create
                 </div>
               ) : products.length === 0 ? (
                 <div className="text-center py-8 bg-gray-50 rounded-lg">
-                  <ShoppingBag className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                  <Package className="h-8 w-8 text-gray-400 mx-auto mb-2" />
                   <p className="text-gray-600 mb-2">Aucun produit disponible</p>
                   <p className="text-sm text-gray-500">
                     Créez d'abord des produits dans la section "Produits"
@@ -480,23 +498,90 @@ export default function CreateOrderDialog({ userId, onClose, onSuccess }: Create
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {/* Search */}
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Search className="h-5 w-5 text-gray-400" />
+                  {/* Search and Sort */}
+                  <div className="flex flex-col md:flex-row gap-4">
+                    {/* Search */}
+                    <div className="relative flex-1">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Search className="h-5 w-5 text-gray-400" />
+                      </div>
+                      <input
+                        type="text"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                        placeholder="Rechercher un produit..."
+                      />
                     </div>
-                    <input
-                      type="text"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
-                      placeholder="Rechercher un produit..."
-                    />
+                    
+                    {/* Sort */}
+                    <div className="relative">
+                      <button
+                        onClick={() => setShowSortOptions(!showSortOptions)}
+                        className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                      >
+                        <ArrowUpDown className="h-5 w-5 text-gray-500" />
+                        <span className="text-sm text-gray-700">
+                          {sortBy === 'name' ? 'Nom' : 
+                           sortBy === 'price-low' ? 'Prix croissant' : 
+                           'Prix décroissant'}
+                        </span>
+                      </button>
+                      
+                      {showSortOptions && (
+                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
+                          <div className="py-1">
+                            <button
+                              onClick={() => {
+                                setSortBy('name');
+                                setShowSortOptions(false);
+                              }}
+                              className={clsx(
+                                'flex items-center w-full px-4 py-2 text-sm',
+                                sortBy === 'name' 
+                                  ? 'bg-indigo-50 text-indigo-600' 
+                                  : 'text-gray-700 hover:bg-gray-50'
+                              )}
+                            >
+                              Nom
+                            </button>
+                            <button
+                              onClick={() => {
+                                setSortBy('price-low');
+                                setShowSortOptions(false);
+                              }}
+                              className={clsx(
+                                'flex items-center w-full px-4 py-2 text-sm',
+                                sortBy === 'price-low' 
+                                  ? 'bg-indigo-50 text-indigo-600' 
+                                  : 'text-gray-700 hover:bg-gray-50'
+                              )}
+                            >
+                              Prix croissant
+                            </button>
+                            <button
+                              onClick={() => {
+                                setSortBy('price-high');
+                                setShowSortOptions(false);
+                              }}
+                              className={clsx(
+                                'flex items-center w-full px-4 py-2 text-sm',
+                                sortBy === 'price-high' 
+                                  ? 'bg-indigo-50 text-indigo-600' 
+                                  : 'text-gray-700 hover:bg-gray-50'
+                              )}
+                            >
+                              Prix décroissant
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                   
                   {/* Product List */}
                   <div className="grid grid-cols-2 gap-4 max-h-60 overflow-y-auto p-1">
-                    {filteredProducts.map(product => (
+                    {sortedProducts.map(product => (
                       <button
                         key={product.id}
                         type="button"

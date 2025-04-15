@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { Users, Package, MessageCircle, ShoppingBag, Book } from 'lucide-react';
+import { Users, Package, MessageCircle, ShoppingBag, Book, Search, Filter, ArrowUpDown } from 'lucide-react';
 import MockupUploader from '../components/MockupUploader';
 import MockupEditor from '../components/MockupEditor';
 import UserList from '../components/admin/UserList';
@@ -42,7 +42,7 @@ interface Notification {
   createdAt: string;
 }
 
-type Tab = 'users' | 'mockups' | 'orders' | 'support' | 'training' | 'notifications';
+type Tab = 'users' | 'mockups' | 'orders' | 'support' | 'training' | 'services';
 
 const TABS = [
   { id: 'users' as const, label: 'Utilisateurs', icon: Users },
@@ -50,7 +50,7 @@ const TABS = [
   { id: 'orders' as const, label: 'Commandes', icon: ShoppingBag },
   { id: 'support' as const, label: 'Support', icon: MessageCircle },
   { id: 'training' as const, label: 'Formations', icon: Book },
-  { id: 'notifications' as const, label: 'Notifications', icon: MessageCircle, badge: true }
+  { id: 'services' as const, label: 'Services', icon: ShoppingBag, badge: true }
 ] as const;
 
 export default function AdminDashboard() {
@@ -77,6 +77,9 @@ export default function AdminDashboard() {
     totalGenerations: 0
   });
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'name' | 'status'>('newest');
+  const [showSortOptions, setShowSortOptions] = useState(false);
 
   useEffect(() => {
     const initialize = async () => {
@@ -160,24 +163,26 @@ export default function AdminDashboard() {
         });
       });
 
-      // Then fetch and process orders
+      // Then fetch and process orders - exclude service orders (platform === 'internal')
       const ordersSnap = await getDocs(collection(db, 'orders'));
-      const ordersData = ordersSnap.docs.map(doc => {
-        const data = doc.data();
-        return {
-          ...data,
-          firestoreId: doc.id,
-          totalAmount: Number(data.totalAmount || 0),
-          purchasePrice: Number(data.purchasePrice || 0),
-          items: data.items.map((item: any) => ({
-            ...item,
-            price: Number(item.price || 0),
-            quantity: Number(item.quantity || 0),
-            purchasePrice: Number(item.purchasePrice || 0),
-            designUrl: designUrlMap[item.sku] // Add design URL to each item
-          }))
-        };
-      }) as Order[];
+      const ordersData = ordersSnap.docs
+        .map(doc => {
+          const data = doc.data();
+          return {
+            ...data,
+            firestoreId: doc.id,
+            totalAmount: Number(data.totalAmount || 0),
+            purchasePrice: Number(data.purchasePrice || 0),
+            items: data.items.map((item: any) => ({
+              ...item,
+              price: Number(item.price || 0),
+              quantity: Number(item.quantity || 0),
+              purchasePrice: Number(item.purchasePrice || 0),
+              designUrl: designUrlMap[item.sku] // Add design URL to each item
+            }))
+          };
+        })
+        .filter(order => order.platform !== 'internal') as Order[];
       
       ordersData.sort((a, b) => 
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -295,6 +300,82 @@ export default function AdminDashboard() {
 
   const unreadNotificationsCount = notifications.filter(n => !n.read).length;
 
+  // Filter data based on search term
+  const getFilteredData = () => {
+    switch (activeTab) {
+      case 'users':
+        return users.filter(user => 
+          user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          user.subscription?.plan?.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+      case 'mockups':
+        return mockups.filter(mockup => 
+          mockup.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          mockup.category?.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+      case 'orders':
+        return orders.filter(order => 
+          order.orderId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          order.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          order.customerEmail?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          order.platform?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          order.status?.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+      case 'support':
+        return tickets.filter(ticket => 
+          ticket.subject?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          ticket.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          ticket.message?.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+      case 'training':
+        return trainings.filter(training => 
+          training.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          training.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          training.category?.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+      case 'services':
+        return notifications.filter(notification => 
+          notification.type?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          notification.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          notification.customerEmail?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          notification.serviceName?.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+      default:
+        return [];
+    }
+  };
+
+  // Sort data based on sort option
+  const getSortedData = (data: any[]) => {
+    switch (sortBy) {
+      case 'newest':
+        return [...data].sort((a, b) => 
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+      case 'oldest':
+        return [...data].sort((a, b) => 
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        );
+      case 'name':
+        return [...data].sort((a, b) => {
+          const aName = a.name || a.title || a.email || a.customerName || '';
+          const bName = b.name || b.title || b.email || b.customerName || '';
+          return aName.localeCompare(bName);
+        });
+      case 'status':
+        return [...data].sort((a, b) => {
+          const aStatus = a.status || '';
+          const bStatus = b.status || '';
+          return aStatus.localeCompare(bStatus);
+        });
+      default:
+        return data;
+    }
+  };
+
+  const filteredData = getFilteredData();
+  const sortedData = getSortedData(filteredData);
+
   if (loading) {
     return <LoadingSpinner message="Chargement du tableau de bord..." />;
   }
@@ -394,9 +475,121 @@ export default function AdminDashboard() {
         </div>
 
         <div className="p-6">
+          {/* Search and Sort Bar */}
+          <div className="flex flex-col md:flex-row justify-between gap-4 mb-6">
+            <div className="flex items-center gap-4">
+              <div className="relative flex-1 md:max-w-md">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Search className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder={`Rechercher ${
+                    activeTab === 'users' ? 'un utilisateur' :
+                    activeTab === 'mockups' ? 'un mockup' :
+                    activeTab === 'orders' ? 'une commande' :
+                    activeTab === 'support' ? 'un ticket' :
+                    activeTab === 'training' ? 'une formation' :
+                    'un service'
+                  }...`}
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              </div>
+              <div className="relative">
+                <button
+                  onClick={() => setShowSortOptions(!showSortOptions)}
+                  className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  <ArrowUpDown className="h-5 w-5 text-gray-500" />
+                  <span className="text-sm text-gray-700">Trier</span>
+                </button>
+                
+                {showSortOptions && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
+                    <div className="py-1">
+                      <button
+                        onClick={() => {
+                          setSortBy('newest');
+                          setShowSortOptions(false);
+                        }}
+                        className={clsx(
+                          'flex items-center w-full px-4 py-2 text-sm',
+                          sortBy === 'newest' 
+                            ? 'bg-indigo-50 text-indigo-600' 
+                            : 'text-gray-700 hover:bg-gray-50'
+                        )}
+                      >
+                        Plus récents
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSortBy('oldest');
+                          setShowSortOptions(false);
+                        }}
+                        className={clsx(
+                          'flex items-center w-full px-4 py-2 text-sm',
+                          sortBy === 'oldest' 
+                            ? 'bg-indigo-50 text-indigo-600' 
+                            : 'text-gray-700 hover:bg-gray-50'
+                        )}
+                      >
+                        Plus anciens
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSortBy('name');
+                          setShowSortOptions(false);
+                        }}
+                        className={clsx(
+                          'flex items-center w-full px-4 py-2 text-sm',
+                          sortBy === 'name' 
+                            ? 'bg-indigo-50 text-indigo-600' 
+                            : 'text-gray-700 hover:bg-gray-50'
+                        )}
+                      >
+                        Nom
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSortBy('status');
+                          setShowSortOptions(false);
+                        }}
+                        className={clsx(
+                          'flex items-center w-full px-4 py-2 text-sm',
+                          sortBy === 'status' 
+                            ? 'bg-indigo-50 text-indigo-600' 
+                            : 'text-gray-700 hover:bg-gray-50'
+                        )}
+                      >
+                        Statut
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={handleRefresh}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+              >
+                Actualiser
+              </button>
+            </div>
+            
+            {activeTab === 'mockups' && (
+              <button
+                onClick={() => setShowUploader(true)}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+              >
+                Ajouter un mockup
+              </button>
+            )}
+          </div>
+
           {activeTab === 'users' && (
             <UserList 
-              users={users} 
+              users={sortedData} 
               onRefresh={handleRefresh}
               stats={stats.users}
             />
@@ -404,7 +597,7 @@ export default function AdminDashboard() {
 
           {activeTab === 'mockups' && (
             <MockupList
-              mockups={mockups}
+              mockups={sortedData}
               totalGenerations={stats.totalGenerations}
               onRefresh={handleRefresh}
               onShowUploader={() => setShowUploader(true)}
@@ -414,45 +607,39 @@ export default function AdminDashboard() {
 
           {activeTab === 'orders' && (
             <OrderList
-              orders={orders}
+              orders={sortedData}
               onRefresh={handleRefresh}
             />
           )}
 
           {activeTab === 'support' && (
             <SupportTickets
-              tickets={tickets}
+              tickets={sortedData}
               onRefresh={handleRefresh}
             />
           )}
 
           {activeTab === 'training' && (
             <TrainingManager
-              trainings={trainings}
+              trainings={sortedData}
               onRefresh={handleRefresh}
             />
           )}
 
-          {activeTab === 'notifications' && (
+          {activeTab === 'services' && (
             <div className="space-y-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-gray-900">Notifications</h2>
-                <button
-                  onClick={handleRefresh}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
-                >
-                  Actualiser
-                </button>
+                <h2 className="text-lg font-semibold text-gray-900">Services</h2>
               </div>
 
-              {notifications.length === 0 ? (
+              {sortedData.length === 0 ? (
                 <div className="text-center py-12 bg-gray-50 rounded-lg">
                   <MessageCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600">Aucune notification</p>
+                  <p className="text-gray-600">Aucun service commandé</p>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {notifications.map(notification => (
+                  {sortedData.map(notification => (
                     <div 
                       key={notification.id}
                       className={clsx(
@@ -498,12 +685,6 @@ export default function AdminDashboard() {
                                 {notification.customerEmail}
                               </a>
                             </div>
-                            <Link
-                              to={`/orders?id=${notification.orderId}`}
-                              className="px-3 py-1 bg-gray-100 text-gray-700 text-xs rounded-lg hover:bg-gray-200 transition"
-                            >
-                              Voir la commande
-                            </Link>
                           </div>
                         </div>
                       )}

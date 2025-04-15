@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { Package, Clock, CheckCircle, XCircle, AlertTriangle, Truck, CreditCard, Loader2, DollarSign, MapPin, Box, ChevronUp, ChevronDown, Eye, FileText, BarChart2, Plus } from 'lucide-react';
+import { Package, Clock, CheckCircle, XCircle, AlertTriangle, Truck, CreditCard, Loader2, DollarSign, MapPin, Box, ChevronUp, ChevronDown, Eye, FileText, BarChart2, Plus, Search, ArrowUpDown, Filter } from 'lucide-react';
 import CreditPaymentDialog from '../components/orders/CreditPaymentDialog';
 import CreateOrderDialog from '../components/orders/CreateOrderDialog';
 import OrderStats from './OrderStats';
@@ -10,7 +10,7 @@ import Pagination from '../components/Pagination';
 import { usePagination } from '../hooks/usePagination';
 import toast from 'react-hot-toast';
 import clsx from 'clsx';
-import type { Order } from '../types/order';
+import type { Order, OrderStatus } from '../types/order';
 import type { UserProfile } from '../types/user';
 
 const TABS = [
@@ -20,6 +20,18 @@ const TABS = [
 ] as const;
 
 type Tab = typeof TABS[number]['id'];
+
+// Sort options
+type SortOption = 'date-desc' | 'date-asc' | 'amount-desc' | 'amount-asc' | 'status';
+
+// Status filter options
+const STATUS_OPTIONS: { value: OrderStatus | 'all'; label: string; icon: React.ElementType }[] = [
+  { value: 'all', label: 'Tous les statuts', icon: Package },
+  { value: 'pending', label: 'En attente', icon: Clock },
+  { value: 'paid', label: 'Payée', icon: CheckCircle },
+  { value: 'shipped', label: 'Expédiée', icon: Truck },
+  { value: 'delivered', label: 'Livrée', icon: Box }
+];
 
 const SETUP_STEPS = [
   {
@@ -99,6 +111,51 @@ export default function Orders() {
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [autoPayEnabled, setAutoPayEnabled] = useState(false);
   const [savingAutoPaySetting, setSavingAutoPaySetting] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState<SortOption>('date-desc');
+  const [showSortOptions, setShowSortOptions] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<OrderStatus | 'all'>('all');
+  const [showStatusFilter, setShowStatusFilter] = useState(false);
+
+  // Filter orders based on search term with null checks
+  // Also filter out service orders (platform === 'internal')
+  const filteredOrders = orders.filter(order => {
+    // Filter out service orders
+    if (order.platform === 'internal') return false;
+    
+    // Apply status filter
+    if (statusFilter !== 'all' && order.status !== statusFilter) return false;
+    
+    if (!searchTerm) return true;
+    
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      (order.orderId?.toLowerCase() || '').includes(searchLower) ||
+      (order.customerName?.toLowerCase() || '').includes(searchLower) ||
+      (order.customerEmail?.toLowerCase() || '').includes(searchLower) ||
+      (order.platform?.toLowerCase() || '').includes(searchLower) ||
+      (order.status?.toLowerCase() || '').includes(searchLower)
+    );
+  });
+
+  // Sort orders
+  const sortedOrders = [...filteredOrders].sort((a, b) => {
+    switch (sortBy) {
+      case 'date-desc':
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      case 'date-asc':
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      case 'amount-desc':
+        return b.totalAmount - a.totalAmount;
+      case 'amount-asc':
+        return a.totalAmount - b.totalAmount;
+      case 'status':
+        const statusOrder = { pending: 0, paid: 1, shipped: 2, delivered: 3 };
+        return statusOrder[a.status] - statusOrder[b.status];
+      default:
+        return 0;
+    }
+  });
 
   const {
     currentPage,
@@ -107,7 +164,7 @@ export default function Orders() {
     setPageSize,
     totalItems,
     paginatedItems: paginatedOrders
-  } = usePagination(orders);
+  } = usePagination(sortedOrders);
 
   useEffect(() => {
     if (!user) return;
@@ -124,10 +181,11 @@ export default function Orders() {
       }
     );
 
-    // Subscribe to orders
+    // Subscribe to orders - exclude service orders (platform === 'internal')
     const ordersQuery = query(
       collection(db, 'orders'),
-      where('userId', '==', user.uid)
+      where('userId', '==', user.uid),
+      where('platform', 'in', ['shopify', 'etsy'])
     );
 
     const unsubscribeOrders = onSnapshot(ordersQuery, (snapshot) => {
@@ -143,10 +201,6 @@ export default function Orders() {
           purchasePrice: Number(item.purchasePrice || 0)
         }))
       })) as Order[];
-
-      ordersData.sort((a, b) => 
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
 
       setOrders(ordersData);
       setLoading(false);
@@ -374,11 +428,159 @@ export default function Orders() {
                 </div>
               </div>
 
-              {/* Create Order Button */}
-              <div className="flex justify-between items-center">
-                <h2 className="text-lg font-semibold text-gray-900">
-                  Commandes
-                </h2>
+              {/* Search and Filter Bar */}
+              <div className="flex flex-col md:flex-row justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <h2 className="text-lg font-semibold text-gray-900">
+                    Commandes
+                  </h2>
+                  <div className="relative flex-1 md:max-w-md">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Search className="h-5 w-5 text-gray-400" />
+                    </div>
+                    <input
+                      type="text"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      placeholder="Rechercher une commande..."
+                      className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                    />
+                  </div>
+                  
+                  {/* Status Filter Dropdown */}
+                  <div className="relative">
+                    <button
+                      onClick={() => setShowStatusFilter(!showStatusFilter)}
+                      className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                    >
+                      <Filter className="h-5 w-5 text-gray-500" />
+                      <span className="text-sm text-gray-700">
+                        {STATUS_OPTIONS.find(option => option.value === statusFilter)?.label || 'Statut'}
+                      </span>
+                      <ChevronDown className="h-4 w-4 text-gray-500" />
+                    </button>
+                    
+                    {showStatusFilter && (
+                      <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
+                        <div className="py-1">
+                          {STATUS_OPTIONS.map(option => {
+                            const Icon = option.icon;
+                            return (
+                              <button
+                                key={option.value}
+                                onClick={() => {
+                                  setStatusFilter(option.value);
+                                  setShowStatusFilter(false);
+                                }}
+                                className={clsx(
+                                  'flex items-center w-full px-4 py-2 text-sm',
+                                  statusFilter === option.value 
+                                    ? 'bg-indigo-50 text-indigo-600' 
+                                    : 'text-gray-700 hover:bg-gray-50'
+                                )}
+                              >
+                                <Icon className="h-4 w-4 mr-2" />
+                                {option.label}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="relative">
+                    <button
+                      onClick={() => setShowSortOptions(!showSortOptions)}
+                      className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                    >
+                      <ArrowUpDown className="h-5 w-5 text-gray-500" />
+                      <span className="text-sm text-gray-700">Trier</span>
+                    </button>
+                    
+                    {showSortOptions && (
+                      <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
+                        <div className="py-1">
+                          <button
+                            onClick={() => {
+                              setSortBy('date-desc');
+                              setShowSortOptions(false);
+                            }}
+                            className={clsx(
+                              'flex items-center w-full px-4 py-2 text-sm',
+                              sortBy === 'date-desc' 
+                                ? 'bg-indigo-50 text-indigo-600' 
+                                : 'text-gray-700 hover:bg-gray-50'
+                            )}
+                          >
+                            <Clock className="h-4 w-4 mr-2" />
+                            Plus récentes
+                          </button>
+                          <button
+                            onClick={() => {
+                              setSortBy('date-asc');
+                              setShowSortOptions(false);
+                            }}
+                            className={clsx(
+                              'flex items-center w-full px-4 py-2 text-sm',
+                              sortBy === 'date-asc' 
+                                ? 'bg-indigo-50 text-indigo-600' 
+                                : 'text-gray-700 hover:bg-gray-50'
+                            )}
+                          >
+                            <Clock className="h-4 w-4 mr-2" />
+                            Plus anciennes
+                          </button>
+                          <button
+                            onClick={() => {
+                              setSortBy('amount-desc');
+                              setShowSortOptions(false);
+                            }}
+                            className={clsx(
+                              'flex items-center w-full px-4 py-2 text-sm',
+                              sortBy === 'amount-desc' 
+                                ? 'bg-indigo-50 text-indigo-600' 
+                                : 'text-gray-700 hover:bg-gray-50'
+                            )}
+                          >
+                            <DollarSign className="h-4 w-4 mr-2" />
+                            Montant (décroissant)
+                          </button>
+                          <button
+                            onClick={() => {
+                              setSortBy('amount-asc');
+                              setShowSortOptions(false);
+                            }}
+                            className={clsx(
+                              'flex items-center w-full px-4 py-2 text-sm',
+                              sortBy === 'amount-asc' 
+                                ? 'bg-indigo-50 text-indigo-600' 
+                                : 'text-gray-700 hover:bg-gray-50'
+                            )}
+                          >
+                            <DollarSign className="h-4 w-4 mr-2" />
+                            Montant (croissant)
+                          </button>
+                          <button
+                            onClick={() => {
+                              setSortBy('status');
+                              setShowSortOptions(false);
+                            }}
+                            className={clsx(
+                              'flex items-center w-full px-4 py-2 text-sm',
+                              sortBy === 'status' 
+                                ? 'bg-indigo-50 text-indigo-600' 
+                                : 'text-gray-700 hover:bg-gray-50'
+                            )}
+                          >
+                            <Filter className="h-4 w-4 mr-2" />
+                            Par statut
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
                 <button
                   onClick={() => setShowCreateDialog(true)}
                   className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
@@ -389,14 +591,16 @@ export default function Orders() {
               </div>
 
               {/* Orders List */}
-              {orders.length === 0 ? (
+              {filteredOrders.length === 0 ? (
                 <div className="text-center py-12">
                   <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                   <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                    Aucune commande
+                    {searchTerm || statusFilter !== 'all' ? 'Aucune commande trouvée' : 'Aucune commande'}
                   </h2>
                   <p className="text-gray-600">
-                    Vous n'avez pas encore de commande.
+                    {searchTerm || statusFilter !== 'all'
+                      ? 'Essayez de modifier vos critères de recherche' 
+                      : 'Vous n\'avez pas encore de commande.'}
                   </p>
                 </div>
               ) : (
@@ -709,7 +913,7 @@ export default function Orders() {
               )}
 
               {/* Pagination */}
-              {orders.length > 0 && (
+              {filteredOrders.length > 0 && (
                 <Pagination
                   currentPage={currentPage}
                   totalItems={totalItems}

@@ -21,9 +21,13 @@ export default function OrderList() {
         // Initialize sample orders if needed
         await initializeOrders(user.uid);
 
-        // Fetch orders
+        // Fetch orders - exclude service orders (platform === 'internal')
         const ordersRef = collection(db, 'orders');
-        const q = query(ordersRef, where('userId', '==', user.uid));
+        const q = query(
+          ordersRef, 
+          where('userId', '==', user.uid),
+          where('platform', 'in', ['shopify', 'etsy'])
+        );
         const snapshot = await getDocs(q);
         
         const ordersData = snapshot.docs.map(doc => ({

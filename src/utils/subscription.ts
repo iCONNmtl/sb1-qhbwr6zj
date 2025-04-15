@@ -19,17 +19,24 @@ export function getPlanMockupLimit(plan: UserPlan): number {
   return PLAN_LIMITS[plan];
 }
 
-export async function updateUserCredits(userId: string, creditsToDeduct: number): Promise<void> {
-  const userRef = doc(db, 'users', userId);
-  const userSnap = await getDoc(userRef);
-  
-  if (!userSnap.exists()) {
-    throw new Error('User not found');
+export async function updateUserCredits(userId: string, creditsToDeduct: number): Promise<{success: boolean, error?: string}> {
+  try {
+    const userRef = doc(db, 'users', userId);
+    const userSnap = await getDoc(userRef);
+    
+    if (!userSnap.exists()) {
+      return { success: false, error: 'User not found' };
+    }
+    
+    await updateDoc(userRef, {
+      'subscription.credits': increment(-creditsToDeduct)
+    });
+    
+    return { success: true };
+  } catch (error) {
+    console.error('Error updating user credits:', error);
+    return { success: false, error: 'Failed to update credits' };
   }
-  
-  await updateDoc(userRef, {
-    'subscription.credits': increment(-creditsToDeduct)
-  });
 }
 
 export async function updateUserSubscription(
