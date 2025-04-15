@@ -15,13 +15,13 @@ const FEATURES = [
   { name: 'Support 24/7', basic: true, expert: true },
   { name: 'Pas de filigrane', basic: true, expert: true },
   { name: 'Générations simultanées', basic: '1', expert: '15' },
-  { name: 'Création de design', basic: true, expert: true },
+  { name: 'Création de designs', basic: true, expert: true },
   { name: 'Traitement des commandes', basic: true, expert: true },
-  { name: 'Configuration de produits', basic: false, expert: true },
   { name: 'Fiche Produit', basic: 'Basic', expert: 'Optimisé SEO' },
+  { name: 'Configuration de produits', basic: false, expert: true },
   { name: 'Personnalisation des mockups', basic: false, expert: true },
   { name: 'Bonus crédits packs', basic: false, expert: '+10%' },
-  { name: 'Statistique des ventes', basic: false, expert: true },
+  { name: 'Statistiques des ventes', basic: false, expert: true },
 ];
 
 // Packs de crédits
@@ -301,7 +301,7 @@ export default function Pricing() {
           {/* Expert Plan */}
           <div className="relative rounded-2xl bg-white shadow-sm overflow-hidden">
             {/* Header */}
-            <div className="p-8 bg-gradient-to-r from-amber-500 to-amber-600 border-b border-amber-600">
+            <div className="p-8 bg-gradient-to-r from-amber-500 to-amber-600 border-b border-amber-500">
               <h3 className="text-2xl font-bold text-white mb-2">Expert</h3>
               <p className="text-white/80">Conçu pour les experts du quotidien</p>
             </div>
@@ -321,7 +321,7 @@ export default function Pricing() {
 
               {/* Price */}
               <div className="flex items-baseline gap-1 mb-2">
-                <span className="text-4xl font-bold">49</span>
+                <span className="text-4xl font-bold">19,90</span>
                 <span className="text-xl">€</span>
                 <span className="text-gray-500 text-sm">/mois</span>
               </div>

@@ -98,14 +98,39 @@ export default function AllInOneToolsSection() {
               ))}
             </div>
 
-            {/* Flèche centrale */}
+            {/* Flèche centrale - responsive */}
             <div className="flex justify-center items-center">
               <div className="w-full relative">
-                <img 
-                  src="https://d2v7vpg8oce97p.cloudfront.net/Branding/Arrow.webp" 
-                  alt="Arrow" 
-                  className="w-3/4 h-auto mx-auto"
-                />
+                {/* Flèche vers la droite sur desktop */}
+                <svg 
+                  className="w-3/4 h-auto mx-auto hidden md:block" 
+                  viewBox="0 0 200 40" 
+                  fill="none" 
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path 
+                    d="M0 20H180M180 20L160 5M180 20L160 35" 
+                    stroke="#1F2937" 
+                    strokeWidth="4" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                {/* Flèche vers le bas sur mobile */}
+                <svg 
+                  className="w-12 h-24 mx-auto md:hidden" 
+                  viewBox="0 0 24 48" 
+                  fill="none" 
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path 
+                    d="M12 4L12 40M12 40L22 30M12 40L2 30" 
+                    stroke="#1F2937" 
+                    strokeWidth="4" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round"
+                  />
+                </svg>
               </div>
             </div>
 
