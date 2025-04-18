@@ -52,7 +52,8 @@ export default function MyProducts() {
         
         const productsData = snapshot.docs.map(doc => ({
           ...doc.data(),
-          firestoreId: doc.id
+          firestoreId: doc.id,
+          variants: doc.data().variants || [] // Ensure variants is always an array
         })) as Product[];
 
         // Sort by creation date (newest first)
@@ -183,12 +184,14 @@ export default function MyProducts() {
         <div className="grid gap-6">
           {paginatedProducts.map((product) => {
             // Calculate stats
-            const totalVariants = product.variants.length;
-            const minPrice = Math.min(...product.variants.map(v => v.price));
-            const maxPrice = Math.max(...product.variants.map(v => v.price));
-            const totalProfit = product.variants.reduce((sum, v) => sum + (v.price - v.cost), 0);
-            const avgProfit = totalProfit / totalVariants;
-            const avgProfitPercentage = (avgProfit / (product.variants.reduce((sum, v) => sum + v.price, 0) / totalVariants)) * 100;
+            const variants = product.variants || []; // Ensure variants is an array
+            const totalVariants = variants.length;
+            const minPrice = Math.min(...variants.map(v => v.price));
+            const maxPrice = Math.max(...variants.map(v => v.price));
+            const totalProfit = variants.reduce((sum, v) => sum + (v.price - v.cost), 0);
+            const avgProfit = totalVariants > 0 ? totalProfit / totalVariants : 0;
+            const avgProfitPercentage = totalVariants > 0 ? 
+              (avgProfit / (variants.reduce((sum, v) => sum + v.price, 0) / totalVariants)) * 100 : 0;
 
             return (
               <div 
@@ -285,7 +288,7 @@ export default function MyProducts() {
                   </div>
 
                   {/* Expanded Details */}
-                  {expandedProduct === product.firestoreId && (
+                  {expandedProduct === product.firestoreId && variants.length > 0 && (
                     <div className="mt-6 pt-6 border-t border-gray-100">
                       <h4 className="font-medium text-gray-900 mb-4">Variantes</h4>
                       <div className="overflow-x-auto -mx-6">
@@ -314,7 +317,7 @@ export default function MyProducts() {
                               </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
-                              {product.variants.map((variant, idx) => (
+                              {variants.map((variant, idx) => (
                                 <tr key={variant.sizeId} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                                   <td className="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                     {variant.dimensions.inches}

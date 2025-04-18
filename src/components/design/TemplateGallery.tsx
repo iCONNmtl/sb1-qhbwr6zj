@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
+import { collection, query, where, getDocs, orderBy, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
-import { Loader2, Search, Filter, Folder, Plus, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Loader2, Search, Filter, Folder, Plus, Trash2, ChevronDown, ChevronUp, BookTemplate } from 'lucide-react';
 import toast from 'react-hot-toast';
 import clsx from 'clsx';
 import type { DesignTemplate } from '../../types/designTemplate';
@@ -27,19 +27,25 @@ export default function TemplateGallery({
   useEffect(() => {
     const fetchTemplates = async () => {
       try {
+        setLoading(true);
+        console.log('Fetching templates for user:', userId);
+        
+        // Use the correct collection name: designTemplates
         const templatesRef = collection(db, 'designTemplates');
         const q = query(
           templatesRef, 
-          where('userId', '==', userId),
-          orderBy('createdAt', 'desc')
+          where('userId', '==', userId)
         );
         
         const snapshot = await getDocs(q);
+        console.log('Templates snapshot size:', snapshot.size);
+        
         const templatesData = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
         })) as DesignTemplate[];
         
+        console.log('Templates data:', templatesData);
         setTemplates(templatesData);
         
         // Extract unique categories
@@ -60,7 +66,9 @@ export default function TemplateGallery({
       }
     };
 
-    fetchTemplates();
+    if (userId) {
+      fetchTemplates();
+    }
   }, [userId]);
 
   // Filter templates based on search and category
@@ -74,6 +82,23 @@ export default function TemplateGallery({
     
     return matchesSearch && matchesCategory;
   });
+
+  const handleDeleteTemplate = async (templateId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ce template ?')) {
+      return;
+    }
+    
+    try {
+      await deleteDoc(doc(db, 'designTemplates', templateId));
+      setTemplates(templates.filter(t => t.id !== templateId));
+      toast.success('Template supprimé');
+    } catch (error) {
+      console.error('Error deleting template:', error);
+      toast.error('Erreur lors de la suppression du template');
+    }
+  };
 
   if (loading) {
     return (
@@ -240,6 +265,15 @@ export default function TemplateGallery({
                       )}
                     </div>
                   </div>
+
+                  {/* Delete button for user templates */}
+                  <button
+                    onClick={(e) => handleDeleteTemplate(template.id, e)}
+                    className="absolute top-2 right-2 p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                    title="Supprimer le template"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
                 </div>
               ))}
             </div>

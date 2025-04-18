@@ -23,9 +23,6 @@ export default function SaveTemplateDialog({
   userId
 }: SaveTemplateDialogProps) {
   const [name, setName] = useState(designState.designName || 'My Template');
-  const [description, setDescription] = useState('');
-  const [category, setCategory] = useState('');
-  const [tags, setTags] = useState('');
   const [loading, setLoading] = useState(false);
 
   if (!isOpen) return null;
@@ -44,7 +41,7 @@ export default function SaveTemplateDialog({
       const templateData = {
         userId,
         name: name.trim(),
-        description: description.trim() || null,
+        description: null,
         thumbnail: thumbnailUrl,
         elements: designState.elements,
         backgroundColor: designState.backgroundColor,
@@ -53,11 +50,11 @@ export default function SaveTemplateDialog({
         sizeId: designState.currentSize,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        tags: tags.trim() ? tags.split(',').map(tag => tag.trim()) : [],
-        category: category.trim() || null
+        tags: [],
+        category: null
       };
 
-      // Save to Firestore
+      // Save to Firestore - use designTemplates collection instead of products
       await addDoc(collection(db, 'designTemplates'), templateData);
       
       toast.success('Template sauvegardé avec succès');
@@ -98,45 +95,6 @@ export default function SaveTemplateDialog({
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
               placeholder="Mon template"
               required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Description (optionnelle)
-            </label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
-              placeholder="Description du template..."
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Catégorie (optionnelle)
-            </label>
-            <input
-              type="text"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
-              placeholder="Ex: Affiche, Flyer, Carte de visite..."
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Tags (séparés par des virgules)
-            </label>
-            <input
-              type="text"
-              value={tags}
-              onChange={(e) => setTags(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
-              placeholder="Ex: minimaliste, moderne, business..."
             />
           </div>
 
