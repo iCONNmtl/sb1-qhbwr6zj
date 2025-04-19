@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { SIZES } from '../data/sizes';
 import { PRODUCT_PRICING, getProductPricing, CONTINENTS } from '../data/shipping';
-import { collection, addDoc, doc, getDoc } from 'firebase/firestore';
+import { collection, addDoc, doc, getDoc, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { nanoid } from 'nanoid';
 import { Save, Loader2, Check, ChevronRight, AlertCircle, Image, DollarSign, Info, Globe2 } from 'lucide-react';
@@ -64,10 +64,6 @@ const SIZE_GROUPS = [
     description: 'Formats internationaux courants',
     sizes: [
       SIZES.find(s => s.id === 'A4')!,
-      SIZES.find(s => s.id === 'A3')!,
-      SIZES.find(s => s.id === 'A2')!,
-      SIZES.find(s => s.id === 'A1')!,
-      SIZES.find(s => s.id === 'A0')!,
       SIZES.find(s => s.id === '5x7')!,
       SIZES.find(s => s.id === '20x28')!,
       SIZES.find(s => s.id === '28x40')!
@@ -90,14 +86,10 @@ const getSimilarSizes = (sizeId: string): string[] => {
     '8x12': ['12x18', '24x36'],
     '12x18': ['8x12', '24x36'],
     '24x36': ['8x12', '12x18'],
-    'A4': ['A3', 'A2', 'A1', 'A0', '5x7', '20x28', '28x40'],
-    'A3': ['A4', 'A2', 'A1', 'A0', '5x7', '20x28', '28x40'],
-    'A2': ['A4', 'A3', 'A1', 'A0', '5x7', '20x28', '28x40'],
-    'A1': ['A4', 'A3', 'A2', 'A0', '5x7', '20x28', '28x40'],
-    'A0': ['A4', 'A3', 'A2', 'A1', '5x7', '20x28', '28x40'],
-    '5x7': ['A4', 'A3', 'A2', 'A1', 'A0', '20x28', '28x40'],
-    '20x28': ['A4', 'A3', 'A2', 'A1', 'A0', 'A4', '5x7', '28x40'],
-    '28x40': ['A4', 'A3', 'A2', 'A1', 'A0', 'A4', '5x7', '20x28']
+    'A4': ['5x7', '20x28', '28x40'],
+    '5x7': ['A4', '20x28', '28x40'],
+    '20x28': ['A4', '5x7', '28x40'],
+    '28x40': ['A4', '5x7', '20x28']
   } as const;
 
   return similarGroups[sizeId as keyof typeof similarGroups] || [];
@@ -114,10 +106,6 @@ const getRecommendedRegions = (sizeId: string): string[] => {
     '11x17': ['northAmerica'],
     '18x24': ['europe'],
     'A4': ['europe', 'asia'],
-    'A3': ['europe', 'asia'],
-    'A2': ['europe', 'asia'],
-    'A1': ['europe', 'asia'],
-    'A0': ['europe', 'asia'],
     '5x7': ['europe', 'northAmerica', 'asia'],
     '20x28': ['europe'],
     '28x40': ['europe']
@@ -144,6 +132,7 @@ export default function Product() {
       isLocked: false
     }))
   );
+  const [userDesigns, setUserDesigns] = useState<{id: string, url: string, name: string}[]>([]);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -161,6 +150,39 @@ export default function Product() {
     };
 
     fetchUserProfile();
+  }, [user]);
+
+  // Fetch user designs from Firebase
+  useEffect(() => {
+    const fetchUserDesigns = async () => {
+      if (!user) return;
+
+      try {
+        // Fetch designs from products collection
+        const productsRef = collection(db, 'products');
+        const q = query(productsRef, where('userId', '==', user.uid));
+        const snapshot = await getDocs(q);
+        
+        const designs: {id: string, url: string, name: string}[] = [];
+        
+        snapshot.docs.forEach(doc => {
+          const product = doc.data();
+          if (product.designUrl) {
+            designs.push({
+              id: doc.id,
+              url: product.designUrl,
+              name: product.title || product.type || 'Design sans nom'
+            });
+          }
+        });
+        
+        setUserDesigns(designs);
+      } catch (error) {
+        console.error('Error fetching user designs:', error);
+      }
+    };
+
+    fetchUserDesigns();
   }, [user]);
 
   const isExpertPlan = userProfile?.subscription?.plan === 'Expert';
@@ -208,7 +230,7 @@ export default function Product() {
           name: PRODUCT_TYPES[productType],
           cost: config.size.cost,
           price: config.price,
-          sku: `${user.uid}-${productId.substring(0, 8)}-${config.size.id}`,
+          sku: `${user.uid.substring(0, 8)}-${productId.substring(0, 8)}-${config.size.id}`,
           designUrl: config.designUrl,
           dimensions: config.size.dimensions
         })),
@@ -580,6 +602,7 @@ export default function Product() {
                     selectedUrl={sizeConfigurations.find(c => c.size.id === currentSizeId)?.designUrl}
                     sizes={[sizeConfigurations.find(c => c.size.id === currentSizeId)!.size]}
                     onDimensionsAvailable={handleDesignDimensionsAvailable}
+                    showExisting={true}
                   />
                 </div>
 

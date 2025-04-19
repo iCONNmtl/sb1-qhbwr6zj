@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, where, getDocs, orderBy, deleteDoc, doc } from 'firebase/firestore';
+import { collection, query, where, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
-import { Loader2, Search, Filter, Folder, Plus, Trash2, ChevronDown, ChevronUp, BookTemplate } from 'lucide-react';
+import { Loader2, Search, Filter, Folder, Plus, Trash2, ChevronDown, ChevronUp, X, BookOpen } from 'lucide-react';
 import toast from 'react-hot-toast';
 import clsx from 'clsx';
 import type { DesignTemplate } from '../../types/designTemplate';
@@ -121,14 +121,19 @@ export default function TemplateGallery({
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-xl p-6 w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-semibold text-gray-900">
-            Mes templates
-          </h3>
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-indigo-100 rounded-lg">
+              <BookOpen className="h-5 w-5 text-indigo-600" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900">
+              Bibliothèque de templates
+            </h3>
+          </div>
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-lg transition"
           >
-            <Trash2 className="h-5 w-5" />
+            <X className="h-5 w-5" />
           </button>
         </div>
 
@@ -236,7 +241,7 @@ export default function TemplateGallery({
                 <div
                   key={template.id}
                   onClick={() => onSelectTemplate(template)}
-                  className="group bg-gray-50 rounded-lg overflow-hidden cursor-pointer hover:shadow-md transition-shadow border border-gray-200"
+                  className="group bg-gray-50 rounded-lg overflow-hidden cursor-pointer hover:shadow-md transition-shadow border border-gray-200 relative"
                 >
                   <div className="aspect-square relative">
                     <img
@@ -267,13 +272,15 @@ export default function TemplateGallery({
                   </div>
 
                   {/* Delete button for user templates */}
-                  <button
-                    onClick={(e) => handleDeleteTemplate(template.id, e)}
-                    className="absolute top-2 right-2 p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
-                    title="Supprimer le template"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+                  {'userId' in template && (
+                    <button
+                      onClick={(e) => handleDeleteTemplate(template.id, e)}
+                      className="absolute top-2 right-2 p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                      title="Supprimer le template"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
