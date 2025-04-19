@@ -11,7 +11,8 @@ import {
   TrendingUp,
   DollarSign,
   Truck,
-  Star
+  Star,
+  Store
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Compare } from '../ui/compare';
@@ -21,54 +22,54 @@ import clsx from 'clsx';
 const FEATURE_BLOCKS = [
   {
     title: "Qu'est-ce que Pixmock ?",
-    description: "Pixmock est une plateforme tout-en-un qui transforme vos designs en mockups professionnels en quelques secondes. Notre technologie avancée vous permet de créer des présentations percutantes pour vos clients et vos réseaux sociaux.",
+    description: "Pixmock est la plateforme créative tout-en-un pensée pour les marques et créateurs en Print on Demand. Générez, éditez et publiez facilement vos visuels, configurez vos produits, gérez vos commandes, et boostez vos ventes grâce à des outils puissants réunis au même endroit.",
     image: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=80&w=2000&auto=format&fit=crop",
     icon: Wand2,
     color: "from-blue-500 to-indigo-600",
     link: "/mockups",
     linkText: "Découvrir notre librairie",
     stats: [
-      { icon: Star, value: "4.9/5", label: "Note moyenne" },
-      { icon: Clock, value: "0.5s", label: "Génération par mockup" },
-      { icon: TrendingUp, value: "+300%", label: "Taux de conversion" }
+      { icon: Star, value: "100%", label: "Clients Satisfaits" },
+      { icon: DollarSign, value: "+10K", label: "Affiches vendus" },
+      { icon: TrendingUp, value: "Mise à jour", label: "Régulièrement" }
     ]
   },
   {
     title: "Créez ou importez vos designs",
-    description: "Utilisez notre générateur AI pour créer des designs uniques ou importez vos propres créations. Notre éditeur visuel vous permet de personnaliser chaque aspect de votre design avec une interface intuitive.",
+    description: "Créez vos visuels avec notre outils ou importez vos créations existantes. Utilisez notre éditeur intégré façon Photoshop pour personnaliser chaque détail : texte, couleurs, formes, calques… Aucune compétence technique requise.",
     image: "https://images.unsplash.com/photo-1558655146-d09347e92766?q=80&w=2000&auto=format&fit=crop",
     icon: Upload,
     color: "from-purple-500 to-pink-600",
     link: "/design-generator",
     linkText: "Essayer le générateur AI",
     stats: [
-      { icon: Wand2, value: "IA avancée", label: "Technologie" },
+      { icon: Wand2, value: "Intuitif", label: "Technologie" },
       { icon: Clock, value: "10 sec", label: "Temps de génération" },
       { icon: Star, value: "Illimité", label: "Nombre de designs" }
     ]
   },
   {
     title: "Configurez vos produits",
-    description: "Transformez vos designs en produits prêts à vendre. Choisissez parmi une variété de formats et de tailles, définissez vos prix et créez des fiches produits optimisées pour maximiser vos ventes.",
+    description: "Associez vos designs à nos produits Print on Demand (Art, Mat, Semi-Glossy). Définissez facilement les tailles, variantes, marges et intégrez votre boutique Shopify ou Etsy en quelques clics.",
     image: "https://images.unsplash.com/photo-1586717791821-3f44a563fa4c?q=80&w=2000&auto=format&fit=crop",
     icon: ShoppingBag,
     color: "from-amber-500 to-orange-600",
     link: "/products",
     linkText: "Explorer les produits",
     stats: [
-      { icon: DollarSign, value: "70%", label: "Marge bénéficiaire" },
+      { icon: Store, value: "3", label: "Produits disponibles" },
       { icon: ShoppingBag, value: "11+", label: "Formats disponibles" },
       { icon: Globe2, value: "Mondial", label: "Réseau d'impression" }
     ],
     highlight: {
       title: "Livraison mondiale",
-      description: "Expédition dans plus de 40 pays avec suivi en temps réel",
+      description: "Expédition dans le monde entier avec suivi en temps réel",
       icon: Truck
     }
   },
   {
     title: "Générez vos images produits",
-    description: "Créez des mockups photoréalistes qui mettent en valeur vos designs. Notre technologie avancée génère des images de qualité professionnelle adaptées à chaque plateforme de vente et réseau social.",
+    description: "Grâce à nos modèles de mockups et notre moteur de génération, Pixmock vous permet de créer automatiquement des images produits professionnelles prêtes à vendre. Gagnez du temps et assurez un rendu visuel cohérent sur toute votre boutique.",
     useCompare: true,
     firstImage: "https://d2v7vpg8oce97p.cloudfront.net/Branding/before.webp",
     secondImage: "https://d2v7vpg8oce97p.cloudfront.net/Branding/after.webp",
@@ -77,23 +78,23 @@ const FEATURE_BLOCKS = [
     link: "/generator",
     linkText: "Générer des mockups",
     stats: [
-      { icon: Clock, value: "2 min", label: "Temps gagné par image" },
-      { icon: ImageIcon, value: "4K", label: "Qualité d'image" },
+      { icon: Clock, value: "20 secondes", label: "Temps gagné par image" },
+      { icon: ImageIcon, value: "2048x2048px", label: "Qualité d'image" },
       { icon: Star, value: "100+", label: "Mockups disponibles" }
     ]
   },
   {
     title: "Gérez vos commandes et analysez vos stats",
-    description: "Suivez vos commandes, gérez vos expéditions et analysez vos performances de vente en temps réel. Notre tableau de bord intuitif vous donne toutes les informations nécessaires pour optimiser votre business.",
+    description: "Suivez vos ventes en temps réel, gérez vos commandes et analysez vos performances depuis un tableau de bord simple et complet. Pilotez votre activité et optimisez vos revenus grâce à des données claires et exploitables.",
     image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2000&auto=format&fit=crop",
     icon: BarChart2,
     color: "from-rose-500 to-red-600",
     link: "/orders",
     linkText: "Voir le tableau de bord",
     stats: [
-      { icon: TrendingUp, value: "+45%", label: "Croissance moyenne" },
-      { icon: DollarSign, value: "12k€", label: "CA moyen mensuel" },
-      { icon: Clock, value: "24h", label: "Traitement commande" }
+      { icon: BarChart2, value: "+5", label: "Onglets de statistiques" },
+      { icon: Clock, value: "Mise à jour", label: "Temps réel" },
+      { icon: Truck, value: "24h", label: "Traitement commande" }
     ],
     testimonial: {
       quote: "J'ai multiplié mon chiffre d'affaires par 3 en seulement 2 mois grâce à Pixmock !",

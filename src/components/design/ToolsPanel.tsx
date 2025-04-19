@@ -104,29 +104,7 @@ const ToolsPanel: React.FC<ToolsPanelProps> = ({
             </button>
           </div>
         </div>
-        
-        {/* Expert Plan Shapes or Upgrade CTA */}
-        <div className="bg-amber-50 rounded-lg p-3 border border-amber-100">
-          <div className="flex items-center justify-between mb-2">
-            <h4 className="text-sm font-medium text-amber-800 flex items-center">
-              <Crown className="h-4 w-4 mr-1 text-amber-600" />
-              Formes avancées
-            </h4>
-            <Link to="/pricing" className="text-xs text-amber-600 hover:text-amber-700">
-              Débloquer
-            </Link>
-          </div>
-          <div className="grid grid-cols-2 gap-2 opacity-60">
-            <div className="flex flex-col items-center p-2 bg-amber-100/50 rounded-lg">
-              <Star className="h-5 w-5 text-amber-600 mb-1" />
-              <span className="text-xs text-amber-800">Étoile</span>
-            </div>
-            <div className="flex flex-col items-center p-2 bg-amber-100/50 rounded-lg">
-              <Hexagon className="h-5 w-5 text-amber-600 mb-1" />
-              <span className="text-xs text-amber-800">Hexagone</span>
-            </div>
-          </div>
-        </div>
+      
       </div>
       
       {/* Grid Settings */}
