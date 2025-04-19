@@ -784,14 +784,15 @@ export default function DesignGenerator() {
       // Convert canvas to image
       const dataUrl = await toPng(canvasRef.current!, { cacheBust: true });
       
-      // Create a product with the design
-      await addDoc(collection(db, 'products'), {
+      // Create a design with the design
+      await addDoc(collection(db, 'designs'), {
         userId: user.uid,
-        type: 'custom-design',
-        title: designState.designName,
-        designUrl: dataUrl,
-        createdAt: new Date().toISOString(),
-        status: 'active'
+        name: designState.designName,
+        url: dataUrl,
+        size: designState.currentSize,
+        width: designState.canvasWidth,
+        height: designState.canvasHeight,
+        createdAt: new Date().toISOString()
       });
       
       toast.success('Design saved successfully');
@@ -848,20 +849,37 @@ export default function DesignGenerator() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
           <h1 className="text-2xl font-bold text-gray-900">
-            Design Generator
+            Générateur de Design
           </h1>
-          <input
-            type="text"
-            value={designState.designName}
-            onChange={(e) => setDesignState(prev => ({ ...prev, designName: e.target.value }))}
-            className="px-3 py-1 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
-            placeholder="Design name"
-          />
+          <div className="flex items-center gap-3">
+            <input
+              type="text"
+              value={designState.designName}
+              onChange={(e) => setDesignState(prev => ({ ...prev, designName: e.target.value }))}
+              className="px-3 py-1 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+              placeholder="Nom du design"
+            />
+            <button
+              onClick={() => setShowTemplateGallery(true)}
+              className="flex items-center px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors"
+            >
+              <Layers className="h-5 w-5 mr-2" />
+              Templates
+            </button>
+            <button
+              onClick={handleSaveAsTemplate}
+              className="flex items-center px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors"
+            >
+              <Download className="h-5 w-5 mr-2" />
+              Sauvegarder le template
+            </button>
+          </div>
         </div>
-        <div className="flex items-center space-x-3">
+        
+        <div className="flex items-center gap-3">
           <select
             value={designState.currentSize}
             onChange={(e) => handleSizeChange(e.target.value)}
@@ -874,34 +892,6 @@ export default function DesignGenerator() {
             ))}
           </select>
           <button
-            onClick={() => setShowTemplateGallery(true)}
-            className="flex items-center px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors"
-          >
-
-            Templates
-          </button>
-          <button
-            onClick={handleSaveAsTemplate}
-            className="flex items-center px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors"
-          >
-            <BookmarkIcon className="h-5 w-5 mr-2" />
-            Sauvegarder comme template
-          </button>
-          <button
-            onClick={handleDownload}
-            disabled={loading}
-            className="flex items-center px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors disabled:opacity-50"
-          >
-            {loading ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
-            ) : (
-              <>
-                <Download className="h-5 w-5 mr-2" />
-                Download
-              </>
-            )}
-          </button>
-          <button
             onClick={handleSave}
             disabled={saving}
             className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50"
@@ -911,7 +901,7 @@ export default function DesignGenerator() {
             ) : (
               <>
                 <Save className="h-5 w-5 mr-2" />
-                Save
+                Créer le design
               </>
             )}
           </button>
