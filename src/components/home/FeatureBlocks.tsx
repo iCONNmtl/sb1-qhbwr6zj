@@ -23,7 +23,7 @@ const FEATURE_BLOCKS = [
   {
     title: "Qu'est-ce que Pixmock ?",
     description: "Pixmock est la plateforme créative tout-en-un pensée pour les marques et créateurs en Print on Demand. Générez, éditez et publiez facilement vos visuels, configurez vos produits, gérez vos commandes, et boostez vos ventes grâce à des outils puissants réunis au même endroit.",
-    image: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=80&w=2000&auto=format&fit=crop",
+    image: "https://d2v7vpg8oce97p.cloudfront.net/Branding/Home1.webp",
     icon: Wand2,
     color: "from-blue-500 to-indigo-600",
     link: "/mockups",
@@ -37,7 +37,7 @@ const FEATURE_BLOCKS = [
   {
     title: "Créez ou importez vos designs",
     description: "Créez vos visuels avec notre outils ou importez vos créations existantes. Utilisez notre éditeur intégré façon Photoshop pour personnaliser chaque détail : texte, couleurs, formes, calques… Aucune compétence technique requise.",
-    image: "https://images.unsplash.com/photo-1558655146-d09347e92766?q=80&w=2000&auto=format&fit=crop",
+    image: "https://d2v7vpg8oce97p.cloudfront.net/Branding/Home2.webp",
     icon: Upload,
     color: "from-purple-500 to-pink-600",
     link: "/design-generator",
@@ -51,7 +51,7 @@ const FEATURE_BLOCKS = [
   {
     title: "Configurez vos produits",
     description: "Associez vos designs à nos produits Print on Demand (Art, Mat, Semi-Glossy). Définissez facilement les tailles, variantes, marges et intégrez votre boutique Shopify ou Etsy en quelques clics.",
-    image: "https://images.unsplash.com/photo-1586717791821-3f44a563fa4c?q=80&w=2000&auto=format&fit=crop",
+    image: "https://d2v7vpg8oce97p.cloudfront.net/Branding/Home3.webp",
     icon: ShoppingBag,
     color: "from-amber-500 to-orange-600",
     link: "/products",
@@ -78,7 +78,7 @@ const FEATURE_BLOCKS = [
     link: "/generator",
     linkText: "Générer des mockups",
     stats: [
-      { icon: Clock, value: "20 secondes", label: "Temps gagné par image" },
+      { icon: Clock, value: "20 secondes", label: "Temps d'une génération" },
       { icon: ImageIcon, value: "2048x2048px", label: "Qualité d'image" },
       { icon: Star, value: "100+", label: "Mockups disponibles" }
     ]
@@ -86,7 +86,7 @@ const FEATURE_BLOCKS = [
   {
     title: "Gérez vos commandes et analysez vos stats",
     description: "Suivez vos ventes en temps réel, gérez vos commandes et analysez vos performances depuis un tableau de bord simple et complet. Pilotez votre activité et optimisez vos revenus grâce à des données claires et exploitables.",
-    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2000&auto=format&fit=crop",
+    image: "https://d2v7vpg8oce97p.cloudfront.net/Branding/Home4.webp",
     icon: BarChart2,
     color: "from-rose-500 to-red-600",
     link: "/orders",
