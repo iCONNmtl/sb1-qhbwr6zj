@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Star, ChevronLeft, ChevronRight, Quote } from 'lucide-react';
+import { Star, ChevronLeft, ChevronRight, Quote, Users } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';
 
@@ -218,14 +218,20 @@ export default function Testimonials() {
                             "{testimonial.content}"
                           </p>
                         </div>
-                        
+
                         <div className="mt-auto">
-                          <div className="flex items-center justify-between">
-                            <div className="text-xs text-gray-500">
-                              {testimonial.company}
-                            </div>
+                        <div className="flex items-center justify-between">
+                          <div className="text-xs text-gray-500">
+                            {testimonial.company}
                           </div>
                         </div>
+                        <div className="mt-3 pt-3 border-t border-gray-200 flex items-center justify-between">
+                          <div className="flex items-center text-sm text-gray-600">
+                            <Users className="h-4 w-4 mr-1" />
+                            <span>{testimonial.location}</span>
+                          </div>
+                        </div>
+                      </div>
                       </div>
                     </div>
                   ))}

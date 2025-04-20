@@ -138,9 +138,9 @@ export default function AllInOneToolsSection() {
             <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-6 shadow-lg text-white">
               <div className="flex flex-col items-center text-center">
                 <h3 className="text-2xl font-bold mb-2">Pixmock</h3>
-                <div className="text-xl font-semibold mb-4">49€/mois</div>
+                <div className="text-xl font-semibold mb-4">19,90€/mois</div>
                 <div className="bg-white/20 px-3 py-1 rounded-full text-sm mb-4">
-                  Économisez {(totalCost - 49).toFixed(2)}€/mois
+                  Économisez {(totalCost - 19.90).toFixed(2)}€/mois
                 </div>
                 <div className="text-sm mb-6">
                   Tout ce dont vous avez besoin en une seule plateforme
@@ -170,12 +170,12 @@ export default function AllInOneToolsSection() {
                 <tr>
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">Coût mensuel</td>
                   <td className="px-6 py-4 text-center text-sm text-gray-500">{totalCost.toFixed(2)}€</td>
-                  <td className="px-6 py-4 text-center text-sm font-medium text-indigo-600">49€</td>
+                  <td className="px-6 py-4 text-center text-sm font-medium text-indigo-600">19,90€</td>
                 </tr>
                 <tr>
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">Temps d'apprentissage</td>
                   <td className="px-6 py-4 text-center text-sm text-gray-500">12+ mois</td>
-                  <td className="px-6 py-4 text-center text-sm font-medium text-indigo-600">1 semaine</td>
+                  <td className="px-6 py-4 text-center text-sm font-medium text-indigo-600">1 jour</td>
                 </tr>
                 <tr>
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">Intégration entre outils</td>

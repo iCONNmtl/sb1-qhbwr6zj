@@ -69,27 +69,22 @@ export default function Footer() {
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-8">
               <div>
                 <h3 className="text-sm font-semibold text-gray-900 tracking-wider uppercase mb-4">
-                  Produit
+                  Création
                 </h3>
                 <ul className="space-y-3">
                   <li>
-                    <Link to="/mockups" className="text-base text-gray-600 hover:text-indigo-600 transition-colors">
-                      Librairie
+                    <Link to="/design-generator" className="text-base text-gray-600 hover:text-indigo-600 transition-colors">
+                    Créer un design
                     </Link>
                   </li>
                   <li>
-                    <Link to="/pricing" className="text-base text-gray-600 hover:text-indigo-600 transition-colors">
-                      Tarifs
+                    <Link to="/generator" className="text-base text-gray-600 hover:text-indigo-600 transition-colors">
+                      mockups
                     </Link>
                   </li>
                   <li>
-                    <Link to="/training" className="text-base text-gray-600 hover:text-indigo-600 transition-colors">
-                      Formations
-                    </Link>
-                  </li>
-                  <li>
-                    <Link to="/products" className="text-base text-gray-600 hover:text-indigo-600 transition-colors">
-                      Catalogue
+                    <Link to="/dashboard" className="text-base text-gray-600 hover:text-indigo-600 transition-colors">
+                      Mes visuels
                     </Link>
                   </li>
                 </ul>
@@ -97,23 +92,33 @@ export default function Footer() {
               
               <div>
                 <h3 className="text-sm font-semibold text-gray-900 tracking-wider uppercase mb-4">
-                  Ressources
+                  Business
                 </h3>
                 <ul className="space-y-3">
                   <li>
-                    <Link to="/training" className="text-base text-gray-600 hover:text-indigo-600 transition-colors">
-                      Centre d'aide
+                    <Link to="/products" className="text-base text-gray-600 hover:text-indigo-600 transition-colors">
+                      Catalogue
                     </Link>
                   </li>
                   <li>
-                    <a href="https://status.mockuppro.com" className="text-base text-gray-600 hover:text-indigo-600 transition-colors">
-                      Status
-                    </a>
+                  <Link to="/my-products" className="text-base text-gray-600 hover:text-indigo-600 transition-colors">
+                      Mes produits
+                    </Link>
                   </li>
                   <li>
-                    <a href="https://blog.mockuppro.com" className="text-base text-gray-600 hover:text-indigo-600 transition-colors">
-                      Blog
-                    </a>
+                  <Link to="/orders" className="text-base text-gray-600 hover:text-indigo-600 transition-colors">
+                      Commandes
+                    </Link>
+                  </li>
+                  <li>
+                  <Link to="/training" className="text-base text-gray-600 hover:text-indigo-600 transition-colors">
+                      Formations
+                    </Link>
+                  </li>
+                  <li>
+                  <Link to="/pricing" className="text-base text-gray-600 hover:text-indigo-600 transition-colors">
+                      Tarifs
+                    </Link>
                   </li>
                 </ul>
               </div>
