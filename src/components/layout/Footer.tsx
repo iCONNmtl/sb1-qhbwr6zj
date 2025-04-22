@@ -79,7 +79,7 @@ export default function Footer() {
                   </li>
                   <li>
                     <Link to="/generator" className="text-base text-gray-600 hover:text-indigo-600 transition-colors">
-                      mockups
+                      Mockups
                     </Link>
                   </li>
                   <li>

@@ -6,8 +6,8 @@ import clsx from 'clsx';
 // Définition des outils remplacés
 const REPLACED_TOOLS = [
   {
-    name: "Photoshop",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Adobe_Photoshop_CC_icon.svg/1200px-Adobe_Photoshop_CC_icon.svg.png",
+    name: "Création",
+    logo: "https://d2v7vpg8oce97p.cloudfront.net/Branding/Tools1.webp",
     price: 29.99,
     color: "#31A8FF",
     features: ["Création de mockups", "Manipulation d'images", "Ajustements visuels"],
@@ -15,8 +15,8 @@ const REPLACED_TOOLS = [
     learningTime: "6+ mois"
   },
   {
-    name: "Canva Pro",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Canva_icon_2021.svg/2048px-Canva_icon_2021.svg.png",
+    name: "Upscale",
+    logo: "https://d2v7vpg8oce97p.cloudfront.net/Branding/Tools2.webp",
     price: 12.99,
     color: "#00C4CC",
     features: ["Création de designs", "Templates", "Exports d'images"],
@@ -24,8 +24,8 @@ const REPLACED_TOOLS = [
     learningTime: "1-2 mois"
   },
   {
-    name: "Shopify",
-    logo: "https://cdn.worldvectorlogo.com/logos/shopify.svg",
+    name: "IA",
+    logo: "https://d2v7vpg8oce97p.cloudfront.net/Branding/Tools3.webp",
     price: 29.99,
     color: "#96BF47",
     features: ["Gestion de produits", "Vente en ligne", "Traitement des commandes"],
@@ -33,8 +33,8 @@ const REPLACED_TOOLS = [
     learningTime: "2-3 mois"
   },
   {
-    name: "Hootsuite",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Hootsuite_logo.svg/1200px-Hootsuite_logo.svg.png",
+    name: "Mockups",
+    logo: "https://d2v7vpg8oce97p.cloudfront.net/Branding/Tools4.webp",
     price: 19.99,
     color: "#FF7A59",
     features: ["Programmation de posts", "Gestion multi-plateformes", "Analytics"],
@@ -42,8 +42,17 @@ const REPLACED_TOOLS = [
     learningTime: "1 mois"
   },
   {
-    name: "Google Analytics",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Google_Analytics_4_logo.svg/1200px-Google_Analytics_4_logo.svg.png",
+    name: "POD",
+    logo: "https://d2v7vpg8oce97p.cloudfront.net/Branding/Tools5.webp",
+    price: 0,
+    color: "#F9AB00",
+    features: ["Suivi des performances", "Rapports détaillés", "Analyse des ventes"],
+    complexity: "Élevée",
+    learningTime: "3+ mois"
+  },
+  {
+    name: "Productivité",
+    logo: "https://d2v7vpg8oce97p.cloudfront.net/Branding/Tools6.webp",
     price: 0,
     color: "#F9AB00",
     features: ["Suivi des performances", "Rapports détaillés", "Analyse des ventes"],
