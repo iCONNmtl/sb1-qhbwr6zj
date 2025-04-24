@@ -8,7 +8,7 @@ const REPLACED_TOOLS = [
   {
     name: "Création",
     logo: "https://d2v7vpg8oce97p.cloudfront.net/Branding/Tools1.webp",
-    price: 29.99,
+    price: 22.99,
     color: "#31A8FF",
     features: ["Création de mockups", "Manipulation d'images", "Ajustements visuels"],
     complexity: "Élevée",
@@ -26,7 +26,7 @@ const REPLACED_TOOLS = [
   {
     name: "IA",
     logo: "https://d2v7vpg8oce97p.cloudfront.net/Branding/Tools3.webp",
-    price: 29.99,
+    price: 20,
     color: "#96BF47",
     features: ["Gestion de produits", "Vente en ligne", "Traitement des commandes"],
     complexity: "Moyenne",
@@ -35,7 +35,7 @@ const REPLACED_TOOLS = [
   {
     name: "Mockups",
     logo: "https://d2v7vpg8oce97p.cloudfront.net/Branding/Tools4.webp",
-    price: 19.99,
+    price: 14.95,
     color: "#FF7A59",
     features: ["Programmation de posts", "Gestion multi-plateformes", "Analytics"],
     complexity: "Moyenne",
@@ -44,7 +44,7 @@ const REPLACED_TOOLS = [
   {
     name: "POD",
     logo: "https://d2v7vpg8oce97p.cloudfront.net/Branding/Tools5.webp",
-    price: 0,
+    price: 14.99,
     color: "#F9AB00",
     features: ["Suivi des performances", "Rapports détaillés", "Analyse des ventes"],
     complexity: "Élevée",
@@ -53,7 +53,7 @@ const REPLACED_TOOLS = [
   {
     name: "Productivité",
     logo: "https://d2v7vpg8oce97p.cloudfront.net/Branding/Tools6.webp",
-    price: 0,
+    price: 19.90,
     color: "#F9AB00",
     features: ["Suivi des performances", "Rapports détaillés", "Analyse des ventes"],
     complexity: "Élevée",
@@ -70,7 +70,7 @@ export default function AllInOneToolsSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-            Remplacez 5 outils coûteux par une seule plateforme
+            Remplacez 6 outils coûteux par une seule plateforme
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Simplifiez votre workflow et économisez du temps et de l'argent avec notre solution tout-en-un
@@ -98,7 +98,6 @@ export default function AllInOneToolsSection() {
                     <h3 className="font-semibold text-gray-900 mb-1">{tool.name}</h3>
                     <div className="text-sm text-gray-500">
                       <div className="flex items-center justify-center">
-                        <DollarSign className="h-4 w-4 mr-1 text-gray-400" />
                         <span>{tool.price}€/mois</span>
                       </div>
                     </div>
