@@ -28,7 +28,10 @@ import {
   Wand2,
   FileText,
   Briefcase,
-  ArrowRight
+  ArrowRight,
+  BarChart2,
+  Calculator,
+  Ruler
 } from 'lucide-react';
 import { CONTINENTS, PRODUCT_PRICING } from '../data/shipping';
 import { SIZES } from '../data/sizes';
@@ -40,7 +43,7 @@ const PRODUCTS = [
     name: 'Poster d\'Art',
     description: 'Impression artistique sur papier texturé 200g/m²',
     image: 'https://d2v7vpg8oce97p.cloudfront.net/Branding/Art1.webp',
-    startingPrice: 3.90,
+    startingPrice: 12,
     rating: 4.8,
     reviewCount: 127,
     features: [
@@ -56,7 +59,7 @@ const PRODUCTS = [
     name: 'Poster Premium Mat',
     description: 'Impression mate professionnelle sur papier 250g/m²',
     image: 'https://d2v7vpg8oce97p.cloudfront.net/Branding/Mat1.webp',
-    startingPrice: 3.70,
+    startingPrice: 15,
     rating: 4.9,
     reviewCount: 243,
     features: [
@@ -72,7 +75,7 @@ const PRODUCTS = [
     name: 'Poster Premium Semi-Brillant',
     image: 'https://d2v7vpg8oce97p.cloudfront.net/Branding/Glossy1.webp',
     description: 'Impression semi-brillante sur papier photo 250g/m²',
-    startingPrice: 3.50,
+    startingPrice: 15,
     rating: 4.7,
     reviewCount: 189,
     features: [
@@ -180,6 +183,31 @@ const FAQ_ITEMS = [
   {
     question: "Quelle est votre politique de retour ?",
     answer: "Nous offrons une garantie satisfaction de 30 jours. Si vous n'êtes pas satisfait de votre commande, nous vous remboursons intégralement ou réimprimons votre poster gratuitement."
+  }
+];
+
+// Size guide information
+const SIZE_GUIDE = [
+  {
+    id: 'small',
+    name: 'Petits formats',
+    sizes: ['5x7', '8x10', 'A4'],
+    description: 'Parfaits pour les petits espaces, bureaux ou étagères',
+    recommendedFor: 'Bureaux, tables de chevet, petits murs'
+  },
+  {
+    id: 'medium',
+    name: 'Formats moyens',
+    sizes: ['11x14', '11x17', '12x18'],
+    description: 'Idéaux pour les espaces moyens et les compositions murales',
+    recommendedFor: 'Salons, couloirs, compositions murales'
+  },
+  {
+    id: 'large',
+    name: 'Grands formats',
+    sizes: ['18x24', '20x28', '24x36', '28x40'],
+    description: 'Impressionnants pour les grands espaces et pièces à vivre',
+    recommendedFor: 'Pièces principales, grands murs, espaces commerciaux'
   }
 ];
 
@@ -322,16 +350,23 @@ function PriceComparison() {
                     const pricing = product.sizes[size.id]?.[selectedRegion];
                     if (!pricing) return <td key={productId} className="py-4 px-4 text-center">-</td>;
 
+                    const totalPrice = pricing.price + pricing.shipping.basePrice;
+                    const profit = totalPrice - size.cost - pricing.shipping.basePrice;
+                    const profitPercentage = (profit / totalPrice) * 100;
+
                     return (
                       <td key={productId} className="py-4 px-4">
                         <div className="text-center space-y-2">
                           <div className="text-lg font-semibold text-indigo-600">
-                            {pricing.price.toFixed(2)}€
+                            {totalPrice.toFixed(2)}€
                           </div>
                           <div className="flex flex-col items-center gap-1 text-sm">
                             <div className="flex items-center gap-1 text-gray-500">
                               <Truck className="h-4 w-4" />
                               <span>+{pricing.shipping.basePrice.toFixed(2)}€</span>
+                            </div>
+                            <div className="text-green-600 font-medium">
+                              +{profit.toFixed(2)}€ ({Math.round(profitPercentage)}%)
                             </div>
                           </div>
                         </div>
@@ -393,6 +428,170 @@ function PriceComparison() {
   );
 }
 
+function ProfitSimulator() {
+  const [monthlySales, setMonthlySales] = useState(10);
+  const profitPerPoster = 30; // 30€ profit per poster
+  const monthlyProfit = monthlySales * profitPerPoster;
+  const yearlyProfit = monthlyProfit * 12;
+
+  return (
+    <div className="bg-white rounded-2xl shadow-md p-8 overflow-hidden">
+      <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+        <Calculator className="h-6 w-6 text-indigo-600" />
+        Simulateur de revenus
+      </h2>
+      
+      <div className="grid md:grid-cols-2 gap-8">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Nombre d'affiches vendues par mois
+          </label>
+          <div className="flex items-center gap-4">
+            <input
+              type="range"
+              min="1"
+              max="100"
+              value={monthlySales}
+              onChange={(e) => setMonthlySales(parseInt(e.target.value))}
+              className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+            />
+            <input
+              type="number"
+              min="1"
+              max="100"
+              value={monthlySales}
+              onChange={(e) => setMonthlySales(parseInt(e.target.value) || 1)}
+              className="w-20 px-3 py-2 border border-gray-300 rounded-lg text-center"
+            />
+          </div>
+          
+          <div className="mt-6 text-sm text-gray-600">
+            <p>Ce simulateur est basé sur un bénéfice moyen de {profitPerPoster}€ par affiche vendue, après déduction des coûts d'impression et de livraison.</p>
+            <p className="mt-2">Les résultats peuvent varier en fonction de vos prix de vente, des formats choisis et des régions de livraison.</p>
+          </div>
+        </div>
+        
+        <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Vos revenus potentiels</h3>
+          
+          <div className="space-y-4">
+            <div className="flex justify-between items-center pb-2 border-b border-indigo-100">
+              <span className="text-gray-600">Ventes mensuelles</span>
+              <span className="text-xl font-bold text-indigo-600">{monthlySales} affiches</span>
+            </div>
+            
+            <div className="flex justify-between items-center pb-2 border-b border-indigo-100">
+              <span className="text-gray-600">Bénéfice mensuel</span>
+              <span className="text-xl font-bold text-green-600">{monthlyProfit.toLocaleString()}€</span>
+            </div>
+            
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600">Bénéfice annuel</span>
+              <span className="text-2xl font-bold text-green-600">{yearlyProfit.toLocaleString()}€</span>
+            </div>
+          </div>
+          
+          <div className="mt-6 bg-white p-4 rounded-lg border border-indigo-100">
+            <div className="flex items-start gap-2">
+              <Info className="h-5 w-5 text-indigo-600 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-gray-600">
+                Avec seulement {monthlySales} affiches vendues par mois, vous pouvez générer un revenu passif de <span className="font-semibold text-indigo-600">{yearlyProfit.toLocaleString()}€</span> par an !
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SizeGuide() {
+  return (
+    <div className="bg-white rounded-2xl shadow-md p-8 overflow-hidden">
+      <div className="flex items-center gap-3 mb-6">
+        <Ruler className="h-6 w-6 text-indigo-600" />
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+          Guide des tailles
+        </h2>
+      </div>
+      
+      <div className="grid md:grid-cols-2 gap-8">
+        <div>
+          <div className="prose max-w-none">
+            <p className="text-gray-600 mb-4">
+              Choisir la bonne taille d'affiche est essentiel pour créer l'impact visuel souhaité dans votre espace. Voici un guide pour vous aider à sélectionner le format idéal pour chaque situation.
+            </p>
+            
+            <h3 className="text-lg font-semibold text-gray-900 mt-6 mb-3">Comment choisir la bonne taille ?</h3>
+            
+            <ul className="space-y-2 text-gray-600">
+              <li className="flex items-start gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-indigo-600 mt-2"></div>
+                <span><strong>Mesurez votre espace</strong> : Prenez les dimensions du mur où vous souhaitez accrocher votre affiche.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-indigo-600 mt-2"></div>
+                <span><strong>Règle des 2/3</strong> : Idéalement, votre affiche devrait occuper environ 2/3 de l'espace disponible.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-indigo-600 mt-2"></div>
+                <span><strong>Considérez la distance de vue</strong> : Plus la distance est grande, plus l'affiche devrait être grande.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-indigo-600 mt-2"></div>
+                <span><strong>Tenez compte du cadre</strong> : Si vous prévoyez d'encadrer votre affiche, ajoutez 5-10 cm aux dimensions.</span>
+              </li>
+            </ul>
+          </div>
+          
+          <div className="mt-8 space-y-6">
+            {SIZE_GUIDE.map(category => (
+              <div key={category.id} className="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                <h4 className="font-semibold text-gray-900 mb-2">{category.name}</h4>
+                <p className="text-sm text-gray-600 mb-3">{category.description}</p>
+                
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {category.sizes.map(sizeId => {
+                    const size = SIZES.find(s => s.id === sizeId);
+                    return size ? (
+                      <span key={sizeId} className="px-2 py-1 bg-indigo-100 text-indigo-700 rounded-lg text-xs font-medium">
+                        {size.dimensions.inches} ({size.dimensions.cm})
+                      </span>
+                    ) : null;
+                  })}
+                </div>
+                
+                <div className="text-xs text-gray-500">
+                  <strong>Recommandé pour:</strong> {category.recommendedFor}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        
+        <div className="relative">
+          <img 
+            src="https://images.unsplash.com/photo-1532372576444-dda954194ad0?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1000&q=80" 
+            alt="Guide des tailles d'affiches" 
+            className="rounded-xl shadow-md w-full h-auto object-cover"
+          />
+          
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent rounded-xl"></div>
+          
+          <div className="absolute bottom-6 left-6 right-6">
+            <div className="bg-white/90 backdrop-blur-sm p-4 rounded-lg shadow-lg">
+              <h4 className="font-semibold text-gray-900 mb-2">Proportions visuelles</h4>
+              <p className="text-sm text-gray-600">
+                Les formats les plus populaires pour la décoration intérieure sont le 8x10" pour les petits espaces, le 18x24" pour les espaces moyens et le 24x36" pour les grands murs.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
@@ -442,7 +641,10 @@ function FAQ() {
       {/* Support CTA */}
       <div className="mt-12 text-center">
         <p className="text-gray-600">
-          Vous ne trouvez pas la réponse à votre question ? Contactez notre support
+          Vous ne trouvez pas la réponse à votre question ?{' '}
+          <Link to="/contact" className="text-indigo-600 hover:text-indigo-500 font-medium">
+            Contactez notre support
+          </Link>
         </p>
       </div>
     </div>
@@ -453,6 +655,7 @@ export default function Products() {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'popular' | 'price-low' | 'price-high'>('popular');
   const [showSortOptions, setShowSortOptions] = useState(false);
+  const [activeTab, setActiveTab] = useState<'products' | 'services'>('products');
 
   // Filter and sort products
   const filteredProducts = PRODUCTS
@@ -473,12 +676,16 @@ export default function Products() {
   return (
     <div className="space-y-16">
       {/* Hero Section - Improved Design */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-purple-600 to-indigo-600 p-8 sm:p-12 text-white shadow-xl">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 p-8 sm:p-12 text-white shadow-xl">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2426&q=80')] bg-cover bg-center opacity-20"></div>
         
         <div className="relative z-10 text-center space-y-6">
+          <div className="inline-flex items-center px-4 py-2 bg-white/20 backdrop-blur-sm text-white rounded-full">
+            <Star className="h-5 w-5 mr-2 text-yellow-300" />
+            <span className="font-medium">Note moyenne de 4.8/5 sur plus de 500 avis</span>
+          </div>
           
-          <h1 className="text-3xl sm:text-5xl md:text-5xl font-bold">
+          <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold">
             Lancez votre business d'impression à la demande
           </h1>
           
@@ -486,65 +693,136 @@ export default function Products() {
             Des produits de qualité premium, une logistique simplifiée et des marges attractives
           </p>
 
+          {/* Stats */}
+          <div className="flex flex-wrap justify-center gap-8 sm:gap-12 mt-8">
+            {STATS.map((stat, index) => (
+              <div key={index} className="text-center">
+                <div className="text-3xl sm:text-4xl font-bold text-white">{stat.value}</div>
+                <div className="text-sm text-white/80">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+          
+          {/* CTA Button */}
+          <div className="mt-8">
+            <Link
+              to="/signup"
+              className="inline-flex items-center px-6 py-3 bg-white text-indigo-600 rounded-xl hover:bg-indigo-50 transition-colors shadow-lg"
+            >
+              <Zap className="h-5 w-5 mr-2" />
+              Commencer gratuitement
+            </Link>
+          </div>
         </div>
       </div>
 
-      {/* Products Section with Banner */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Side: Information */}
-        <div className="lg:col-span-1 space-y-6">
-          <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl p-6 shadow-sm">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+      {/* Tabs Navigation */}
+      <div className="border-b border-gray-200">
+        <nav className="-mb-px flex space-x-8">
+          <button
+            onClick={() => setActiveTab('products')}
+            className={`py-4 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'products'
+                ? 'border-indigo-600 text-indigo-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            <div className="flex items-center">
+              <Package className="h-5 w-5 mr-2" />
               Produits d'impression
-            </h2>
-            <p className="text-gray-600 mb-6">
-              Nos produits d'impression sont fabriqués avec des matériaux de haute qualité et imprimés localement au plus près de vos clients pour une livraison rapide et écologique.
-            </p>
-            
-            <div className="space-y-4">
-              <div className="flex items-start gap-3">
-                <div className="p-2 bg-indigo-100 rounded-lg mt-1">
-                  <CheckCircle className="h-5 w-5 text-indigo-600" />
+            </div>
+          </button>
+          <button
+            onClick={() => setActiveTab('services')}
+            className={`py-4 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'services'
+                ? 'border-indigo-600 text-indigo-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            <div className="flex items-center">
+              <Briefcase className="h-5 w-5 mr-2" />
+              Services digitaux
+            </div>
+          </button>
+        </nav>
+      </div>
+
+      {activeTab === 'products' ? (
+        <>
+          {/* Products Section with Banner */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Left Side: Information */}
+            <div className="lg:col-span-1 space-y-6">
+              <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl p-6 shadow-sm">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                  Produits d'impression
+                </h2>
+                <p className="text-gray-600 mb-6">
+                  Nos produits d'impression sont fabriqués avec des matériaux de haute qualité et imprimés localement au plus près de vos clients pour une livraison rapide et écologique.
+                </p>
+                
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 bg-indigo-100 rounded-lg mt-1">
+                      <CheckCircle className="h-5 w-5 text-indigo-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-gray-900">Qualité premium</h3>
+                      <p className="text-sm text-gray-600">Papiers haut de gamme et encres professionnelles pour des résultats exceptionnels.</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 bg-indigo-100 rounded-lg mt-1">
+                      <CheckCircle className="h-5 w-5 text-indigo-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-gray-900">Livraison mondiale</h3>
+                      <p className="text-sm text-gray-600">Expédition depuis nos centres locaux dans plus de 15 pays pour des délais optimisés.</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 bg-indigo-100 rounded-lg mt-1">
+                      <CheckCircle className="h-5 w-5 text-indigo-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-gray-900">Marges élevées</h3>
+                      <p className="text-sm text-gray-600">Jusqu'à 70% de marge sur chaque vente pour maximiser vos profits.</p>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-medium text-gray-900">Qualité premium</h3>
-                  <p className="text-sm text-gray-600">Papiers haut de gamme et encres professionnelles pour des résultats exceptionnels.</p>
+                
+                <div className="mt-8">
+                  <Link
+                    to="/products/art-poster"
+                    className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                  >
+                    <Package className="h-5 w-5 mr-2" />
+                    Découvrir nos produits
+                  </Link>
                 </div>
               </div>
               
-              <div className="flex items-start gap-3">
-                <div className="p-2 bg-indigo-100 rounded-lg mt-1">
-                  <CheckCircle className="h-5 w-5 text-indigo-600" />
+              {/* Network Map */}
+              <div className="bg-white rounded-2xl shadow-sm p-6 overflow-hidden">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-indigo-100 rounded-lg">
+                    <Globe2 className="h-5 w-5 text-indigo-600" />
+                  </div>
+                  <h3 className="font-medium text-gray-900">Réseau mondial</h3>
                 </div>
-                <div>
-                  <h3 className="font-medium text-gray-900">Livraison mondiale</h3>
-                  <p className="text-sm text-gray-600">Expédition depuis nos centres locaux dans plus de 15 pays pour des délais optimisés.</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start gap-3">
-                <div className="p-2 bg-indigo-100 rounded-lg mt-1">
-                  <CheckCircle className="h-5 w-5 text-indigo-600" />
-                </div>
-                <div>
-                  <h3 className="font-medium text-gray-900">Marges élevées</h3>
-                  <p className="text-sm text-gray-600">Jusqu'à 70% de marge sur chaque vente pour maximiser vos profits.</p>
-                </div>
-              </div>
-            </div>
-          
-          </div>
-          
-          {/* Network Map */}
-          <div className="bg-white rounded-2xl shadow-sm p-6 overflow-hidden">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-indigo-100 rounded-lg">
-                <Globe2 className="h-5 w-5 text-indigo-600" />
-              </div>
-              <h3 className="font-medium text-gray-900">Réseau mondial</h3>
-            </div>
-            
-            <div className="relative aspect-[4/3] rounded-lg overflow-hidden mb-4">
+                
+                <div className="relative aspect-[4/3] rounded-lg overflow-hidden mb-4">
+                  <img 
+                    src="https://images.unsplash.com/photo-1504052434569-70ad5836ab65?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2000&q=80" 
+                    alt="Réseau d'impression mondial" 
+                    className="w-full h-full object-cover"
+                  />
+                  
+                  {/* Overlay with locations */}
+                  <div className="relative aspect-[4/3] rounded-lg overflow-hidden mb-4">
               <img 
                 src="https://d2v7vpg8oce97p.cloudfront.net/Branding/World.webp" 
                 alt="Réseau d'impression mondial" 
@@ -593,170 +871,202 @@ export default function Products() {
               </div>
             </div>
             
-            <div className="grid grid-cols-2 gap-3">
-              <div className="bg-indigo-50 p-2 rounded-lg text-center">
-                <div className="font-medium text-gray-900">6 régions</div>
-                <div className="text-xs text-gray-600">Centres d'impression</div>
+            {/* Right Side: Product Cards */}
+            <div className="lg:col-span-2">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">
+                  Nos produits d'impression
+                </h2>
+                
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Rechercher..."
+                    className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                  />
+                  <Search className="h-5 w-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+                </div>
               </div>
               
-              <div className="bg-indigo-50 p-2 rounded-lg text-center">
-                <div className="font-medium text-gray-900">200+</div>
-                <div className="text-xs text-gray-600">Partenaires</div>
+              <div className="grid sm:grid-cols-2 gap-6">
+                {filteredProducts.map((product) => (
+                  <div
+                    key={product.id}
+                    className="group bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 border border-gray-100"
+                  >
+                    {/* Image with overlay */}
+                    <div className="aspect-[4/3] relative overflow-hidden">
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                      
+                      {/* Rating */}
+                      <div className="absolute top-3 right-3 px-2 py-1 bg-white/90 backdrop-blur-sm rounded-full flex items-center">
+                        <Star className="h-3 w-3 text-yellow-500 mr-1" />
+                        <span className="text-xs font-medium">{product.rating}</span>
+                      </div>
+                      
+                      {/* Popular badge */}
+                      {product.popular && (
+                        <div className="absolute top-3 left-3 px-2 py-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full text-xs font-medium">
+                          Populaire
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Content */}
+                    <div className="p-4">
+                      <div className="mb-3">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-1 group-hover:text-indigo-600 transition-colors">
+                          {product.name}
+                        </h3>
+                        <p className="text-sm text-gray-600 line-clamp-2">
+                          {product.description}
+                        </p>
+                      </div>
+
+                      {/* Price and Action */}
+                      <div className="flex items-center justify-between mt-4">
+                        <div className="text-sm text-gray-500">
+                          À partir de <span className="text-lg font-semibold text-indigo-600">{product.startingPrice}€</span>
+                        </div>
+                        <Link
+                          to={`/products/${product.id}`}
+                          className="flex items-center px-3 py-1.5 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors"
+                        >
+                          <span className="text-sm">Détails</span>
+                          <ChevronRight className="h-4 w-4 ml-1" />
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
-        </div>
-        
-        {/* Right Side: Product Cards */}
-        <div className="lg:col-span-2">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">
-              Nos produits d'impression
-            </h2>
+
+          {/* Price Comparison Section */}
+          <div className="px-4 sm:px-0">
+            <PriceComparison />
+          </div>
+
+          {/* Profit Simulator */}
+          <div className="px-4 sm:px-0">
+            <ProfitSimulator />
+          </div>
+
+          {/* Size Guide */}
+          <div className="px-4 sm:px-0">
+            <SizeGuide />
+          </div>
+        </>
+      ) : (
+        <>
+          {/* Services Section with Banner */}
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 p-8 sm:p-12 text-white shadow-xl mb-12">
+            <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1557683316-973673baf926?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2426&q=80')] bg-cover bg-center opacity-20"></div>
             
-            <div className="relative">
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Rechercher..."
-                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
-              />
-              <Search className="h-5 w-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+            <div className="relative z-10 text-center space-y-6">
+              <div className="inline-flex items-center px-4 py-2 bg-white/20 backdrop-blur-sm text-white rounded-full">
+                <Briefcase className="h-5 w-5 mr-2" />
+                <span className="font-medium">Services professionnels</span>
+              </div>
+              
+              <h2 className="text-3xl sm:text-4xl font-bold">
+                Boostez votre business avec nos services complémentaires
+              </h2>
+              
+              <p className="text-xl text-white/90 max-w-3xl mx-auto">
+                Des solutions sur mesure pour vous démarquer de la concurrence
+              </p>
             </div>
           </div>
-          
-          <div className="grid sm:grid-cols-2 gap-6">
-            {filteredProducts.map((product) => (
-              <div
-                key={product.id}
-                className="group bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 border border-gray-100"
-              >
-                {/* Image with overlay */}
-                <div className="aspect-[4/3] relative overflow-hidden">
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0" />
-                  
-                  {/* Rating */}
-                  <div className="absolute top-3 right-3 px-2 py-1 bg-white/90 backdrop-blur-sm rounded-full flex items-center">
-                    <Star className="h-3 w-3 text-yellow-500 mr-1" />
-                    <span className="text-xs font-medium">{product.rating}</span>
-                  </div>
-                  
-                  {/* Popular badge */}
-                  {product.popular && (
-                    <div className="absolute top-3 left-3 px-2 py-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full text-xs font-medium">
-                      Populaire
-                    </div>
-                  )}
-                </div>
 
-                {/* Content */}
-                <div className="p-4">
-                  <div className="mb-3">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-1 group-hover:text-indigo-600 transition-colors">
-                      {product.name}
+          {/* Services Grid */}
+          <div className="grid sm:grid-cols-3 gap-8">
+            {SERVICES.map((service) => {
+              const Icon = service.icon;
+              return (
+                <Link
+                  key={service.id}
+                  to={`/services/${service.id}`}
+                  className="group bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition-all duration-300 border border-gray-100"
+                >
+                  {/* Image with overlay */}
+                  <div className="aspect-[3/2] relative overflow-hidden">
+                    <img
+                      src={service.image}
+                      alt={service.name}
+                      className="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                    
+                    {/* Icon */}
+                    <div className="absolute top-3 left-3 p-2 bg-white/90 backdrop-blur-sm rounded-lg">
+                      <Icon className="h-4 w-4 text-indigo-600" />
+                    </div>
+                    
+                    {/* Price */}
+                    <div className="absolute bottom-3 right-3 px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-lg">
+                      <span className="font-semibold text-indigo-600">{service.price}€</span>
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-4">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-indigo-600 transition-colors">
+                      {service.name}
                     </h3>
-                    <p className="text-sm text-gray-600 line-clamp-2">
-                      {product.description}
+                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                      {service.description}
                     </p>
-                  </div>
 
-                  {/* Price and Action */}
-                  <div className="flex items-center justify-between mt-4">
-                    <div className="text-sm text-gray-500">
-                      À partir de <span className="text-lg font-semibold text-indigo-600">{product.startingPrice}€</span>
+                    {/* Features */}
+                    <ul className="space-y-1 mb-4">
+                      {service.features.slice(0, 2).map((feature, index) => (
+                        <li key={index} className="flex items-center text-xs text-gray-600">
+                          <CheckCircle className="h-3 w-3 text-green-500 mr-1 flex-shrink-0" />
+                          <span className="line-clamp-1">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    <div className="flex items-center text-indigo-600 group-hover:translate-x-2 transition-transform">
+                      <span className="text-sm font-medium">Commander maintenant</span>
+                      <ArrowRight className="h-4 w-4 ml-1" />
                     </div>
-                    <Link
-                      to={`/products/${product.id}`}
-                      className="flex items-center px-3 py-1.5 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors"
-                    >
-                      <span className="text-sm">Choisir ce produit</span>
-                      <ChevronRight className="h-4 w-4 ml-1" />
-                    </Link>
                   </div>
-                </div>
-              </div>
-            ))}
+                </Link>
+              );
+            })}
           </div>
-        </div>
-      </div>
+        </>
+      )}
 
-      {/* Price Comparison Section */}
-      <div className="px-4 sm:px-0">
-        <PriceComparison />
-      </div>
-
-      {/* Services Section with Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-purple-600 to-indigo-600 p-8 sm:p-12 text-white shadow-xl mb-12">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1557683316-973673baf926?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2426&q=80')] bg-cover bg-center opacity-20"></div>
-        
-        <div className="relative z-10 text-center space-y-6">
-          
-          <h2 className="text-3xl sm:text-4xl font-bold">
-            Boostez votre business avec nos services complémentaires
-          </h2>
-          
-          <p className="text-xl text-white/90 max-w-3xl mx-auto">
-            Des solutions sur mesure pour vous démarquer de la concurrence
-          </p>
-        </div>
-      </div>
-
-      {/* Services Grid */}
-      <div className="grid sm:grid-cols-3 gap-8">
-        {SERVICES.map((service) => {
-          const Icon = service.icon;
+      {/* Benefits Section - Improved Design */}
+      <div className="grid md:grid-cols-3 gap-8">
+        {BENEFITS.map((benefit, index) => {
+          const Icon = benefit.icon;
           return (
-            <Link
-              key={service.id}
-              to={`/services/${service.id}`}
-              className="group bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition-all duration-300 border border-gray-100"
+            <div 
+              key={index} 
+              className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow border border-gray-100"
             >
-              {/* Image with overlay */}
-              <div className="aspect-[3/2] relative overflow-hidden">
-                <img
-                  src={service.image}
-                  alt={service.name}
-                  className="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute inset-0" />
-                
-                {/* Price */}
-                <div className="absolute bottom-3 right-3 px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-lg">
-                  <span className="font-semibold text-indigo-600">{service.price}€</span>
-                </div>
+              <div className="p-3 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-xl w-fit mb-4">
+                <Icon className="h-6 w-6 text-indigo-600" />
               </div>
-
-              {/* Content */}
-              <div className="p-4">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-indigo-600 transition-colors">
-                  {service.name}
-                </h3>
-                <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                  {service.description}
-                </p>
-
-                {/* Features */}
-                <ul className="space-y-1 mb-4">
-                  {service.features.slice(0, 2).map((feature, index) => (
-                    <li key={index} className="flex items-center text-xs text-gray-600">
-                      <CheckCircle className="h-3 w-3 text-green-500 mr-1 flex-shrink-0" />
-                      <span className="line-clamp-1">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <div className="flex items-center text-indigo-600 group-hover:translate-x-2 transition-transform">
-                  <span className="text-sm font-medium">Commander maintenant</span>
-                  <ArrowRight className="h-4 w-4 ml-1" />
-                </div>
-              </div>
-            </Link>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                {benefit.title}
+              </h3>
+              <p className="text-gray-600">
+                {benefit.description}
+              </p>
+            </div>
           );
         })}
       </div>
@@ -767,7 +1077,7 @@ export default function Products() {
       </div>
 
       {/* CTA Section - Improved Design */}
-      <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-3xl p-8 sm:p-12 text-center text-white mx-4 sm:mx-0 shadow-xl">
+      <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-3xl p-8 sm:p-12 text-center text-white mx-4 sm:mx-0 shadow-xl">
         <div className="max-w-3xl mx-auto">
           <h2 className="text-2xl sm:text-3xl font-bold mb-4">
             Prêt à lancer votre business ?

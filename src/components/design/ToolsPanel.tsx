@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { Type, Square, Circle, ImageIcon, Palette, Layers, ChevronUp, ChevronDown, Eye, EyeOff, Lock, Unlock, Move, Plus, Minus, Triangle, Star, Hexagon, Crown, Grid3X3, Wand2 } from 'lucide-react';
 import clsx from 'clsx';
 import { DesignState } from '../../types/design';
@@ -43,6 +43,45 @@ const ToolsPanel: React.FC<ToolsPanelProps> = ({
 }) => {
   // Check if user is on Expert plan
   const isExpertPlan = false; // This should be determined from user profile
+  const [draggedId, setDraggedId] = useState<string | null>(null);
+
+  const handleDragStart = (e: React.DragEvent, id: string, zIndex: number) => {
+    setDraggedId(id);
+    e.dataTransfer.setData('application/json', JSON.stringify({ id, zIndex }));
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = (e: React.DragEvent, targetId: string, targetZIndex: number) => {
+    e.preventDefault();
+    
+    if (!draggedId || draggedId === targetId) return;
+    
+    const data = JSON.parse(e.dataTransfer.getData('application/json'));
+    const sourceId = data.id;
+    const sourceZIndex = data.zIndex;
+    
+    // Update the z-index of the elements
+    const updatedElements = [...state.elements].map(el => {
+      if (el.id === sourceId) {
+        return { ...el, zIndex: targetZIndex };
+      }
+      if (el.id === targetId) {
+        return { ...el, zIndex: sourceZIndex };
+      }
+      return el;
+    });
+    
+    setState(prev => ({
+      ...prev,
+      elements: updatedElements
+    }));
+    
+    setDraggedId(null);
+  };
 
   return (
     <div className="space-y-6">
@@ -104,7 +143,29 @@ const ToolsPanel: React.FC<ToolsPanelProps> = ({
             </button>
           </div>
         </div>
-      
+        
+        {/* Expert Plan Shapes or Upgrade CTA */}
+        <div className="bg-amber-50 rounded-lg p-3 border border-amber-100">
+          <div className="flex items-center justify-between mb-2">
+            <h4 className="text-sm font-medium text-amber-800 flex items-center">
+              <Crown className="h-4 w-4 mr-1 text-amber-600" />
+              Formes avancées
+            </h4>
+            <Link to="/pricing" className="text-xs text-amber-600 hover:text-amber-700">
+              Débloquer
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 gap-2 opacity-60">
+            <div className="flex flex-col items-center p-2 bg-amber-100/50 rounded-lg">
+              <Star className="h-5 w-5 text-amber-600 mb-1" />
+              <span className="text-xs text-amber-800">Étoile</span>
+            </div>
+            <div className="flex flex-col items-center p-2 bg-amber-100/50 rounded-lg">
+              <Hexagon className="h-5 w-5 text-amber-600 mb-1" />
+              <span className="text-xs text-amber-800">Hexagone</span>
+            </div>
+          </div>
+        </div>
       </div>
       
       {/* Grid Settings */}
@@ -230,24 +291,44 @@ const ToolsPanel: React.FC<ToolsPanelProps> = ({
       
       {/* Layers Panel */}
       {showLayersPanel && (
-        <div className="space-y-2 max-h-96 overflow-y-auto">
+        <div className="space-y-2 max-h-96 overflow-y-auto bg-gray-50 rounded-lg p-2">
+          <div className="text-xs text-gray-500 uppercase tracking-wider px-2 py-1">
+            Calques ({state.elements.length})
+          </div>
+          
           {state.elements.length === 0 ? (
             <p className="text-sm text-gray-500 text-center py-4">
               Aucun élément
             </p>
           ) : (
             state.elements
-              .sort((a, b) => b.zIndex - a.zIndex) // Sort by z-index (highest first)
+              .sort((a, b) => b.zIndex - a.zIndex)
               .map(element => (
                 <div
                   key={element.id}
+                  draggable={true}
+                  onDragStart={(e) => handleDragStart(e, element.id, element.zIndex)}
+                  onDragOver={(e) => handleDragOver(e)}
+                  onDrop={(e) => handleDrop(e, element.id, element.zIndex)}
                   className={clsx(
                     "flex items-center justify-between p-2 rounded-lg cursor-pointer",
-                    state.selectedElementId === element.id ? "bg-indigo-50" : "hover:bg-gray-50"
+                    state.selectedElementId === element.id ? "bg-indigo-50" : "hover:bg-gray-50",
+                    draggedId === element.id && "opacity-50",
+                    draggedId && draggedId !== element.id && "border-dashed border-2 border-indigo-300 hover:border-indigo-500"
                   )}
                   onClick={() => setState(prev => ({ ...prev, selectedElementId: element.id }))}
                 >
                   <div className="flex items-center min-w-0">
+                    {/* Drag handle */}
+                    <div className="cursor-move p-1 mr-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="8" cy="8" r="1" />
+                        <circle cx="16" cy="8" r="1" />
+                        <circle cx="8" cy="16" r="1" />
+                        <circle cx="16" cy="16" r="1" />
+                      </svg>
+                    </div>
+                    
                     {/* Element type icon */}
                     {element.type === 'text' ? (
                       <Type className="h-4 w-4 text-gray-500 mr-2 flex-shrink-0" />

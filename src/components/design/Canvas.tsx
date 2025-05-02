@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import DesignElement from './DesignElement';
 import { DesignState } from '../../types/design';
 import clsx from 'clsx';
@@ -77,10 +77,20 @@ const Canvas: React.FC<CanvasProps> = ({
         updates.y = 0;
         needsUpdate = true;
       }
+      
+      // Check if element width exceeds canvas width
+      if (element.width > state.canvasWidth) {
+        updates.width = state.canvasWidth;
+        needsUpdate = true;
+      }
+      
+      // Check if element extends beyond right edge
       if (element.x + element.width > state.canvasWidth) {
         updates.x = state.canvasWidth - element.width;
         needsUpdate = true;
       }
+      
+      // Check if element extends beyond bottom edge
       if (element.y + element.height > state.canvasHeight) {
         updates.y = state.canvasHeight - element.height;
         needsUpdate = true;
