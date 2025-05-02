@@ -1043,7 +1043,6 @@ export default function Products() {
               );
             })}
           </div>
-        </>
       )}
 
       {/* Benefits Section - Improved Design */}
