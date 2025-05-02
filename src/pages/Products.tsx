@@ -42,7 +42,7 @@ const PRODUCTS = [
     id: 'art-poster',
     name: 'Poster d\'Art',
     description: 'Impression artistique sur papier texturé 200g/m²',
-    image: 'https://d2v7vpg8oce97p.cloudfront.net/Branding/Art1.webp',
+    image: 'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?auto=format&fit=crop&q=80&w=2574',
     startingPrice: 12,
     rating: 4.8,
     reviewCount: 127,
@@ -58,7 +58,7 @@ const PRODUCTS = [
     id: 'premium-mat',
     name: 'Poster Premium Mat',
     description: 'Impression mate professionnelle sur papier 250g/m²',
-    image: 'https://d2v7vpg8oce97p.cloudfront.net/Branding/Mat1.webp',
+    image: 'https://images.unsplash.com/photo-1581430872221-d1cfed785922?auto=format&fit=crop&q=80&w=2670',
     startingPrice: 15,
     rating: 4.9,
     reviewCount: 243,
@@ -73,7 +73,7 @@ const PRODUCTS = [
   {
     id: 'premium-semigloss',
     name: 'Poster Premium Semi-Brillant',
-    image: 'https://d2v7vpg8oce97p.cloudfront.net/Branding/Glossy1.webp',
+    image: 'https://images.unsplash.com/photo-1582053433976-25c00369fc93?auto=format&fit=crop&q=80&w=2512',
     description: 'Impression semi-brillante sur papier photo 250g/m²',
     startingPrice: 15,
     rating: 4.7,
@@ -822,50 +822,44 @@ export default function Products() {
                   />
                   
                   {/* Overlay with locations */}
-                  <div className="relative aspect-[4/3] rounded-lg overflow-hidden mb-4">
-              <img 
-                src="https://d2v7vpg8oce97p.cloudfront.net/Branding/World.webp" 
-                alt="Réseau d'impression mondial" 
-                className="w-full h-full object-cover"
-              />
-              
-              {/* Overlay with locations */}
-              <div className="absolute inset-0">
-                <div className="w-full h-full relative">
-                  {/* Europe */}
-                  <div className="absolute top-[40%] left-[48%] animate-pulse">
-                    <div className="w-3 h-3 bg-indigo-600 rounded-full"></div>
-                    <div className="absolute -top-1 -left-1 w-5 h-5 bg-indigo-600 rounded-full opacity-30 animate-ping"></div>
+                  <div className="absolute inset-0">
+                    <div className="w-full h-full relative">
+                      {/* Europe */}
+                      <div className="absolute top-[30%] left-[48%] animate-pulse">
+                        <div className="w-3 h-3 bg-indigo-600 rounded-full"></div>
+                        <div className="absolute -top-1 -left-1 w-5 h-5 bg-indigo-600 rounded-full opacity-30 animate-ping"></div>
+                      </div>
+                      
+                      {/* North America */}
+                      <div className="absolute top-[35%] left-[25%] animate-pulse">
+                        <div className="w-3 h-3 bg-indigo-600 rounded-full"></div>
+                        <div className="absolute -top-1 -left-1 w-5 h-5 bg-indigo-600 rounded-full opacity-30 animate-ping"></div>
+                      </div>
+                      
+                      {/* Asia */}
+                      <div className="absolute top-[40%] left-[70%] animate-pulse">
+                        <div className="w-3 h-3 bg-indigo-600 rounded-full"></div>
+                        <div className="absolute -top-1 -left-1 w-5 h-5 bg-indigo-600 rounded-full opacity-30 animate-ping"></div>
+                      </div>
+                      
+                      {/* Australia */}
+                      <div className="absolute top-[65%] left-[80%] animate-pulse">
+                        <div className="w-3 h-3 bg-indigo-600 rounded-full"></div>
+                        <div className="absolute -top-1 -left-1 w-5 h-5 bg-indigo-600 rounded-full opacity-30 animate-ping"></div>
+                      </div>
+                    </div>
                   </div>
-
-                  {/* Afrique */}
-                  <div className="absolute top-[60%] left-[50%] animate-pulse">
-                    <div className="w-3 h-3 bg-indigo-600 rounded-full"></div>
-                    <div className="absolute -top-1 -left-1 w-5 h-5 bg-indigo-600 rounded-full opacity-30 animate-ping"></div>
-                  </div>
-                  
-                  {/* North America */}
-                  <div className="absolute top-[40%] left-[20%] animate-pulse">
-                    <div className="w-3 h-3 bg-indigo-600 rounded-full"></div>
-                    <div className="absolute -top-1 -left-1 w-5 h-5 bg-indigo-600 rounded-full opacity-30 animate-ping"></div>
-                  </div>
-
-                  {/* South America */}
-                  <div className="absolute top-[65%] left-[30%] animate-pulse">
-                    <div className="w-3 h-3 bg-indigo-600 rounded-full"></div>
-                    <div className="absolute -top-1 -left-1 w-5 h-5 bg-indigo-600 rounded-full opacity-30 animate-ping"></div>
-                  </div>
-                  
-                  {/* Asia */}
-                  <div className="absolute top-[40%] left-[70%] animate-pulse">
-                    <div className="w-3 h-3 bg-indigo-600 rounded-full"></div>
-                    <div className="absolute -top-1 -left-1 w-5 h-5 bg-indigo-600 rounded-full opacity-30 animate-ping"></div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-indigo-50 p-2 rounded-lg text-center">
+                    <div className="font-medium text-gray-900">15+ pays</div>
+                    <div className="text-xs text-gray-600">Centres d'impression</div>
                   </div>
                   
-                  {/* Australia */}
-                  <div className="absolute top-[75%] left-[85%] animate-pulse">
-                    <div className="w-3 h-3 bg-indigo-600 rounded-full"></div>
-                    <div className="absolute -top-1 -left-1 w-5 h-5 bg-indigo-600 rounded-full opacity-30 animate-ping"></div>
+                  <div className="bg-indigo-50 p-2 rounded-lg text-center">
+                    <div className="font-medium text-gray-900">200+</div>
+                    <div className="text-xs text-gray-600">Partenaires</div>
                   </div>
                 </div>
               </div>
@@ -964,7 +958,9 @@ export default function Products() {
           <div className="px-4 sm:px-0">
             <SizeGuide />
           </div>
-
+        </>
+      ) : (
+        <>
           {/* Services Section with Banner */}
           <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 p-8 sm:p-12 text-white shadow-xl mb-12">
             <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1557683316-973673baf926?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2426&q=80')] bg-cover bg-center opacity-20"></div>
@@ -1043,6 +1039,7 @@ export default function Products() {
               );
             })}
           </div>
+        </>
       )}
 
       {/* Benefits Section - Improved Design */}
